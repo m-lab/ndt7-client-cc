@@ -127,22 +127,6 @@ macro(MKSetRestrictiveCompilerFlags)
 endmacro()
 MKSetRestrictiveCompilerFlags()
 
-set(MK_LIBNDT_AMALGAMATE_DEST single_include/libndt.hpp)
-file(REMOVE ${MK_LIBNDT_AMALGAMATE_DEST})
-foreach(SOURCE IN ITEMS
-        include/libndt/preamble.hpp
-        third_party/github.com/nlohmann/json/json.hpp
-        include/libndt/internal/assert.hpp
-        include/libndt/internal/sys.hpp
-        include/libndt/internal/logger.hpp
-        include/libndt/internal/curlx.hpp
-        include/libndt/internal/err.hpp
-        include/libndt/timeout.hpp
-        include/libndt/libndt.hpp)
-  file(READ ${SOURCE} CONTENT)
-  file(APPEND ${MK_LIBNDT_AMALGAMATE_DEST} "${CONTENT}")
-endforeach()
-
 add_definitions(${CMAKE_REQUIRED_DEFINITIONS})
 include_directories(${CMAKE_REQUIRED_INCLUDES}
                     ${CMAKE_SOURCE_DIR}
