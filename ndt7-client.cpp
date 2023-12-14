@@ -4,7 +4,7 @@
 
 #include "third_party/github.com/nlohmann/json/json.hpp"
 
-#include "libndt/libndt.hpp"  // not standalone
+#include "libndt7/libndt7.hpp"  // not standalone
 
 #include <stdlib.h>
 
@@ -53,7 +53,7 @@ void BatchClient::on_performance(libndt::NettestFlags tid, uint8_t nflows,
 // summary is overridden to print a JSON summary.
 void BatchClient::summary() noexcept {
   nlohmann::json summary;
-  
+
   if (summary_.download_speed != 0.0) {
     nlohmann::json download;
     download["Speed"] = summary_.download_speed;
@@ -71,7 +71,7 @@ void BatchClient::summary() noexcept {
     summary["Download"] = download;
     summary["Latency"] = summary_.min_rtt;
   }
-  
+
   if (summary_.upload_speed != 0.0) {
     nlohmann::json upload;
     upload["Speed"] = summary_.upload_speed;

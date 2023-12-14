@@ -14,8 +14,8 @@
 #include <sstream>
 
 #ifndef LIBNDT_SINGLE_INCLUDE
-#include "libndt/internal/assert.hpp"
-#include "libndt/internal/logger.hpp"
+#include "libndt7/internal/assert.hpp"
+#include "libndt7/internal/logger.hpp"
 #endif
 
 namespace measurement_kit {
