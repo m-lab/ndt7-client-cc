@@ -53,7 +53,7 @@ void BatchClient::on_performance(libndt::NettestFlags tid, uint8_t nflows,
 // summary is overridden to print a JSON summary.
 void BatchClient::summary() noexcept {
   nlohmann::json summary;
-  
+
   if (summary_.download_speed != 0.0) {
     nlohmann::json download;
     download["Speed"] = summary_.download_speed;
@@ -71,7 +71,7 @@ void BatchClient::summary() noexcept {
     summary["Download"] = download;
     summary["Latency"] = summary_.min_rtt;
   }
-  
+
   if (summary_.upload_speed != 0.0) {
     nlohmann::json upload;
     upload["Speed"] = summary_.upload_speed;
@@ -100,30 +100,25 @@ nearby servers. The default policy is `geo-options`. The deprecated
 `-random` flag is an alias for `-lookup-policy random`.
 
 You MUST specify what subtest to enable. The `-download` flag enables the
-download subtest. The `-upload` flag enables the upload subtest. The
-`-download-ext` flag enables the multi-stream download subtest, which
-is not implemented by M-Lab servers. Hence you need to know the hostname
-of a server implementing this feature to run the test with.
+download subtest. The `-upload` flag enables the upload subtest.
 
 The `-port <port>` flag specifies what port to use. The default is to
 use the correct port depending on the selected NDT protocol (see below).
 
-By default, we use the most ancient NDT protocol. However, adding the
-`-json` flag enables wrapping NDT messages inside of JSON objects. Adding
-the `-tls` flag causes NDT to use a TLS connection rather than a TCP
-connection. When using `-tls`, you may also want to use `-insecure` to
-allow connecting to servers with self-signed or otherwise invalid TLS
-certificate. With `-tls`, you can also use the `-ca-bundle-path <path>`
-to use a specific CA bundle path. Adding the `-websocket` flag will
-cause NDT to wrap its messages (possibly already wrapped by JSON) into
-WebSocket messages. Finally, adding the `-ndt7` flag turns on version
-7 of the NDT protocol, which is not backwards compatible. Since `-ndt7`
-uses TLS, both `-ca-bundle-path <path>` and `-insecure` work also
-in combination with the `-ndt7` flag. When using `-ndt7`, `-batch` can be
-specified so that the only output on STDOUT will be the JSON test results.
-To further reduce the amount of output, you can use the `-summary` flag,
-which only prints a summary at the end of the tests. If used with `-batch`,
-the generated summary will be JSON.
+By default, we use the ndt7 protocol. Adding the `-tls` flag causes NDT to use
+a TLS connection rather than a TCP connection. When using `-tls`, you may also
+want to use `-insecure` to allow connecting to servers with self-signed or
+otherwise invalid TLS certificate. With `-tls`, you can also use the
+`-ca-bundle-path <path>` to use a specific CA bundle path. Adding the
+`-websocket` flag will cause NDT to wrap its messages (possibly already wrapped
+by JSON) into WebSocket messages. Finally, adding the `-ndt7` flag turns on
+version 7 of the NDT protocol, which is not backwards compatible. Since `-ndt7`
+uses TLS, both `-ca-bundle-path <path>` and `-insecure` work also in combination
+with the `-ndt7` flag. When using `-ndt7`, `-batch` can be specified so that the
+only output on STDOUT will be the JSON test results.  To further reduce the
+amount of output, you can use the `-summary` flag, which only prints a summary
+at the end of the tests. If used with `-batch`, the generated summary will be
+JSON.
 
 In practice, these are the flags you want to use:
 
@@ -131,7 +126,7 @@ In practice, these are the flags you want to use:
 
 2. `-tls` to use the original NDT protocol over TLS;
 
-3. `-websocket -tls -json` to run a NDT test using the same protocol
+3. `-websocket -tls` to run a NDT test using the same protocol
 that is typically used by tests run in the browser;
 
 4. `-ndt7` to use version 7 of the protocol.
@@ -165,18 +160,12 @@ int main(int, char **argv) {
       if (flag == "download") {
         settings.nettest_flags |= libndt::nettest_flag_download;
         std::clog << "will run the download sub-test" << std::endl;
-      } else if (flag == "download-ext") {
-        settings.nettest_flags |= libndt::nettest_flag_download_ext;
-        std::clog << "will run the multi-stream download sub-test" << std::endl;
       } else if (flag == "help") {
         usage();
         exit(EXIT_SUCCESS);
       } else if (flag == "insecure") {
         settings.tls_verify_peer = false;
         std::clog << "WILL NOT verify the TLS peer (INSECURE!)" << std::endl;
-      } else if (flag == "json") {
-        settings.protocol_flags |= libndt::protocol_flag_json;
-        std::clog << "will use the JSON-based NDT protocol" << std::endl;
       } else if (flag == "ndt7") {
         settings.protocol_flags |= libndt::protocol_flag_ndt7;
         std::clog << "will use the ndt7 protocol" << std::endl;
