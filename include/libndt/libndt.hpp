@@ -1025,22 +1025,12 @@ bool Client::query_mlabns(std::vector<std::string> *fqdns) noexcept {
     return true;
   }
   std::string mlabns_url = settings_.mlabns_base_url;
-  if ((settings_.nettest_flags & nettest_flag_download_ext) != 0) {
-    LIBNDT_EMIT_WARNING("tweaking mlabns settings to allow for multi stream download");
-    LIBNDT_EMIT_WARNING("we need to use the neubot sliver and to force json since");
-    LIBNDT_EMIT_WARNING("this is the only configuration supported by neubot's sliver");
-    settings_.protocol_flags &= ~protocol_flag_tls;
-    settings_.protocol_flags &= ~protocol_flag_websocket;
-    settings_.protocol_flags |= protocol_flag_json;
-    mlabns_url += "/neubot";  // only botticelli implements multi stream dload
+  if ((settings_.protocol_flags & protocol_flag_ndt7) != 0) {
+    mlabns_url += "/ndt7";
+  } else if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
+    mlabns_url += "/ndt_ssl";
   } else {
-    if ((settings_.protocol_flags & protocol_flag_ndt7) != 0) {
-      mlabns_url += "/ndt7";
-    } else if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
-      mlabns_url += "/ndt_ssl";
-    } else {
-      mlabns_url += "/ndt";
-    }
+    mlabns_url += "/ndt";
   }
   if (settings_.mlabns_policy == mlabns_policy_random) {
     mlabns_url += "?policy=random";
