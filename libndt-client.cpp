@@ -120,16 +120,11 @@ amount of output, you can use the `-summary` flag, which only prints a summary
 at the end of the tests. If used with `-batch`, the generated summary will be
 JSON.
 
-In practice, these are the flags you want to use:
+In practice, these are the flags you want to use for ndt7:
 
-1. none, to use the original NDT protocol;
+1. none, to use the plain ndt7 protocol (ws://);
 
-2. `-tls` to use the original NDT protocol over TLS;
-
-3. `-websocket -tls` to run a NDT test using the same protocol
-that is typically used by tests run in the browser;
-
-4. `-ndt7` to use version 7 of the protocol.
+2. `-tls` to use the ndt7 protocol over TLS (wss://);
 
 When running, this client emits messages. You can use `-verbose` to cause
 it to emit even more messages.
