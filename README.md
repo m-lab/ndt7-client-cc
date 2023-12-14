@@ -15,25 +15,19 @@ measures the download and upload speed, and complements these measurements
 with kernel-level measurements. NDT is the most popular network performance
 test hosted by [Measurement Lab](https://www.measurementlab.net/).
 
-This library implements all flavours of NDT. The code implementing the
-legacy NDT protocol (i.e., no JSON, no WebSocket, no TLS, no ndt7) is
-the most stable, tested, and peer reviewed code. The JSON, WebSocket, and
-TLS flavoured NDT code is in beta stage. Ndt7 code is in alpha stage.
+This library implements the ndt7 protocol only. The ndt7 code is in alpha stage.
 
 ## Getting started
 
 Libndt depends on OpenSSL (for TLS support and in the future for
 WebSocket support) and cURL (to autodiscover servers).
 
-Download [single_include/libndt.hpp](
-https://github.com/measurement-kit/libndt/blob/master/single_include/libndt.hpp) and
-put it in the current working directory.
-
 This example runs a NDT download-only nettest with a nearby server. Create
 a file named `main.cpp` with this content.
 
 ```C++
-#include "libndt.hpp"
+#include "third_party/github.com/nlohmann/json/json.hpp"
+#include "include/libndt/libndt.hpp"
 
 int main() {
   using namespace measurement_kit;
@@ -44,6 +38,7 @@ int main() {
 
 Compile with `g++ -std=c++11 -Wall -Wextra -I. -o main main.cpp`.
 
+TODO(soltesz): update API documentation.
 See [codedocs.xyz/measurement-kit/libndt](
 https://codedocs.xyz/measurement-kit/libndt/) for API documentation;
 [include/libndt/libndt.hpp](include/libndt/libndt.hpp) for the full API.
@@ -55,7 +50,7 @@ See [libndt-client.cpp](libndt-client.cpp) for a comprehensive usage example.
 To develop libndt or run tests, you need a clone of the repository.
 
 ```
-git clone https://github.com/measurement-kit/libndt
+git clone https://github.com/m-lab/ndt7-client-cc
 ```
 
 ## Building and testing
@@ -68,7 +63,7 @@ cmake --build .
 ctest -a --output-on-failure .
 ```
 
-## Command line client 
+## Command line client
 
 Building with CMake also builds a simple command line client. Get usage info
 by running:
