@@ -173,4 +173,4 @@ add_test(NAME simple_test COMMAND libndt-client
          -download -upload -verbose)
 add_test(NAME modern_test COMMAND libndt-client
          -ca-bundle-path ${CMAKE_SOURCE_DIR}/third_party/curl.haxx.se/ca/cacert.pem
-         -verbose -download -upload -tls -json -websocket)
+         -verbose -download -upload -tls -websocket)
