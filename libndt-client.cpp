@@ -111,10 +111,7 @@ want to use `-insecure` to allow connecting to servers with self-signed or
 otherwise invalid TLS certificate. With `-tls`, you can also use the
 `-ca-bundle-path <path>` to use a specific CA bundle path. Adding the
 `-websocket` flag will cause NDT to wrap its messages (possibly already wrapped
-by JSON) into WebSocket messages. Finally, adding the `-ndt7` flag turns on
-version 7 of the NDT protocol, which is not backwards compatible. Since `-ndt7`
-uses TLS, both `-ca-bundle-path <path>` and `-insecure` work also in combination
-with the `-ndt7` flag. When using `-ndt7`, `-batch` can be specified so that the
+by JSON) into WebSocket messages. Also, `-batch` can be specified so that the
 only output on STDOUT will be the JSON test results.  To further reduce the
 amount of output, you can use the `-summary` flag, which only prints a summary
 at the end of the tests. If used with `-batch`, the generated summary will be
