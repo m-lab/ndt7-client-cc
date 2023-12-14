@@ -1027,10 +1027,6 @@ bool Client::query_mlabns(std::vector<std::string> *fqdns) noexcept {
   std::string mlabns_url = settings_.mlabns_base_url;
   if ((settings_.protocol_flags & protocol_flag_ndt7) != 0) {
     mlabns_url += "/ndt7";
-  } else if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
-    mlabns_url += "/ndt_ssl";
-  } else {
-    mlabns_url += "/ndt";
   }
   if (settings_.mlabns_policy == mlabns_policy_random) {
     mlabns_url += "?policy=random";
