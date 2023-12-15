@@ -109,6 +109,18 @@
 namespace measurement_kit {
 namespace libndt {
 
+// Structure to store extracted URL parts
+struct UrlParts {
+  std::string scheme;
+  std::string host;
+  std::string port;
+  std::string path;
+};
+
+UrlParts parse_ws_url(const std::string& url);
+
+std::string unsafe_format_http_params(const std::map<std::string, std::string>& params);
+
 // Versioning
 // ``````````
 
@@ -167,28 +179,6 @@ constexpr ProtocolFlags protocol_flag_tls = ProtocolFlags{1 << 1};
 /// When this flag is set we use WebSocket. This specifically means that
 /// we use the WebSocket framing to encapsulate NDT messages.
 constexpr ProtocolFlags protocol_flag_websocket = ProtocolFlags{1 << 2};
-
-/// When this flag is set, we use ndt7 rather than ndt5. This specifically
-/// means that a totally different protocol is used. You can read more on ndt7
-/// at https://github.com/m-lab/ndt-server/blob/master/spec/ndt7-protocol.md
-constexpr ProtocolFlags protocol_flag_ndt7 = ProtocolFlags{1 << 3};
-
-// Policy for auto-selecting a NDT server
-// ``````````````````````````````````````
-
-/// Flags modifying the behavior of mlab-ns. Mlab-ns is the web service used
-/// to automatically discover NDT's (and other experiments') servers.
-using MlabnsPolicy = unsigned short;
-
-/// Request just the closest NDT server.
-constexpr MlabnsPolicy mlabns_policy_closest = MlabnsPolicy{0};
-
-/// Request for a random NDT server.
-constexpr MlabnsPolicy mlabns_policy_random = MlabnsPolicy{1};
-
-/// Return a list of nearby NDT servers. When more than one server is returned
-/// all the available servers will be tried in case some of them are down.
-constexpr MlabnsPolicy mlabns_policy_geo_options = MlabnsPolicy{2};
 
 // EventHandler
 // ------------
@@ -259,26 +249,20 @@ EventHandler::~EventHandler() noexcept {}
 // Settings
 // ````````
 
-constexpr const char *ndt_version_compat = "v3.7.0";
-
 /// NDT client settings. If you do not customize the settings when creating
 /// a Client, the defaults listed below will be used instead.
 class Settings {
  public:
-  /// Base URL to be used to query the mlab-ns service. If you specify an
-  /// explicit hostname, mlab-ns won't be used. Note that the URL specified
+  /// Base URL to be used to query the Locate API service. If you specify an
+  /// explicit hostname, Locate API won't be used. Note that the URL specified
   /// here MUST NOT end with a final slash.
-  std::string mlabns_base_url = "https://locate.measurementlab.net";
-
-  /// Flags that modify the behavior of mlabn-ns. By default we use the
-  /// geo_options policy that is the most robust to random server failures.
-  MlabnsPolicy mlabns_policy = mlabns_policy_geo_options;
+  std::string locate_api_base_url = "https://locate.measurementlab.net";
 
   /// Timeout used for I/O operations.
   Timeout timeout = Timeout{7} /* seconds */;
 
   /// Host name of the NDT server to use. If this is left blank (the default),
-  /// we will use mlab-ns to discover a nearby server.
+  /// we will use Locate API to discover a nearby server.
   std::string hostname;
 
   /// Port of the NDT server to use. If this is not specified, we will use
@@ -294,17 +278,16 @@ class Settings {
   Verbosity verbosity = verbosity_quiet;
 
   /// Metadata to include in the server side logs. By default we just identify
-  /// the NDT version and the application.
+  /// the client version and the library.
   std::map<std::string, std::string> metadata{
-      {"client.version", ndt_version_compat},
-      {"client.application", "measurement-kit/libndt"},
+      {"client_library_version", "v0.1.0"},
+      {"client_library_name", "m-lab/ndt7-client-cc"},
+      // TODO: add build option for specifying client_name.
   };
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
   /// cause libndt to use different default settings for the port or for
-  /// mlab-ns. Clear text NDT uses port 3001, NDT-over-TLS uses 3010. There
-  /// will most likely be servers listening on port 443 in the future, but
-  /// they will only support the TLS+WebSocket protocol.
+  /// the Locate API. Clear text ndt7 uses port 80, ndt7-over-TLS uses 443.
   ProtocolFlags protocol_flags = ProtocolFlags{0};
 
   /// Maximum time for which a nettest (i.e. download) is allowed to run. After
@@ -410,7 +393,7 @@ class Client : public EventHandler {
 
   // High-level API
   virtual void summary() noexcept;
-  virtual bool query_mlabns(std::vector<std::string> *) noexcept;
+  virtual bool query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept;
 
   // ndt7 protocol API
   // `````````````````
@@ -422,13 +405,13 @@ class Client : public EventHandler {
 
   // ndt7_download performs a ndt7 download. Returns true if the download
   // succeeds and false in case of failure.
-  bool ndt7_download() noexcept;
+  bool ndt7_download(const UrlParts &url) noexcept;
 
   // ndt7_upload is like ndt7_download but performs an upload.
-  bool ndt7_upload() noexcept;
+  bool ndt7_upload(const UrlParts &url) noexcept;
 
   // ndt7_connect connects to @p url_path.
-  bool ndt7_connect(std::string url_path) noexcept;
+  bool ndt7_connect(const UrlParts &url) noexcept;
 
   // WebSocket
   // `````````
@@ -580,7 +563,7 @@ class Client : public EventHandler {
   // Close a socket.
   virtual internal::Err netx_closesocket(internal::Socket fd) noexcept;
 
-  virtual bool query_mlabns_curl(const std::string &url, long timeout,
+  virtual bool query_locate_api_curl(const std::string &url, long timeout,
                                  std::string *body) noexcept;
 
   // Other helpers
@@ -906,38 +889,43 @@ Client::~Client() noexcept {
 // `````````````
 
 bool Client::run() noexcept {
-  std::vector<std::string> fqdns;
-  if (!query_mlabns(&fqdns)) {
+  std::vector<nlohmann::json> targets;
+  if (!query_locate_api(settings_.metadata, &targets)) {
     return false;
   }
-  for (auto &fqdn : fqdns) {
-    LIBNDT_EMIT_DEBUG("trying to connect to " << fqdn);
-    settings_.hostname = fqdn;
-    // TODO(bassosimone): we will eventually want to refactor the code to
-    // make ndt7 the default and ndt5 the optional case.
-    if ((settings_.protocol_flags & protocol_flag_ndt7) != 0) {
-      LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
-      if ((settings_.nettest_flags & nettest_flag_download) != 0) {
-        // TODO(bassosimone): for now we do not try with more than one host
-        // when using ndt7 and there's a failure. We may want to do that.
-        if (!ndt7_download()) {
-          LIBNDT_EMIT_WARNING("ndt7: download failed");
-          // FALLTHROUGH
-        }
+  std::string scheme = "ws";
+  if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
+    scheme = "wss";
+  }
+  for (auto &urls : targets) {
+    LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
+    if ((settings_.nettest_flags & nettest_flag_download) != 0) {
+      auto key = scheme + ":///ndt/v7/download";
+      if (!urls.contains(key)) {
+        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        continue;
       }
-      if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
-        // TODO(bassosimone): same as above.
-        if (!ndt7_upload()) {
-          LIBNDT_EMIT_WARNING("ndt7: upload failed");
-          // FALLTHROUGH
-        }
+      auto url = urls[key];
+      UrlParts parts = parse_ws_url(url);
+      if (!ndt7_download(parts)) {
+        LIBNDT_EMIT_WARNING("ndt7: download failed");
+       // FALLTHROUGH
       }
-      LIBNDT_EMIT_INFO("ndt7: test complete");
-      // TODO(bassosimone): here we may want to warn if the user selects
-      // subtests that we actually do not implement.
-      return true;
     }
-    LIBNDT_EMIT_DEBUG("connection closed");
+    if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
+      auto key = scheme + ":///ndt/v7/upload";
+      if (!urls.contains(key)) {
+        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        continue;
+      }
+      auto url = urls[key];
+      UrlParts parts = parse_ws_url(url);
+      if (!ndt7_upload(parts)) {
+        LIBNDT_EMIT_WARNING("ndt7: upload failed");
+        // FALLTHROUGH
+      }
+    }
+    LIBNDT_EMIT_INFO("ndt7: test complete");
     return true;
   }
   LIBNDT_EMIT_WARNING("no more hosts to try; failing the test");
@@ -1015,29 +1003,29 @@ void Client::summary() noexcept {
   }
 }
 
-bool Client::query_mlabns(std::vector<std::string> *fqdns) noexcept {
-  assert(fqdns != nullptr);
+bool Client::query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept {
+  assert(urls != nullptr);
+  // TODO(soltesz): support the static host case correctly.
   if (!settings_.hostname.empty()) {
-    LIBNDT_EMIT_DEBUG("no need to query mlab-ns; we have hostname");
+    LIBNDT_EMIT_DEBUG("no need to query locate api; we have hostname");
     // When we already know the hostname that we want to use just fake out the
-    // result of a mlabns query as like mlabns returned that hostname.
-    fqdns->push_back(std::move(settings_.hostname));
+    // result of a locate_api query as like locate_api returned that hostname.
+    urls->push_back(std::move(settings_.hostname));
     return true;
   }
-  std::string mlabns_url = settings_.mlabns_base_url;
-  if ((settings_.protocol_flags & protocol_flag_ndt7) != 0) {
-    mlabns_url += "/ndt7";
-  }
-  if (settings_.mlabns_policy == mlabns_policy_random) {
-    mlabns_url += "?policy=random";
-  } else if (settings_.mlabns_policy == mlabns_policy_geo_options) {
-    mlabns_url += "?policy=geo_options";
+  std::string locate_api_url = settings_.locate_api_base_url;
+  locate_api_url += "/v2/nearest/ndt/ndt7";
+  if (opts.size() > 0) {
+    // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
+    locate_api_url += "?" + unsafe_format_http_params(opts);
   }
   std::string body;
-  if (!query_mlabns_curl(mlabns_url, settings_.timeout, &body)) {
+  LIBNDT_EMIT_INFO("locate_api url: " << locate_api_url);
+  if (!query_locate_api_curl(locate_api_url, settings_.timeout, &body)) {
+
     return false;
   }
-  LIBNDT_EMIT_DEBUG("mlabns reply: " << body);
+  LIBNDT_EMIT_DEBUG("locate_api reply: " << body);
   nlohmann::json json;
   try {
     json = nlohmann::json::parse(body);
@@ -1045,34 +1033,43 @@ bool Client::query_mlabns(std::vector<std::string> *fqdns) noexcept {
     LIBNDT_EMIT_WARNING("cannot parse JSON: " << exc.what());
     return false;
   }
-  // In some cases mlab-ns returns a single object but in other cases (e.g.
-  // with the `geo_options` policy) it returns an array. Always make an
-  // array so that we can write uniform code for processing mlab-ns response.
-  if (json.is_object()) {
-    auto array = nlohmann::json::array();
-    array.push_back(json);
-    std::swap(json, array);
-  }
-  for (auto &entry : json) {
-    std::string fqdn;
-    try {
-      fqdn = entry.at("fqdn").get<std::string>();
-    } catch (const nlohmann::json::exception &exc) {
-      LIBNDT_EMIT_WARNING("cannot access FQDN field: " << exc.what());
+
+  // On success, the Locate API returns an object with a "results" array. On
+  // error, the object includes an "error". On success, there is always at least
+  // one result in an array.
+  if (!json.contains("results")) {
+    if (!json.contains("error")) {
+      LIBNDT_EMIT_WARNING("no results and no error! " << body);
       return false;
     }
-    LIBNDT_EMIT_DEBUG("discovered host: " << fqdn);
-    fqdns->push_back(std::move(fqdn));
+    auto err = json["error"];
+    LIBNDT_EMIT_WARNING("error response from " << locate_api_url << ": " << err);
+    return false;
   }
-  return true;
+  auto results = json["results"];
+  for (auto &target : results) {
+    if (!target.contains("urls")) {
+      // This should not occur.
+      LIBNDT_EMIT_WARNING("results object is missing urls: " << body);
+      continue;
+    }
+    auto result_urls = target["urls"];
+    do {
+      auto it = result_urls.begin();
+      // Any key is fine for debug logging.
+      LIBNDT_EMIT_DEBUG("discovered host: " << result_urls[it.key()]);
+    } while(0);
+    urls->push_back(std::move(result_urls));
+  }
+  return urls->size() > 0;
 }
 
 // ndt7 protocol API
 // `````````````````
 
-bool Client::ndt7_download() noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 download test");
-  if (!ndt7_connect("/ndt/v7/download")) {
+bool Client::ndt7_download(const UrlParts &url) noexcept {
+  LIBNDT_EMIT_INFO("starting ndt7 download test: " << url.scheme << "://" << url.host);
+  if (!ndt7_connect(url)) {
     return false;
   }
   // The following value is the maximum amount of bytes that an implementation
@@ -1153,9 +1150,9 @@ bool Client::ndt7_download() noexcept {
   return true;
 }
 
-bool Client::ndt7_upload() noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 upload test");
-  if (!ndt7_connect("/ndt/v7/upload")) {
+bool Client::ndt7_upload(const UrlParts &url) noexcept {
+  LIBNDT_EMIT_INFO("starting ndt7 upload test: " << url.scheme << "://" << url.host);
+  if (!ndt7_connect(url)) {
     return false;
   }
   // Implementation note: we send messages smaller than the maximum message
@@ -1242,24 +1239,20 @@ bool Client::ndt7_upload() noexcept {
   return true;
 }
 
-bool Client::ndt7_connect(std::string url_path) noexcept {
-  std::string port = "443";
-  if (!settings_.port.empty()) {
-    port = settings_.port;
-  }
+bool Client::ndt7_connect(const UrlParts &url) noexcept {
   // Don't leak resources if the socket is already open.
   if (internal::IsSocketValid(sock_)) {
     LIBNDT_EMIT_DEBUG("ndt7: closing socket openned in previous attempt");
     (void)netx_closesocket(sock_);
     sock_ = (internal::Socket)-1;
   }
-  // Note: ndt7 implies WebSocket and TLS
-  settings_.protocol_flags |= protocol_flag_websocket | protocol_flag_tls;
+  // Note: ndt7 implies WebSocket.
+  settings_.protocol_flags |= protocol_flag_websocket;
 	internal::Err err = netx_maybews_dial(
-      settings_.hostname, port,
+      url.host, url.port,
       ws_f_connection | ws_f_upgrade | ws_f_sec_ws_accept |
           ws_f_sec_ws_protocol,
-      ws_proto_ndt7, url_path, &sock_);
+      ws_proto_ndt7, url.path, &sock_);
   if (err != internal::Err::none) {
     return false;
   }
@@ -2920,7 +2913,7 @@ class CurlxLoggerAdapter : public internal::Logger {
   Client *client_;
 };
 
-bool Client::query_mlabns_curl(const std::string &url, long timeout,
+bool Client::query_locate_api_curl(const std::string &url, long timeout,
                                std::string *body) noexcept {
   CurlxLoggerAdapter adapter{this};
   internal::Curlx curlx{adapter};
@@ -2932,6 +2925,59 @@ bool Client::query_mlabns_curl(const std::string &url, long timeout,
 
 Verbosity Client::get_verbosity() const noexcept {
   return settings_.verbosity;
+}
+
+// Function to parse a websocket URL and return its components. The URL must
+// include a resource path.
+// TODO(soltesz): add testing for various input cases.
+ UrlParts parse_ws_url(const std::string& url) {
+  UrlParts parts;
+
+  // Find the scheme.
+  auto colon_pos = url.find(":");
+  if (colon_pos != std::string::npos) {
+    parts.scheme = url.substr(0, colon_pos);
+  }
+
+  // Extract the hostname and port.
+  auto slash_pos = url.find("/", colon_pos + 3);
+  if (slash_pos != std::string::npos) {
+    auto host_part = url.substr(colon_pos + 3, slash_pos - colon_pos - 3);
+    auto port_pos = host_part.find(":");
+    // Does the host include a port?
+    if (port_pos != std::string::npos) {
+      parts.host = host_part.substr(0, port_pos);
+      parts.port = host_part.substr(port_pos + 1);
+    } else {
+      parts.host = host_part;
+      if (parts.scheme == "ws") {
+        parts.port = "80";
+      } else if (parts.scheme == "wss") {
+        parts.port = "443";
+      }
+    }
+  }
+
+  // Extract the path.
+  if (slash_pos != std::string::npos) {
+    parts.path = url.substr(slash_pos);
+  }
+
+  return parts;
+}
+
+// unsafe_format_http_params is only intended for parameters within the library itself.
+std::string unsafe_format_http_params(const std::map<std::string, std::string>& params) {
+  std::stringstream ss;
+  bool first = true;
+  for (const auto& kv : params) {
+    if (!first) {
+      ss << "&";
+    }
+    ss << kv.first << "=" << kv.second;
+    first = false;
+  }
+  return ss.str();
 }
 
 }  // namespace libndt

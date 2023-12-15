@@ -48,12 +48,12 @@ using namespace measurement_kit::libndt;
 class FailQueryMlabns : public Client {
  public:
   using Client::Client;
-  bool query_mlabns(std::vector<std::string> *) noexcept override {
+  bool query_locate_api(const std::map<std::string, std::string>&, std::vector<nlohmann::json>*) noexcept override {
     return false;
   }
 };
 
-TEST_CASE("Client::run() deals with Client::query_mlabns() failure") {
+TEST_CASE("Client::run() deals with Client::query_locate_api() failure") {
   FailQueryMlabns client;
   REQUIRE(client.run() == false);
 }
@@ -66,79 +66,85 @@ TEST_CASE("Client::on_warning() works as expected") {
   client.on_warning("calling on_warning() to increase coverage");
 }
 
-// Client::query_mlabns() tests
+// Client::query_locate_api() tests
 // ----------------------------
 
 class FailQueryMlabnsCurl : public Client {
  public:
   using Client::Client;
-  bool query_mlabns_curl(const std::string &, long,
+  bool query_locate_api_curl(const std::string &, long,
                          std::string *) noexcept override {
     return false;
   }
 };
 
-TEST_CASE("Client::query_mlabns() does nothing when we already know hostname") {
+TEST_CASE("Client::query_locate_api() does nothing when we already know hostname") {
   Settings settings;
   settings.hostname = "neubot.mlab.mlab1.trn01.measurement-lab.org";
   FailQueryMlabnsCurl client{settings};
   std::vector<std::string> v;
-  REQUIRE(client.query_mlabns(&v) == true);
+  std::vector<nlohmann::json> targets;
+  std::map<std::string, std::string> metadata;
+  REQUIRE(client.query_locate_api(metadata, &targets) == true);
 }
 
 TEST_CASE(
-    "Client::query_mlabns() deals with Client::query_mlabns_curl() failure") {
+    "Client::query_locate_api() deals with Client::query_locate_api_curl() failure") {
   FailQueryMlabnsCurl client;
-  std::vector<std::string> v;
-  REQUIRE(client.query_mlabns(&v) == false);
+  std::vector<nlohmann::json> targets;
+  std::map<std::string, std::string> metadata;
+  REQUIRE(client.query_locate_api(metadata, &targets) == false);
 }
 
 class EmptyMlabnsJson : public Client {
  public:
   using Client::Client;
-  bool query_mlabns_curl(const std::string &, long,
+  bool query_locate_api_curl(const std::string &, long,
                          std::string *body) noexcept override {
     *body = "";
     return true;
   }
 };
 
-TEST_CASE("Client::query_mlabns() deals with empty JSON") {
+TEST_CASE("Client::query_locate_api() deals with empty JSON") {
   EmptyMlabnsJson client;
-  std::vector<std::string> v;
-  REQUIRE(client.query_mlabns(&v) == false);
+  std::vector<nlohmann::json> targets;
+  std::map<std::string, std::string> metadata;
+  REQUIRE(client.query_locate_api(metadata, &targets) == false);
 }
 
 class InvalidMlabnsJson : public Client {
  public:
   using Client::Client;
-  bool query_mlabns_curl(const std::string &, long,
+  bool query_locate_api_curl(const std::string &, long,
                          std::string *body) noexcept override {
     *body = "{{{{";
     return true;
   }
 };
 
-TEST_CASE("Client::query_mlabns() deals with invalid JSON") {
+TEST_CASE("Client::query_locate_api() deals with invalid JSON") {
   InvalidMlabnsJson client;
-  std::vector<std::string> v;
-  REQUIRE(client.query_mlabns(&v) == false);
+  std::vector<nlohmann::json> targets;
+  std::map<std::string, std::string> metadata;
+  REQUIRE(client.query_locate_api(metadata, &targets) == false);
 }
 
 class IncompleteMlabnsJson : public Client {
  public:
   using Client::Client;
-  bool query_mlabns_curl(const std::string &, long,
+  bool query_locate_api_curl(const std::string &, long,
                          std::string *body) noexcept override {
     *body = "{}";
     return true;
   }
 };
 
-TEST_CASE("Client::query_mlabns() deals with incomplete JSON") {
+TEST_CASE("Client::query_locate_api() deals with incomplete JSON") {
   IncompleteMlabnsJson client;
-  std::vector<std::string> v;
-  REQUIRE(client.query_mlabns(&v) == false);
+  std::vector<nlohmann::json> targets;
+  std::map<std::string, std::string> metadata;
+  REQUIRE(client.query_locate_api(metadata, &targets) == false);
 }
 
 // Client::netx_maybesocks5h_dial() tests
@@ -1390,15 +1396,15 @@ TEST_CASE("Client::netx_poll() deals with timeout") {
   REQUIRE(client.netx_poll(&pfds, timeout) == internal::Err::timed_out);
 }
 
-// Client::query_mlabns_curl() tests
+// Client::query_locate_api_curl() tests
 // ---------------------------------
 
 #ifdef HAVE_CURL
-TEST_CASE("Client::query_mlabns_curl() deals with Curl{} failure") {
+TEST_CASE("Client::query_locate_api_curl() deals with Curl{} failure") {
   Client client;
   // Note: passing `nullptr` should cause Curl{} to fail and hence we can
   // also easily check for cases where Curl{} fails.
-  REQUIRE(client.query_mlabns_curl("", 3, nullptr) == false);
+  REQUIRE(client.query_locate_api_curl("", 3, nullptr) == false);
 }
 #endif
 
