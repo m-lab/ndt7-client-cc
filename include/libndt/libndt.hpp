@@ -2973,7 +2973,7 @@ Verbosity Client::get_verbosity() const noexcept {
 // Function to parse a websocket URL and return its components. The URL must
 // include a resource path.
 // TODO(soltesz): add testing for various input cases.
- UrlParts parse_ws_url(const std::string& url) {
+UrlParts parse_ws_url(const std::string& url) {
   UrlParts parts;
 
   // Find the scheme.
