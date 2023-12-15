@@ -249,8 +249,6 @@ EventHandler::~EventHandler() noexcept {}
 // Settings
 // ````````
 
-constexpr const char *ndt_client_version = "v0.1.0";
-
 /// NDT client settings. If you do not customize the settings when creating
 /// a Client, the defaults listed below will be used instead.
 class Settings {
@@ -282,8 +280,8 @@ class Settings {
   /// Metadata to include in the server side logs. By default we just identify
   /// the client version and the library.
   std::map<std::string, std::string> metadata{
-      {"client_version", ndt_client_version},
-      {"client_library", "m-lab/ndt7-client-cc"},
+      {"client_library_version", "v0.1.0"},
+      {"client_library_name", "m-lab/ndt7-client-cc"},
       // TODO: add build option for specifying client_name.
   };
 
