@@ -285,7 +285,7 @@ class Settings {
   Verbosity verbosity = verbosity_quiet;
 
   /// Metadata to include in the server side logs. By default we just identify
-  /// the client version and the application.
+  /// the client version and the library.
   std::map<std::string, std::string> metadata{
       {"client_version", ndt_client_version},
       {"client_library", "m-lab/ndt7-client-cc"},
@@ -900,10 +900,14 @@ bool Client::run() noexcept {
   if (!query_locate_api(settings_.metadata, &targets)) {
     return false;
   }
+  std::string scheme = "ws";
+  if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
+    scheme = "wss";
+  }
   for (auto &urls : targets) {
     LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
     if ((settings_.nettest_flags & nettest_flag_download) != 0) {
-      auto url = urls["wss:///ndt/v7/download"];
+      auto url = urls[scheme+":///ndt/v7/download"];
       UrlParts parts = parse_ws_url(url);
       if (!ndt7_download(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: download failed");
@@ -911,7 +915,7 @@ bool Client::run() noexcept {
       }
     }
     if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
-      auto url = urls["wss:///ndt/v7/upload"];
+      auto url = urls[scheme+":///ndt/v7/download"];
       UrlParts parts = parse_ws_url(url);
       if (!ndt7_upload(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: upload failed");
