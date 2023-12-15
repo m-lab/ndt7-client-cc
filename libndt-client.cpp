@@ -158,9 +158,6 @@ int main(int, char **argv) {
       } else if (flag == "insecure") {
         settings.tls_verify_peer = false;
         std::clog << "WILL NOT verify the TLS peer (INSECURE!)" << std::endl;
-      } else if (flag == "ndt7") {
-        settings.protocol_flags |= libndt::protocol_flag_ndt7;
-        std::clog << "will use the ndt7 protocol" << std::endl;
       } else if (flag == "tls") {
         settings.protocol_flags |= libndt::protocol_flag_tls;
         std::clog << "will secure communications using TLS" << std::endl;
@@ -174,9 +171,6 @@ int main(int, char **argv) {
         std::cout << libndt::version_major << "." << libndt::version_minor
                   << "." << libndt::version_patch << std::endl;
         exit(EXIT_SUCCESS);
-      } else if (flag == "websocket") {
-        settings.protocol_flags |= libndt::protocol_flag_websocket;
-        std::clog << "will use the NDT-over-WebSocket protocol" << std::endl;
       } else if (flag == "batch") {
         batch_mode = true;
         std::clog << "will run in batch mode" << std::endl;
