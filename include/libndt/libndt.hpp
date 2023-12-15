@@ -119,7 +119,7 @@ struct UrlParts {
 
 UrlParts parse_ws_url(const std::string& url);
 
-std::string format_http_params(const std::map<std::string, std::string>& params);
+std::string unsafe_format_http_params(const std::map<std::string, std::string>& params);
 
 // Versioning
 // ``````````
@@ -407,13 +407,13 @@ class Client : public EventHandler {
 
   // ndt7_download performs a ndt7 download. Returns true if the download
   // succeeds and false in case of failure.
-  bool ndt7_download(UrlParts url) noexcept;
+  bool ndt7_download(const UrlParts &url) noexcept;
 
   // ndt7_upload is like ndt7_download but performs an upload.
-  bool ndt7_upload(UrlParts url) noexcept;
+  bool ndt7_upload(const UrlParts &url) noexcept;
 
   // ndt7_connect connects to @p url_path.
-  bool ndt7_connect(UrlParts url) noexcept;
+  bool ndt7_connect(const UrlParts &url) noexcept;
 
   // WebSocket
   // `````````
@@ -902,15 +902,25 @@ bool Client::run() noexcept {
   for (auto &urls : targets) {
     LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
     if ((settings_.nettest_flags & nettest_flag_download) != 0) {
-      auto url = urls[scheme+":///ndt/v7/download"];
+      auto key = scheme + ":///ndt/v7/download";
+      if (!urls.contains(key)) {
+        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        continue;
+      }
+      auto url = urls[key];
       UrlParts parts = parse_ws_url(url);
       if (!ndt7_download(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: download failed");
-        // FALLTHROUGH
+       // FALLTHROUGH
       }
     }
     if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
-      auto url = urls[scheme+":///ndt/v7/upload"];
+      auto key = scheme + ":///ndt/v7/upload";
+      if (!urls.contains(key)) {
+        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        continue;
+      }
+      auto url = urls[key];
       UrlParts parts = parse_ws_url(url);
       if (!ndt7_upload(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: upload failed");
@@ -997,6 +1007,7 @@ void Client::summary() noexcept {
 
 bool Client::query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept {
   assert(urls != nullptr);
+  // TODO(soltesz): support the static host case correctly.
   if (!settings_.hostname.empty()) {
     LIBNDT_EMIT_DEBUG("no need to query locate api; we have hostname");
     // When we already know the hostname that we want to use just fake out the
@@ -1008,7 +1019,7 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
   locate_api_url += "/v2/nearest/ndt/ndt7";
   if (opts.size() > 0) {
     // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
-    locate_api_url += "?" + format_http_params(opts);
+    locate_api_url += "?" + unsafe_format_http_params(opts);
   }
   std::string body;
   LIBNDT_EMIT_INFO("locate_api url: " << locate_api_url);
@@ -1058,7 +1069,7 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
 // ndt7 protocol API
 // `````````````````
 
-bool Client::ndt7_download(UrlParts url) noexcept {
+bool Client::ndt7_download(const UrlParts &url) noexcept {
   LIBNDT_EMIT_INFO("starting ndt7 download test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
@@ -1141,7 +1152,7 @@ bool Client::ndt7_download(UrlParts url) noexcept {
   return true;
 }
 
-bool Client::ndt7_upload(UrlParts url) noexcept {
+bool Client::ndt7_upload(const UrlParts &url) noexcept {
   LIBNDT_EMIT_INFO("starting ndt7 upload test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
@@ -1230,7 +1241,7 @@ bool Client::ndt7_upload(UrlParts url) noexcept {
   return true;
 }
 
-bool Client::ndt7_connect(UrlParts url) noexcept {
+bool Client::ndt7_connect(const UrlParts &url) noexcept {
   // Don't leak resources if the socket is already open.
   if (internal::IsSocketValid(sock_)) {
     LIBNDT_EMIT_DEBUG("ndt7: closing socket openned in previous attempt");
@@ -2918,8 +2929,10 @@ Verbosity Client::get_verbosity() const noexcept {
   return settings_.verbosity;
 }
 
-// Function to parse a websocket URL and return its components.
-UrlParts parse_ws_url(const std::string& url) {
+// Function to parse a websocket URL and return its components. The URL must
+// include a resource path.
+// TODO(soltesz): add testing for various input cases.
+ UrlParts parse_ws_url(const std::string& url) {
   UrlParts parts;
 
   // Find the scheme.
@@ -2955,7 +2968,8 @@ UrlParts parse_ws_url(const std::string& url) {
   return parts;
 }
 
-std::string format_http_params(const std::map<std::string, std::string>& params) {
+// unsafe_format_http_params is only intended for parameters within the library itself.
+std::string unsafe_format_http_params(const std::map<std::string, std::string>& params) {
   std::stringstream ss;
   bool first = true;
   for (const auto& kv : params) {
