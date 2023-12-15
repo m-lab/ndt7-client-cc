@@ -2970,8 +2970,7 @@ Verbosity Client::get_verbosity() const noexcept {
   return parts;
 }
 
-static std::string curl_urlencode(const std::string& raw)
-{
+static std::string curl_urlencode(const std::string& raw) {
     const auto encoded_value = curl_easy_escape(nullptr, raw.c_str(), static_cast<int>(raw.length()));
     std::string result(encoded_value);
     curl_free(encoded_value);
