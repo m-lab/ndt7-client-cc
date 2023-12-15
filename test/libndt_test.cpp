@@ -48,7 +48,7 @@ using namespace measurement_kit::libndt;
 class FailQueryMlabns : public Client {
  public:
   using Client::Client;
-  bool query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept override {
+  bool query_locate_api(const std::map<std::string, std::string>&, std::vector<nlohmann::json>*) noexcept override {
     return false;
   }
 };
