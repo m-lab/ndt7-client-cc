@@ -288,7 +288,7 @@ class Settings {
   /// the client version and the application.
   std::map<std::string, std::string> metadata{
       {"client_version", ndt_client_version},
-      {"client_application", "m-lab/ndt7-client-cc"},
+      {"client_name", "m-lab/ndt7-client-cc"},
   };
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
