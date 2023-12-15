@@ -42,7 +42,11 @@ int main() {
 }
 ```
 
-Compile with `g++ -std=c++11 -Wall -Wextra -I. -o main main.cpp`.
+Compile your client with a unique name using:
+
+```sh
+g++ -std=c++11 -Wall -Wextra -DCLIENT_NAME=\"my-ndt7-client\" -I. -o main main.cpp
+```
 
 See [codedocs.xyz/measurement-kit/libndt](
 https://codedocs.xyz/measurement-kit/libndt/) for API documentation;
@@ -68,7 +72,7 @@ cmake --build .
 ctest -a --output-on-failure .
 ```
 
-## Command line client 
+## Command line client
 
 Building with CMake also builds a simple command line client. Get usage info
 by running:

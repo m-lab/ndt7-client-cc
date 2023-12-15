@@ -58,6 +58,10 @@
 #error "Libndt requires nlohmann/json >= 3"
 #endif
 
+#ifndef CLIENT_NAME
+#define CLIENT_NAME "libndt7-default"
+#endif
+
 // TODO(bassosimone): these headers should be in impl.hpp and here we
 // need to include the bare minimum required by the API
 
@@ -285,8 +289,8 @@ class Settings {
   /// the client version and the library.
   std::map<std::string, std::string> metadata{
       {"client_library_version", "v0.1.0"},
-      {"client_library_name", "m-lab/ndt7-client-cc"},
-      // TODO: add build option for specifying client_name.
+      {"client_library_name", "m-lab/libndt7"},
+      {"client_name", CLIENT_NAME}
   };
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
