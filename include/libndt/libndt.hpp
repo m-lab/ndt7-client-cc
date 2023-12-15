@@ -1029,9 +1029,9 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
   // error, the object includes an "error". On success, there is always at least
   // one result in an array.
   if (!json.contains("results")) {
-    // TODO: read error, return false.
     if (!json.contains("error")) {
       LIBNDT_EMIT_WARNING("no results and no error! " << body);
+      return false;
     }
     auto err = json["error"];
     LIBNDT_EMIT_WARNING("error response from " << locate_api_url << ": " << err);
@@ -1047,11 +1047,12 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
     auto result_urls = target["urls"];
     do {
       auto it = result_urls.begin();
+      // Any key is fine for debug logging.
       LIBNDT_EMIT_DEBUG("discovered host: " << result_urls[it.key()]);
     } while(0);
     urls->push_back(std::move(result_urls));
   }
-  return true;
+  return urls->size() > 0;
 }
 
 // ndt7 protocol API
