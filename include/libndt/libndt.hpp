@@ -119,7 +119,9 @@ struct UrlParts {
 
 UrlParts parse_ws_url(const std::string& url);
 
-std::string unsafe_format_http_params(const std::map<std::string, std::string>& params);
+std::string format_http_params(const std::map<std::string, std::string>& params);
+
+static std::string curl_urlencode(const std::string& raw);
 
 // Versioning
 // ``````````
@@ -1017,7 +1019,7 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
   locate_api_url += "/v2/nearest/ndt/ndt7";
   if (opts.size() > 0) {
     // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
-    locate_api_url += "?" + unsafe_format_http_params(opts);
+    locate_api_url += "?" + format_http_params(opts);
   }
   std::string body;
   LIBNDT_EMIT_INFO("locate_api url: " << locate_api_url);
@@ -2941,20 +2943,22 @@ Verbosity Client::get_verbosity() const noexcept {
 
   // Extract the hostname and port.
   auto slash_pos = url.find("/", colon_pos + 3);
-  if (slash_pos != std::string::npos) {
-    auto host_part = url.substr(colon_pos + 3, slash_pos - colon_pos - 3);
-    auto port_pos = host_part.find(":");
-    // Does the host include a port?
-    if (port_pos != std::string::npos) {
-      parts.host = host_part.substr(0, port_pos);
-      parts.port = host_part.substr(port_pos + 1);
-    } else {
-      parts.host = host_part;
-      if (parts.scheme == "ws") {
-        parts.port = "80";
-      } else if (parts.scheme == "wss") {
-        parts.port = "443";
-      }
+  if (slash_pos == std::string::npos) {
+    // No resource path.
+    slash_pos = url.length();
+  }
+  auto host_part = url.substr(colon_pos + 3, slash_pos - colon_pos - 3);
+  auto port_pos = host_part.find(":");
+  // Does the host include a port?
+  if (port_pos != std::string::npos) {
+    parts.host = host_part.substr(0, port_pos);
+    parts.port = host_part.substr(port_pos + 1);
+  } else {
+    parts.host = host_part;
+    if (parts.scheme == "ws") {
+      parts.port = "80";
+    } else if (parts.scheme == "wss") {
+      parts.port = "443";
     }
   }
 
@@ -2966,15 +2970,23 @@ Verbosity Client::get_verbosity() const noexcept {
   return parts;
 }
 
-// unsafe_format_http_params is only intended for parameters within the library itself.
-std::string unsafe_format_http_params(const std::map<std::string, std::string>& params) {
+static std::string curl_urlencode(const std::string& raw)
+{
+    const auto encoded_value = curl_easy_escape(nullptr, raw.c_str(), static_cast<int>(raw.length()));
+    std::string result(encoded_value);
+    curl_free(encoded_value);
+    return result;
+}
+
+// format_http_params is only intended for parameters within the library itself.
+std::string format_http_params(const std::map<std::string, std::string>& params) {
   std::stringstream ss;
   bool first = true;
   for (const auto& kv : params) {
     if (!first) {
       ss << "&";
     }
-    ss << kv.first << "=" << kv.second;
+    ss << curl_urlencode(kv.first) << "=" << curl_urlencode(kv.second);
     first = false;
   }
   return ss.str();
