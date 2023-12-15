@@ -90,8 +90,13 @@ You MUST specify what subtest to enable:
  * `-download` enables the download subtest
  * `-upload` enables the upload subtest
 
-By default, libndt-client uses M-Lab's Locate API to find a suitable target
-server. You may specify a specific server using a combination of the flags:
+By default, libndt-client uses M-Lab's unregistered Locate API to find a
+suitable target server. For registered clients, you may specify an API key for
+the Locate API using:
+* `-key=<key>`
+
+Instead of the Locate API, you may specify a specific server using a combination
+of the flags:
  * `-port=<port>`
  * `-scheme=<ws>`
  * `-hostname=<hostname>`
@@ -104,15 +109,12 @@ The default mode is wss (TLS).
 You may control information output using a combination of the following flags:
  * `-batch` outputs JSON results to STDOUT.
  * `-summary` only prints a summary at the end of the test.
+ * `-verbose` prints additional debug information.
 
 In combination, -batch and -summary produce a final summary in JSON.
 
-
-When running, this client emits messages. You can use `-verbose` to cause
-it to emit even more messages.
-
 The `-socks5h <port>` flag causes this tool to use the specified SOCKS5h
-proxy to contact mlab-ns and for running the selected subtests.
+proxy to contact Locate API and for running the selected subtests.
 
 The `-version` shows the version number and exits.)" << std::endl;
   // clang-format on
@@ -131,6 +133,7 @@ int main(int, char **argv) {
     cmdline.add_param("ca-bundle-path");
     cmdline.add_param("lookup-policy");
     cmdline.add_param("socks5h");
+    cmdline.add_param("key");
     cmdline.add_param("port");
     cmdline.add_param("scheme");
     cmdline.add_param("hostname");
@@ -171,6 +174,9 @@ int main(int, char **argv) {
       if (param.first == "ca-bundle-path") {
         settings.ca_bundle_path = param.second;
         std::clog << "will use this CA bundle: " << param.second << std::endl;
+      } else if (param.first == "key") {
+        settings.metadata["key"] = param.second;
+        std::clog << "will use this key: " << param.second << std::endl;
       } else if (param.first == "port") {
         settings.port = param.second;
         std::clog << "will use this port: " << param.second << std::endl;
