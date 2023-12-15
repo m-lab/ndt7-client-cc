@@ -59,7 +59,7 @@
 #endif
 
 #ifndef CLIENT_NAME
-#define CLIENT_NAME "libndt7-default"
+#define CLIENT_NAME "libndt7-cc-default"
 #endif
 
 // TODO(bassosimone): these headers should be in impl.hpp and here we
