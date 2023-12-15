@@ -119,6 +119,19 @@ struct UrlParts {
 
 UrlParts parse_ws_url(const std::string& url);
 
+std::string format_http_params(const std::map<std::string, std::string>& params) {
+  std::stringstream ss;
+  bool first = true;
+  for (const auto& kv : params) {
+    if (!first) {
+      ss << "&";
+    }
+    ss << kv.first << "=" << kv.second;
+    first = false;
+  }
+  return ss.str();
+}
+
 // Versioning
 // ``````````
 
@@ -252,7 +265,7 @@ EventHandler::~EventHandler() noexcept {}
 // Settings
 // ````````
 
-constexpr const char *ndt_version_compat = "v7.0.0";
+constexpr const char *ndt_client_version = "v0.1.0";
 
 /// NDT client settings. If you do not customize the settings when creating
 /// a Client, the defaults listed below will be used instead.
@@ -285,7 +298,7 @@ class Settings {
   /// Metadata to include in the server side logs. By default we just identify
   /// the client version and the application.
   std::map<std::string, std::string> metadata{
-      {"client_version", ndt_version_compat},
+      {"client_version", ndt_client_version},
       {"client_application", "m-lab/ndt7-client-cc"},
   };
 
@@ -397,7 +410,7 @@ class Client : public EventHandler {
 
   // High-level API
   virtual void summary() noexcept;
-  virtual bool query_locate_api(std::string opts, std::vector<nlohmann::json> *urls) noexcept;
+  virtual bool query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept;
 
   // ndt7 protocol API
   // `````````````````
@@ -894,7 +907,7 @@ Client::~Client() noexcept {
 
 bool Client::run() noexcept {
   std::vector<nlohmann::json> targets;
-  if (!query_locate_api("", &targets)) {
+  if (!query_locate_api(settings_.metadata, &targets)) {
     return false;
   }
   for (auto &urls : targets) {
@@ -993,7 +1006,7 @@ void Client::summary() noexcept {
   }
 }
 
-bool Client::query_locate_api(std::string opts, std::vector<nlohmann::json> *urls) noexcept {
+bool Client::query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept {
   assert(urls != nullptr);
   if (!settings_.hostname.empty()) {
     LIBNDT_EMIT_DEBUG("no need to query locate api; we have hostname");
@@ -1004,13 +1017,12 @@ bool Client::query_locate_api(std::string opts, std::vector<nlohmann::json> *url
   }
   std::string locate_api_url = settings_.locate_api_base_url;
   locate_api_url += "/v2/nearest/ndt/ndt7";
-  if (opts.length() > 0) {
+  if (opts.size() > 0) {
     // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
-    // TODO(soltesz): add client metadata.
-    locate_api_url += "?" + opts;
+    locate_api_url += "?" + format_http_params(opts);
   }
   std::string body;
-  LIBNDT_EMIT_DEBUG("locate_api url: " << locate_api_url);
+  LIBNDT_EMIT_INFO("locate_api url: " << locate_api_url);
   if (!query_locate_api_curl(locate_api_url, settings_.timeout, &body)) {
 
     return false;
