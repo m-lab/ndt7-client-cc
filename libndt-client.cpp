@@ -161,11 +161,6 @@ int main(int, char **argv) {
       } else if (flag == "ndt7") {
         settings.protocol_flags |= libndt::protocol_flag_ndt7;
         std::clog << "will use the ndt7 protocol" << std::endl;
-      } else if (flag == "random") {
-        std::clog << "WARNING: the `-random` flag is deprecated" << std::endl;
-        std::clog << "HINT: replace with `-lookup-policy random`" << std::endl;
-        settings.mlabns_policy = libndt::mlabns_policy_random;
-        std::clog << "will auto-select a random server" << std::endl;
       } else if (flag == "tls") {
         settings.protocol_flags |= libndt::protocol_flag_tls;
         std::clog << "will secure communications using TLS" << std::endl;
@@ -198,19 +193,6 @@ int main(int, char **argv) {
       if (param.first == "ca-bundle-path") {
         settings.ca_bundle_path = param.second;
         std::clog << "will use this CA bundle: " << param.second << std::endl;
-      } else if (param.first == "lookup-policy") {
-        if (param.second == "closest") {
-          settings.mlabns_policy = libndt::mlabns_policy_closest;
-        } else if (param.second == "random") {
-          settings.mlabns_policy = libndt::mlabns_policy_random;
-        } else if (param.second == "geo-options") {
-          settings.mlabns_policy = libndt::mlabns_policy_geo_options;
-        } else {
-          std::clog << "fatal: unrecognized -lookup-policy: " << param.second
-                    << std::endl << std::endl;
-          usage();
-          exit(EXIT_FAILURE);
-        }
       } else if (param.first == "port") {
         settings.port = param.second;
         std::clog << "will use this port: " << param.second << std::endl;
