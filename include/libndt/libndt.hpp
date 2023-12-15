@@ -904,7 +904,6 @@ bool Client::run() noexcept {
     if ((settings_.nettest_flags & nettest_flag_download) != 0) {
       auto url = urls[scheme+":///ndt/v7/download"];
       UrlParts parts = parse_ws_url(url);
-      LIBNDT_EMIT_INFO("url: " << std::string(url) << " " << parts.scheme << " " << parts.host);
       if (!ndt7_download(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: download failed");
         // FALLTHROUGH
@@ -913,7 +912,6 @@ bool Client::run() noexcept {
     if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
       auto url = urls[scheme+":///ndt/v7/upload"];
       UrlParts parts = parse_ws_url(url);
-      LIBNDT_EMIT_INFO("url: " << std::string(url) << " " << parts.scheme << " " << parts.host);
       if (!ndt7_upload(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: upload failed");
         // FALLTHROUGH
@@ -1061,7 +1059,7 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
 // `````````````````
 
 bool Client::ndt7_download(UrlParts url) noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 download test");
+  LIBNDT_EMIT_INFO("starting ndt7 download test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
   }
@@ -1144,8 +1142,7 @@ bool Client::ndt7_download(UrlParts url) noexcept {
 }
 
 bool Client::ndt7_upload(UrlParts url) noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 upload test");
-  LIBNDT_EMIT_INFO("starting ndt7 upload test: " << url.scheme << " " << url.host);
+  LIBNDT_EMIT_INFO("starting ndt7 upload test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
   }
@@ -2011,10 +2008,10 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
   LIBNDT_EMIT_DEBUG(
       "netx_maybessl_dial: netx_maybesocks5h_dial() returned successfully");
   if ((settings_.protocol_flags & protocol_flag_tls) == 0) {
-    LIBNDT_EMIT_INFO("netx_maybessl_dial: TLS not enabled");
+    LIBNDT_EMIT_DEBUG("netx_maybessl_dial: TLS not enabled");
     return internal::Err::none;
   }
-  LIBNDT_EMIT_INFO("netx_maybetls_dial: about to start TLS handshake");
+  LIBNDT_EMIT_DEBUG("netx_maybetls_dial: about to start TLS handshake");
   if (settings_.ca_bundle_path.empty() && settings_.tls_verify_peer) {
 #ifndef _WIN32
     // See <https://serverfault.com/a/722646>
