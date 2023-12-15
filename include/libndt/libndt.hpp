@@ -180,11 +180,6 @@ constexpr ProtocolFlags protocol_flag_tls = ProtocolFlags{1 << 1};
 /// we use the WebSocket framing to encapsulate NDT messages.
 constexpr ProtocolFlags protocol_flag_websocket = ProtocolFlags{1 << 2};
 
-/// When this flag is set, we use ndt7 rather than ndt5. This specifically
-/// means that a totally different protocol is used. You can read more on ndt7
-/// at https://github.com/m-lab/ndt-server/blob/master/spec/ndt7-protocol.md
-constexpr ProtocolFlags protocol_flag_ndt7 = ProtocolFlags{1 << 3};
-
 // EventHandler
 // ------------
 
@@ -285,7 +280,7 @@ class Settings {
   Verbosity verbosity = verbosity_quiet;
 
   /// Metadata to include in the server side logs. By default we just identify
-  /// the client version and the application.
+  /// the client version and the library.
   std::map<std::string, std::string> metadata{
       {"client_version", ndt_client_version},
       {"client_library", "m-lab/ndt7-client-cc"},
@@ -900,19 +895,25 @@ bool Client::run() noexcept {
   if (!query_locate_api(settings_.metadata, &targets)) {
     return false;
   }
+  std::string scheme = "ws";
+  if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
+    scheme = "wss";
+  }
   for (auto &urls : targets) {
     LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
     if ((settings_.nettest_flags & nettest_flag_download) != 0) {
-      auto url = urls["wss:///ndt/v7/download"];
+      auto url = urls[scheme+":///ndt/v7/download"];
       UrlParts parts = parse_ws_url(url);
+      LIBNDT_EMIT_INFO("url: " << std::string(url) << " " << parts.scheme << " " << parts.host);
       if (!ndt7_download(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: download failed");
         // FALLTHROUGH
       }
     }
     if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
-      auto url = urls["wss:///ndt/v7/upload"];
+      auto url = urls[scheme+":///ndt/v7/upload"];
       UrlParts parts = parse_ws_url(url);
+      LIBNDT_EMIT_INFO("url: " << std::string(url) << " " << parts.scheme << " " << parts.host);
       if (!ndt7_upload(parts)) {
         LIBNDT_EMIT_WARNING("ndt7: upload failed");
         // FALLTHROUGH
@@ -1144,6 +1145,7 @@ bool Client::ndt7_download(UrlParts url) noexcept {
 
 bool Client::ndt7_upload(UrlParts url) noexcept {
   LIBNDT_EMIT_INFO("starting ndt7 upload test");
+  LIBNDT_EMIT_INFO("starting ndt7 upload test: " << url.scheme << " " << url.host);
   if (!ndt7_connect(url)) {
     return false;
   }
@@ -1238,8 +1240,8 @@ bool Client::ndt7_connect(UrlParts url) noexcept {
     (void)netx_closesocket(sock_);
     sock_ = (internal::Socket)-1;
   }
-  // Note: ndt7 implies WebSocket and TLS
-  settings_.protocol_flags |= protocol_flag_websocket | protocol_flag_tls;
+  // Note: ndt7 implies WebSocket.
+  settings_.protocol_flags |= protocol_flag_websocket;
 	internal::Err err = netx_maybews_dial(
       url.host, url.port,
       ws_f_connection | ws_f_upgrade | ws_f_sec_ws_accept |
@@ -2009,10 +2011,10 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
   LIBNDT_EMIT_DEBUG(
       "netx_maybessl_dial: netx_maybesocks5h_dial() returned successfully");
   if ((settings_.protocol_flags & protocol_flag_tls) == 0) {
-    LIBNDT_EMIT_DEBUG("netx_maybessl_dial: TLS not enabled");
+    LIBNDT_EMIT_INFO("netx_maybessl_dial: TLS not enabled");
     return internal::Err::none;
   }
-  LIBNDT_EMIT_DEBUG("netx_maybetls_dial: about to start TLS handshake");
+  LIBNDT_EMIT_INFO("netx_maybetls_dial: about to start TLS handshake");
   if (settings_.ca_bundle_path.empty() && settings_.tls_verify_peer) {
 #ifndef _WIN32
     // See <https://serverfault.com/a/722646>
