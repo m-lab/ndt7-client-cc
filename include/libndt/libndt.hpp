@@ -119,18 +119,7 @@ struct UrlParts {
 
 UrlParts parse_ws_url(const std::string& url);
 
-std::string format_http_params(const std::map<std::string, std::string>& params) {
-  std::stringstream ss;
-  bool first = true;
-  for (const auto& kv : params) {
-    if (!first) {
-      ss << "&";
-    }
-    ss << kv.first << "=" << kv.second;
-    first = false;
-  }
-  return ss.str();
-}
+std::string format_http_params(const std::map<std::string, std::string>& params);
 
 // Versioning
 // ``````````
@@ -2963,6 +2952,19 @@ UrlParts parse_ws_url(const std::string& url) {
   }
 
   return parts;
+}
+
+std::string format_http_params(const std::map<std::string, std::string>& params) {
+  std::stringstream ss;
+  bool first = true;
+  for (const auto& kv : params) {
+    if (!first) {
+      ss << "&";
+    }
+    ss << kv.first << "=" << kv.second;
+    first = false;
+  }
+  return ss.str();
 }
 
 }  // namespace libndt
