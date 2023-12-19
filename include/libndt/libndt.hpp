@@ -397,7 +397,7 @@ class Client : public EventHandler {
   // High-level API
   virtual void summary() noexcept;
   virtual bool query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept;
-  virtual std::string get_static_result(std::string opts, std::string scheme, std::string hostname, std::string port);
+  virtual std::string get_static_locate_result(std::string opts, std::string scheme, std::string hostname, std::string port);
   virtual std::string replace_all_with(std::string templ, std::string pattern, std::string replace);
 
   // ndt7 protocol API
@@ -1008,7 +1008,7 @@ void Client::summary() noexcept {
   }
 }
 
-std::string Client::get_static_result(
+std::string Client::get_static_locate_result(
   std::string opts, std::string scheme, std::string hostname, std::string port) {
   std::string templ = R"({
   "results": [
@@ -1049,7 +1049,7 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
   if (!settings_.hostname.empty()) {
     LIBNDT_EMIT_DEBUG("no need to query locate api; we have hostname");
     // We already know the hostname, scheme and port, so return a static result.
-    body = get_static_result(
+    body = get_static_locate_result(
       unsafe_format_http_params(opts), settings_.scheme, settings_.hostname,
       settings_.port);
   } else {
