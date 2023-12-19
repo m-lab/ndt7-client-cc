@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12.0)
-project("libndt")
+project("libndt7")
 
 include(CheckCXXCompilerFlag)
 include(CheckFunctionExists)
@@ -151,8 +151,8 @@ include_directories(${CMAKE_REQUIRED_INCLUDES}
 add_executable(curlx_test test/curlx_test.cpp)
 target_link_libraries(curlx_test ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(libndt-client ndt7-client-cc.cpp)
-target_link_libraries(libndt-client ${CMAKE_REQUIRED_LIBRARIES})
+add_executable(ndt7-client-cc ndt7-client-cc.cpp)
+target_link_libraries(ndt7-client-cc ${CMAKE_REQUIRED_LIBRARIES})
 
 add_executable(libndt-standalone-builds libndt-standalone-builds.cpp)
 target_link_libraries(libndt-standalone-builds ${CMAKE_REQUIRED_LIBRARIES})
@@ -169,8 +169,8 @@ add_test(NAME curlx_unit_tests COMMAND curlx_test)
 add_test(NAME other_unit_tests COMMAND tests-libndt)
 add_test(NAME sys_unit_tests COMMAND sys_test)
 
-add_test(NAME simple_test COMMAND libndt-client
+add_test(NAME simple_test COMMAND ndt7-client-cc
          -download -upload -verbose -scheme=ws)
-add_test(NAME modern_test COMMAND libndt-client
+add_test(NAME modern_test COMMAND ndt7-client-cc
          -ca-bundle-path ${CMAKE_SOURCE_DIR}/third_party/curl.haxx.se/ca/cacert.pem
          -verbose -download -upload -scheme=wss)
