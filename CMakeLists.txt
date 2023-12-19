@@ -154,8 +154,8 @@ target_link_libraries(curlx_test ${CMAKE_REQUIRED_LIBRARIES})
 add_executable(ndt7-client-cc ndt7-client-cc.cpp)
 target_link_libraries(ndt7-client-cc ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(libndt-standalone-builds libndt-standalone-builds.cpp)
-target_link_libraries(libndt-standalone-builds ${CMAKE_REQUIRED_LIBRARIES})
+add_executable(libndt7-standalone-builds libndt7-standalone-builds.cpp)
+target_link_libraries(libndt7-standalone-builds ${CMAKE_REQUIRED_LIBRARIES})
 
 add_executable(sys_test test/sys_test.cpp)
 target_link_libraries(sys_test ${CMAKE_REQUIRED_LIBRARIES})
