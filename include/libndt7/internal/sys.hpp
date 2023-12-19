@@ -1,8 +1,8 @@
 // Part of Measurement Kit <https://measurement-kit.github.io/>.
 // Measurement Kit is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_SYS_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_SYS_HPP
+#ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_SYS_HPP
+#define MEASUREMENT_KIT_LIBNDT7_INTERNAL_SYS_HPP
 
 // libndt/internal/sys.hpp - system dependent routines
 
@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 namespace measurement_kit {
-namespace libndt {
+namespace libndt7 {
 namespace internal {
 
 // Size is our definition of size
@@ -50,11 +50,11 @@ constexpr bool IsSocketValid(Socket s) noexcept {
 #endif
 }
 
-// LIBNDT_OS_EINVAL is a portable EINVAL
+// LIBNDT7_OS_EINVAL is a portable EINVAL
 #ifdef _WIN32
-#define LIBNDT_OS_EINVAL WSAEINVAL
+#define LIBNDT7_OS_EINVAL WSAEINVAL
 #else
-#define LIBNDT_OS_EINVAL EINVAL
+#define LIBNDT7_OS_EINVAL EINVAL
 #endif
 
 // Sys allow to simulate failures in system dependencies.
@@ -112,8 +112,8 @@ class Sys {
   virtual ~Sys() noexcept;
 };
 
-// LIBNDT_HAVE_STRTONUM tells us whether we have strtonum in libc
-#ifndef LIBNDT_HAVE_STRTONUM
+// LIBNDT7_HAVE_STRTONUM tells us whether we have strtonum in libc
+#ifndef LIBNDT7_HAVE_STRTONUM
 // clang-format off
 /*
  * Copyright (c) 2004 Ted Unangst and Todd Miller
@@ -175,18 +175,18 @@ strtonum(const char *numstr, long long minval, long long maxval,
 	return (ll);
 }
 // clang-format on
-#endif  // LIBNDT_HAVE_STRTONUM
+#endif  // LIBNDT7_HAVE_STRTONUM
 
 #ifdef _WIN32
-#define LIBNDT_AS_OS_BUFFER(b) ((char *)b)
-#define LIBNDT_AS_OS_BUFFER_LEN(n) ((int)n)
-#define LIBNDT_OS_SSIZE_MAX INT_MAX
-#define LIBNDT_AS_OS_OPTION_VALUE(x) ((char *)x)
+#define LIBNDT7_AS_OS_BUFFER(b) ((char *)b)
+#define LIBNDT7_AS_OS_BUFFER_LEN(n) ((int)n)
+#define LIBNDT7_OS_SSIZE_MAX INT_MAX
+#define LIBNDT7_AS_OS_OPTION_VALUE(x) ((char *)x)
 #else
-#define LIBNDT_AS_OS_BUFFER(b) ((char *)b)
-#define LIBNDT_AS_OS_BUFFER_LEN(n) ((size_t)n)
-#define LIBNDT_OS_SSIZE_MAX SSIZE_MAX
-#define LIBNDT_AS_OS_OPTION_VALUE(x) ((void *)x)
+#define LIBNDT7_AS_OS_BUFFER(b) ((char *)b)
+#define LIBNDT7_AS_OS_BUFFER_LEN(n) ((size_t)n)
+#define LIBNDT7_OS_SSIZE_MAX SSIZE_MAX
+#define LIBNDT7_AS_OS_OPTION_VALUE(x) ((void *)x)
 #endif
 
 int Sys::GetLastError() const noexcept {
@@ -227,8 +227,8 @@ int Sys::Connect(Socket fd, const sockaddr *sa, socklen_t len) const noexcept {
 }
 
 Ssize Sys::Recv(Socket fd, void *base, Size count) const noexcept {
-  if (count > LIBNDT_OS_SSIZE_MAX) {
-    this->SetLastError(LIBNDT_OS_EINVAL);
+  if (count > LIBNDT7_OS_SSIZE_MAX) {
+    this->SetLastError(LIBNDT7_OS_EINVAL);
     return -1;
   }
   int flags = 0;
@@ -237,12 +237,12 @@ Ssize Sys::Recv(Socket fd, void *base, Size count) const noexcept {
   flags |= MSG_NOSIGNAL;
 #endif
   return (Ssize)::recv(
-      fd, LIBNDT_AS_OS_BUFFER(base), LIBNDT_AS_OS_BUFFER_LEN(count), flags);
+      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
-  if (count > LIBNDT_OS_SSIZE_MAX) {
-    this->SetLastError(LIBNDT_OS_EINVAL);
+  if (count > LIBNDT7_OS_SSIZE_MAX) {
+    this->SetLastError(LIBNDT7_OS_EINVAL);
     return -1;
   }
   int flags = 0;
@@ -251,7 +251,7 @@ Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
   flags |= MSG_NOSIGNAL;
 #endif
   return (Ssize)::send(
-      fd, LIBNDT_AS_OS_BUFFER(base), LIBNDT_AS_OS_BUFFER_LEN(count), flags);
+      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 int Sys::Shutdown(Socket fd, int shutdown_how) const noexcept {
@@ -295,12 +295,12 @@ int Sys::Fcntl(Socket s, int cmd, int arg) const noexcept {
 int Sys::Getsockopt(Socket socket, int level, int name, void *value,
                     socklen_t *len) const noexcept {
   return ::getsockopt(
-      socket, level, name, LIBNDT_AS_OS_OPTION_VALUE(value), len);
+      socket, level, name, LIBNDT7_AS_OS_OPTION_VALUE(value), len);
 }
 
 Sys::~Sys() noexcept {}
 
 }  // namespace internal
-}  // namespace libndt
+}  // namespace libndt7
 }  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT_INTERNAL_SYS_HPP
+#endif  // MEASUREMENT_KIT_LIBNDT7_INTERNAL_SYS_HPP

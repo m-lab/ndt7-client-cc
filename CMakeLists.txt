@@ -28,9 +28,9 @@ if((${APPLE}))
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -L/usr/local/lib")
 endif()
 
-check_function_exists(strtonum LIBNDT_HAVE_STRTONUM)
-if(${LIBNDT_HAVE_STRTONUM})
-  add_definitions(-DLIBNDT_HAVE_STRTONUM)
+check_function_exists(strtonum LIBNDT7_HAVE_STRTONUM)
+if(${LIBNDT7_HAVE_STRTONUM})
+  add_definitions(-DLIBNDT7_HAVE_STRTONUM)
 endif()
 
 CHECK_INCLUDE_FILE_CXX("curl/curl.h" MK_HAVE_CURL_CURL_H)
@@ -127,8 +127,8 @@ macro(MKSetRestrictiveCompilerFlags)
 endmacro()
 MKSetRestrictiveCompilerFlags()
 
-set(MK_LIBNDT_AMALGAMATE_DEST single_include/libndt7.hpp)
-file(REMOVE ${MK_LIBNDT_AMALGAMATE_DEST})
+set(MK_LIBNDT7_AMALGAMATE_DEST single_include/libndt7.hpp)
+file(REMOVE ${MK_LIBNDT7_AMALGAMATE_DEST})
 foreach(SOURCE IN ITEMS
         include/libndt7/preamble.hpp
         third_party/github.com/nlohmann/json/json.hpp
@@ -140,7 +140,7 @@ foreach(SOURCE IN ITEMS
         include/libndt7/timeout.hpp
         include/libndt7/libndt7.hpp)
   file(READ ${SOURCE} CONTENT)
-  file(APPEND ${MK_LIBNDT_AMALGAMATE_DEST} "${CONTENT}")
+  file(APPEND ${MK_LIBNDT7_AMALGAMATE_DEST} "${CONTENT}")
 endforeach()
 
 add_definitions(${CMAKE_REQUIRED_DEFINITIONS})
@@ -160,7 +160,7 @@ target_link_libraries(libndt7-standalone-builds ${CMAKE_REQUIRED_LIBRARIES})
 add_executable(sys_test test/sys_test.cpp)
 target_link_libraries(sys_test ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(tests-libndt test/libndt_test.cpp)
+add_executable(tests-libndt test/libndt7_test.cpp)
 target_link_libraries(tests-libndt ${CMAKE_REQUIRED_LIBRARIES})
 
 enable_testing()

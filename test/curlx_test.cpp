@@ -7,7 +7,7 @@
 #define CATCH_CONFIG_MAIN
 #include "third_party/github.com/catchorg/Catch2/catch.hpp"
 
-using namespace measurement_kit::libndt::internal;
+using namespace measurement_kit::libndt7::internal;
 
 static const Logger &NoLoggerInstance() {
   static NoLogger singleton;
