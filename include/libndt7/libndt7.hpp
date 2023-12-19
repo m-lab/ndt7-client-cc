@@ -43,10 +43,10 @@
 /// the build to fail, because libndt uses nlohmann/json symbols.
 
 #ifndef LIBNDT_SINGLE_INCLUDE
-#include "libndt/internal/err.hpp"
-#include "libndt/internal/sys.hpp"
-#include "libndt/internal/curlx.hpp"
-#include "libndt/timeout.hpp"
+#include "libndt7/internal/err.hpp"
+#include "libndt7/internal/sys.hpp"
+#include "libndt7/internal/curlx.hpp"
+#include "libndt7/timeout.hpp"
 #endif // !LIBNDT_SINGLE_INCLUDE
 
 // Check dependencies
