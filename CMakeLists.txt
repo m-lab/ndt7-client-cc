@@ -127,18 +127,18 @@ macro(MKSetRestrictiveCompilerFlags)
 endmacro()
 MKSetRestrictiveCompilerFlags()
 
-set(MK_LIBNDT_AMALGAMATE_DEST single_include/libndt.hpp)
+set(MK_LIBNDT_AMALGAMATE_DEST single_include/libndt7.hpp)
 file(REMOVE ${MK_LIBNDT_AMALGAMATE_DEST})
 foreach(SOURCE IN ITEMS
-        include/libndt/preamble.hpp
+        include/libndt7/preamble.hpp
         third_party/github.com/nlohmann/json/json.hpp
-        include/libndt/internal/assert.hpp
-        include/libndt/internal/sys.hpp
-        include/libndt/internal/logger.hpp
-        include/libndt/internal/curlx.hpp
-        include/libndt/internal/err.hpp
-        include/libndt/timeout.hpp
-        include/libndt/libndt.hpp)
+        include/libndt7/internal/assert.hpp
+        include/libndt7/internal/sys.hpp
+        include/libndt7/internal/logger.hpp
+        include/libndt7/internal/curlx.hpp
+        include/libndt7/internal/err.hpp
+        include/libndt7/timeout.hpp
+        include/libndt7/libndt7.hpp)
   file(READ ${SOURCE} CONTENT)
   file(APPEND ${MK_LIBNDT_AMALGAMATE_DEST} "${CONTENT}")
 endforeach()
@@ -151,7 +151,7 @@ include_directories(${CMAKE_REQUIRED_INCLUDES}
 add_executable(curlx_test test/curlx_test.cpp)
 target_link_libraries(curlx_test ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(libndt-client libndt-client.cpp)
+add_executable(libndt-client ndt7-client-cc.cpp)
 target_link_libraries(libndt-client ${CMAKE_REQUIRED_LIBRARIES})
 
 add_executable(libndt-standalone-builds libndt-standalone-builds.cpp)

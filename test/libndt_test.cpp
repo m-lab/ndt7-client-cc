@@ -4,7 +4,7 @@
 
 #include "third_party/github.com/nlohmann/json/json.hpp"
 
-#include "libndt/libndt.hpp"
+#include "libndt7/libndt7.hpp"
 
 #ifndef _WIN32
 #include <arpa/inet.h>

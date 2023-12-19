@@ -2,7 +2,7 @@
 // Measurement Kit is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
 
-#include "libndt/internal/sys.hpp"
+#include "libndt7/internal/sys.hpp"
 
 #include <string.h>
 

@@ -2,7 +2,7 @@
 // Measurement Kit is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
 
-#include "libndt/internal/curlx.hpp"
+#include "libndt7/internal/curlx.hpp"
 
 #define CATCH_CONFIG_MAIN
 #include "third_party/github.com/catchorg/Catch2/catch.hpp"
