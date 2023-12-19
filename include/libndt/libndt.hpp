@@ -270,7 +270,7 @@ class Settings {
   std::string port = "443";
 
   /// Scheme to use connecting to the NDT server. If this is not specified, we will use
-  /// the unencrypted configuration.
+  /// the secure websocket configuration.
   std::string scheme = "wss";
 
   /// The tests you want to run with the NDT server. By default we run
