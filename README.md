@@ -45,7 +45,10 @@ int main() {
 Compile your client with a unique name using:
 
 ```sh
-g++ -std=c++11 -Wall -Wextra -DCLIENT_NAME=\"my-ndt7-client\" -I. -o main main.cpp
+g++ -std=c++11 -Wall -Wextra -I. \
+  -DCLIENT_NAME=\"my-ndt7-client\" \
+  -DCLIENT_VERSION=\"v0.1.0\" \
+  -o main main.cpp
 ```
 
 See [codedocs.xyz/measurement-kit/libndt](

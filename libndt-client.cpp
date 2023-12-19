@@ -21,6 +21,13 @@
 #pragma clang diagnostic pop
 #endif  // __clang__
 
+#ifndef CLIENT_NAME
+#define CLIENT_NAME "libndt7-cc-default"
+#endif
+#ifndef CLIENT_VERSION
+#define CLIENT_VERSION "v0.1.0"
+#endif
+
 using namespace measurement_kit;
 
 // BatchClient only prints JSON messages on stdout.
@@ -216,6 +223,10 @@ int main(int, char **argv) {
       std::clog << "will auto-select a suitable server" << std::endl;
     }
   }
+
+  // Set the client name provided to the Locate API.
+  settings.metadata["client_name"] = CLIENT_NAME;
+  settings.metadata["client_version"] = CLIENT_VERSION;
 
   if (settings.nettest_flags == 0) {
     std::clog << "FATAL: No test selected" << std::endl;
