@@ -90,10 +90,10 @@ You MUST specify what subtest to enable:
  * `-download` enables the download subtest
  * `-upload` enables the upload subtest
 
-By default, libndt-client uses M-Lab's unregistered Locate API to find a
-suitable target server. For registered clients, you may specify an API key for
-the Locate API using:
-* `-key=<key>`
+By default, libndt-client uses M-Lab's Locate API for unregistered clients
+(without an API key) to find a suitable target server. For registered clients,
+you may specify an API key for the Locate API using:
+* `-locate-api-key=<key>`
 
 Instead of the Locate API, you may specify a specific server using a combination
 of the flags:
@@ -133,7 +133,7 @@ int main(int, char **argv) {
     cmdline.add_param("ca-bundle-path");
     cmdline.add_param("lookup-policy");
     cmdline.add_param("socks5h");
-    cmdline.add_param("key");
+    cmdline.add_param("locate-api-key");
     cmdline.add_param("port");
     cmdline.add_param("scheme");
     cmdline.add_param("hostname");
@@ -174,7 +174,7 @@ int main(int, char **argv) {
       if (param.first == "ca-bundle-path") {
         settings.ca_bundle_path = param.second;
         std::clog << "will use this CA bundle: " << param.second << std::endl;
-      } else if (param.first == "key") {
+      } else if (param.first == "locate-api-key") {
         settings.metadata["key"] = param.second;
         std::clog << "will use this key: " << param.second << std::endl;
       } else if (param.first == "port") {
