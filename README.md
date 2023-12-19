@@ -37,8 +37,12 @@ a file named `main.cpp` with this content.
 
 int main() {
   using namespace measurement_kit;
-  libndt::Client client;
-  client.run();
+  libndt::Settings settings;
+  std::unique_ptr<libndt::Client>  client;
+  settings.metadata["client_name"] = CLIENT_NAME;
+  settings.metadata["client_version"] = CLIENT_VERSION;
+  client.reset(new libndt::Client{settings});
+  client->run();
 }
 ```
 
