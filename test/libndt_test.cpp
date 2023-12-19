@@ -42,6 +42,78 @@ using namespace measurement_kit::libndt;
 // Speaking of coverage, if specific code is already tested by running the
 // example client, we don't need to write also a test for it here.
 
+// UrlParts Client::parse_ws_url(const std::string& url) tests
+// -----------------------------------------------------------
+
+TEST_CASE("Client::parse_ws_url() table tests") {
+  struct Test {
+    std::string url;
+    UrlParts want;
+  };
+  Test cases[] = {
+    {
+      .url = "ws://test:80/",
+      .want = {.scheme = "ws", .host = "test", .port = "80", .path = "/"},
+    },
+    {
+      .url = "wss://this.example.com/path/to/something",
+      .want = {.scheme = "wss", .host = "this.example.com", .port = "443", .path = "/path/to/something"},
+    },
+    {
+      .url = "ws://this.example.com",
+      .want = {.scheme = "ws", .host = "this.example.com", .port = "80", .path = ""},
+    },
+    {
+      .url = "wss:///",
+      .want = {.scheme = "wss", .host = "", .port = "443", .path = "/"},
+    },
+    {
+      .url = "ws://",
+      .want = {.scheme = "ws", .host = "", .port = "80", .path = ""},
+    },
+    {
+      .url = "://",
+      .want = {.scheme = "", .host = "", .port = "", .path = ""},
+    },
+    /*
+    TODO(soltesz): support parsing IPv6 hosts.
+    {
+      .url = "ws://[::1]/test?foo",
+      .want = {.scheme = "ws", .host = "[::1]", .port = "80", .path = "/test?foo"},
+    },
+    */
+  };
+  for (unsigned long i = 0; i < sizeof(cases)/sizeof(cases[0]); i++ ) {
+    auto parts = parse_ws_url(cases[i].url);
+    REQUIRE(parts.scheme == cases[i].want.scheme);
+    REQUIRE(parts.host == cases[i].want.host);
+    REQUIRE(parts.port == cases[i].want.port);
+    REQUIRE(parts.path == cases[i].want.path);
+  }
+}
+
+// std::string format_http_params(const std::map<std::string, std::string>& params);
+TEST_CASE("Client::format_http_params() table tests") {
+  struct Test {
+    std::map<std::string, std::string> params;
+    std::string want;
+  };
+  Test cases[] = {
+    {
+      .params = {{"key", "value"}, {"name", "okay"}},
+      .want = "key=value&name=okay",
+    },
+    {
+      .params = {{"key", "value with space"}, {"name", "okay!@#$"}},
+      .want = "key=value%20with%20space&name=okay%21%40%23%24",
+    },
+  };
+  for (unsigned long i = 0; i < sizeof(cases)/sizeof(cases[0]); i++ ) {
+    auto got = format_http_params(cases[i].params);
+    REQUIRE(got == cases[i].want);
+  }
+}
+
 // Client::run() tests
 // -------------------
 
@@ -80,7 +152,7 @@ class FailQueryMlabnsCurl : public Client {
 
 TEST_CASE("Client::query_locate_api() does nothing when we already know hostname") {
   Settings settings;
-  settings.hostname = "neubot.mlab.mlab1.trn01.measurement-lab.org";
+  settings.hostname = "ndt-mlab1-trn01.mlab-oti.measurement-lab.org";
   FailQueryMlabnsCurl client{settings};
   std::vector<std::string> v;
   std::vector<nlohmann::json> targets;
