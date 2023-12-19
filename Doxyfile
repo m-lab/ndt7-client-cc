@@ -1,9 +1,9 @@
 BUILTIN_STL_SUPPORT = YES
 EXTRACT_ALL = NO
 HIDE_UNDOC_MEMBERS = YES
-INPUT = include/libndt/libndt.hpp
+INPUT = include/libndt7/libndt7.hpp
 JAVADOC_AUTOBRIEF = YES
 PROJECT_BRIEF = "Measurement Kit NDT library"
-PROJECT_NAME = measurement-kit/libndt
-PROJECT_NUMBER = v0.27.0
+PROJECT_NAME = m-lab/ndt7-client-cc
+PROJECT_NUMBER = v0.1.0
 RECURSIVE = NO
