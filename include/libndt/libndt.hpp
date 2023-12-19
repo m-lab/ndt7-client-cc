@@ -267,7 +267,11 @@ class Settings {
 
   /// Port of the NDT server to use. If this is not specified, we will use
   /// the most correct port depending on the configuration.
-  std::string port;
+  std::string port = "443";
+
+  /// Scheme to use connecting to the NDT server. If this is not specified, we will use
+  /// the secure websocket configuration.
+  std::string scheme = "wss";
 
   /// The tests you want to run with the NDT server. By default we run
   /// a download test, because that is probably the typical usage.
@@ -281,8 +285,7 @@ class Settings {
   /// the client version and the library.
   std::map<std::string, std::string> metadata{
       {"client_library_version", "v0.1.0"},
-      {"client_library_name", "m-lab/ndt7-client-cc"},
-      // TODO: add build option for specifying client_name.
+      {"client_library_name", "m-lab/libndt7-cc"},
   };
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
@@ -394,6 +397,8 @@ class Client : public EventHandler {
   // High-level API
   virtual void summary() noexcept;
   virtual bool query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept;
+  virtual std::string get_static_locate_result(std::string opts, std::string scheme, std::string hostname, std::string port);
+  virtual std::string replace_all_with(std::string templ, std::string pattern, std::string replace);
 
   // ndt7 protocol API
   // `````````````````
@@ -1003,27 +1008,60 @@ void Client::summary() noexcept {
   }
 }
 
+std::string Client::get_static_locate_result(
+  std::string opts, std::string scheme, std::string hostname, std::string port) {
+  std::string templ = R"({
+  "results": [
+    {
+      "machine": "{{hostname}}",
+      "location": {
+        "city": "Your City",
+        "country": "US"
+      },
+      "urls": {
+        "{{scheme}}:///ndt/v7/download": "{{scheme}}://{{hostname}}:{{port}}/ndt/v7/download?{{opts}}",
+        "{{scheme}}:///ndt/v7/upload": "{{scheme}}://{{hostname}}:{{port}}/ndt/v7/upload?{{opts}}"
+      }
+    }
+  ]
+})";
+  std::string result = templ;
+  result = replace_all_with(result, "{{hostname}}", hostname);
+  result = replace_all_with(result, "{{scheme}}", scheme);
+  result = replace_all_with(result, "{{port}}", port);
+  result = replace_all_with(result, "{{opts}}", opts);
+  return result;
+}
+
+std::string Client::replace_all_with(std::string templ, std::string pattern, std::string replace) {
+  std::size_t pos = 0;
+  std::string result = templ;
+  while ((pos = result.find(pattern, pos)) != std::string::npos) {
+    result = result.replace(pos, pattern.length(), replace);
+  }
+  return result;
+}
+
 bool Client::query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept {
   assert(urls != nullptr);
-  // TODO(soltesz): support the static host case correctly.
+  std::string body;
+  std::string locate_api_url = settings_.locate_api_base_url;
   if (!settings_.hostname.empty()) {
     LIBNDT_EMIT_DEBUG("no need to query locate api; we have hostname");
-    // When we already know the hostname that we want to use just fake out the
-    // result of a locate_api query as like locate_api returned that hostname.
-    urls->push_back(std::move(settings_.hostname));
-    return true;
-  }
-  std::string locate_api_url = settings_.locate_api_base_url;
-  locate_api_url += "/v2/nearest/ndt/ndt7";
-  if (opts.size() > 0) {
-    // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
-    locate_api_url += "?" + unsafe_format_http_params(opts);
-  }
-  std::string body;
-  LIBNDT_EMIT_INFO("locate_api url: " << locate_api_url);
-  if (!query_locate_api_curl(locate_api_url, settings_.timeout, &body)) {
-
-    return false;
+    // We already know the hostname, scheme and port, so return a static result.
+    body = get_static_locate_result(
+      unsafe_format_http_params(opts), settings_.scheme, settings_.hostname,
+      settings_.port);
+  } else {
+    locate_api_url += "/v2/nearest/ndt/ndt7";
+    if (opts.size() > 0) {
+      // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
+      locate_api_url += "?" + unsafe_format_http_params(opts);
+    }
+    LIBNDT_EMIT_INFO("using locate: " << locate_api_url);
+    if (!query_locate_api_curl(locate_api_url, settings_.timeout, &body)) {
+      return false;
+    }
   }
   LIBNDT_EMIT_DEBUG("locate_api reply: " << body);
   nlohmann::json json;
@@ -1068,7 +1106,7 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
 // `````````````````
 
 bool Client::ndt7_download(const UrlParts &url) noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 download test: " << url.scheme << "://" << url.host);
+  LIBNDT_EMIT_INFO("ndt7: starting download test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
   }
@@ -1151,7 +1189,7 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
 }
 
 bool Client::ndt7_upload(const UrlParts &url) noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 upload test: " << url.scheme << "://" << url.host);
+  LIBNDT_EMIT_INFO("ndt7: starting upload test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
   }
@@ -2930,7 +2968,7 @@ Verbosity Client::get_verbosity() const noexcept {
 // Function to parse a websocket URL and return its components. The URL must
 // include a resource path.
 // TODO(soltesz): add testing for various input cases.
- UrlParts parse_ws_url(const std::string& url) {
+UrlParts parse_ws_url(const std::string& url) {
   UrlParts parts;
 
   // Find the scheme.

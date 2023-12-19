@@ -37,12 +37,23 @@ a file named `main.cpp` with this content.
 
 int main() {
   using namespace measurement_kit;
-  libndt::Client client;
-  client.run();
+  libndt::Settings settings;
+  std::unique_ptr<libndt::Client>  client;
+  settings.metadata["client_name"] = CLIENT_NAME;
+  settings.metadata["client_version"] = CLIENT_VERSION;
+  client.reset(new libndt::Client{settings});
+  client->run();
 }
 ```
 
-Compile with `g++ -std=c++11 -Wall -Wextra -I. -o main main.cpp`.
+Compile your client with a unique name using:
+
+```sh
+g++ -std=c++11 -Wall -Wextra -I. \
+  -DCLIENT_NAME=\"my-ndt7-client\" \
+  -DCLIENT_VERSION=\"v0.1.0\" \
+  -o main main.cpp
+```
 
 See [codedocs.xyz/measurement-kit/libndt](
 https://codedocs.xyz/measurement-kit/libndt/) for API documentation;
@@ -68,7 +79,7 @@ cmake --build .
 ctest -a --output-on-failure .
 ```
 
-## Command line client 
+## Command line client
 
 Building with CMake also builds a simple command line client. Get usage info
 by running:
