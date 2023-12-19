@@ -63,6 +63,25 @@ TEST_CASE("Client::parse_ws_url() table tests") {
       .url = "ws://this.example.com",
       .want = {.scheme = "ws", .host = "this.example.com", .port = "80", .path = ""},
     },
+    {
+      .url = "wss:///",
+      .want = {.scheme = "wss", .host = "", .port = "443", .path = "/"},
+    },
+    {
+      .url = "ws://",
+      .want = {.scheme = "ws", .host = "", .port = "80", .path = ""},
+    },
+    {
+      .url = "://",
+      .want = {.scheme = "", .host = "", .port = "", .path = ""},
+    },
+    /*
+    TODO(soltesz): support parsing IPv6 hosts.
+    {
+      .url = "ws://[::1]/test?foo",
+      .want = {.scheme = "ws", .host = "[::1]", .port = "80", .path = "/test?foo"},
+    },
+    */
   };
   for (unsigned long i = 0; i < sizeof(cases)/sizeof(cases[0]); i++ ) {
     auto parts = parse_ws_url(cases[i].url);
