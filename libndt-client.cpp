@@ -21,6 +21,13 @@
 #pragma clang diagnostic pop
 #endif  // __clang__
 
+#ifndef CLIENT_NAME
+#define CLIENT_NAME "libndt7-cc-default"
+#endif
+#ifndef CLIENT_VERSION
+#define CLIENT_VERSION "v0.1.0"
+#endif
+
 using namespace measurement_kit;
 
 // BatchClient only prints JSON messages on stdout.
@@ -84,50 +91,37 @@ void BatchClient::summary() noexcept {
 
 static void usage() {
   // clang-format off
-  std::clog << R"(Usage: libndt-client [options] [<hostname>]
+  std::clog << R"(Usage: libndt-client <-upload|-download> [options]
 
-Options can start either with a single dash (i.e. -option) or with
-a double dash (i.e. --option).
+You MUST specify what subtest to enable:
+ * `-download` enables the download subtest
+ * `-upload` enables the upload subtest
 
-If an hostname is not specified, we use M-Lab's name service to
-lookup a suitable M-Lab server to run the test with. You can use
-the `-lookup-policy <policy>` flag to choose the policy to discover
-M-Lab servers. The available policies are: `closest`, `random`,
-and `geo-options`. The `closest` policy requests the hostname of a
-closest nearby server. The `random` policy requests the hostname
-of a random server. The `geo-options` policy returns a list of
-nearby servers. The default policy is `geo-options`. The deprecated
-`-random` flag is an alias for `-lookup-policy random`.
+By default, libndt-client uses M-Lab's Locate API for unregistered clients
+(without an API key) to find a suitable target server. For registered clients,
+you may specify an API key for the Locate API using:
+* `-locate-api-key=<key>`
 
-You MUST specify what subtest to enable. The `-download` flag enables the
-download subtest. The `-upload` flag enables the upload subtest.
+Instead of the Locate API, you may specify a specific server using a combination
+of the flags:
+ * `-port=<port>`
+ * `-scheme=<ws>`
+ * `-hostname=<hostname>`
 
-The `-port <port>` flag specifies what port to use. The default is to
-use the correct port depending on the selected NDT protocol (see below).
+The default mode is wss (TLS).
+ * `-scheme=wss` (default)
+ * `-insecure` allows connecting to servers with self-signed or invalid certs.
+ * `-ca-bundle-path=<path>` allows specifying an alternate CA bundle.
 
-By default, we use the ndt7 protocol. Adding the `-tls` flag causes NDT to use
-a TLS connection rather than a TCP connection. When using `-tls`, you may also
-want to use `-insecure` to allow connecting to servers with self-signed or
-otherwise invalid TLS certificate. With `-tls`, you can also use the
-`-ca-bundle-path <path>` to use a specific CA bundle path. Adding the
-`-websocket` flag will cause NDT to wrap its messages (possibly already wrapped
-by JSON) into WebSocket messages. Also, `-batch` can be specified so that the
-only output on STDOUT will be the JSON test results.  To further reduce the
-amount of output, you can use the `-summary` flag, which only prints a summary
-at the end of the tests. If used with `-batch`, the generated summary will be
-JSON.
+You may control information output using a combination of the following flags:
+ * `-batch` outputs JSON results to STDOUT.
+ * `-summary` only prints a summary at the end of the test.
+ * `-verbose` prints additional debug information.
 
-In practice, these are the flags you want to use for ndt7:
-
-1. none, to use the plain ndt7 protocol (ws://);
-
-2. `-tls` to use the ndt7 protocol over TLS (wss://);
-
-When running, this client emits messages. You can use `-verbose` to cause
-it to emit even more messages.
+In combination, -batch and -summary produce a final summary in JSON.
 
 The `-socks5h <port>` flag causes this tool to use the specified SOCKS5h
-proxy to contact mlab-ns and for running the selected subtests.
+proxy to contact Locate API and for running the selected subtests.
 
 The `-version` shows the version number and exits.)" << std::endl;
   // clang-format on
@@ -145,25 +139,25 @@ int main(int, char **argv) {
     argh::parser cmdline;
     cmdline.add_param("ca-bundle-path");
     cmdline.add_param("lookup-policy");
-    cmdline.add_param("port");
     cmdline.add_param("socks5h");
+    cmdline.add_param("locate-api-key");
+    cmdline.add_param("port");
+    cmdline.add_param("scheme");
+    cmdline.add_param("hostname");
     cmdline.parse(argv);
     for (auto &flag : cmdline.flags()) {
       if (flag == "download") {
         settings.nettest_flags |= libndt::nettest_flag_download;
         std::clog << "will run the download sub-test" << std::endl;
+      } else if (flag == "upload") {
+        settings.nettest_flags |= libndt::nettest_flag_upload;
+        std::clog << "will run the upload sub-test" << std::endl;
       } else if (flag == "help") {
         usage();
         exit(EXIT_SUCCESS);
       } else if (flag == "insecure") {
         settings.tls_verify_peer = false;
         std::clog << "WILL NOT verify the TLS peer (INSECURE!)" << std::endl;
-      } else if (flag == "tls") {
-        settings.protocol_flags |= libndt::protocol_flag_tls;
-        std::clog << "will secure communications using TLS" << std::endl;
-      } else if (flag == "upload") {
-        settings.nettest_flags |= libndt::nettest_flag_upload;
-        std::clog << "will run the upload sub-test" << std::endl;
       } else if (flag == "verbose") {
         settings.verbosity = libndt::verbosity_debug;
         std::clog << "will be verbose" << std::endl;
@@ -187,9 +181,18 @@ int main(int, char **argv) {
       if (param.first == "ca-bundle-path") {
         settings.ca_bundle_path = param.second;
         std::clog << "will use this CA bundle: " << param.second << std::endl;
+      } else if (param.first == "locate-api-key") {
+        settings.metadata["key"] = param.second;
+        std::clog << "will use this key: " << param.second << std::endl;
       } else if (param.first == "port") {
         settings.port = param.second;
         std::clog << "will use this port: " << param.second << std::endl;
+      } else if (param.first == "scheme") {
+        settings.scheme = param.second;
+        std::clog << "will use this scheme: " << param.second << std::endl;
+      } else if (param.first == "hostname") {
+        settings.hostname = param.second;
+        std::clog << "will use this hostname: " << param.second << std::endl;
       } else if (param.first == "socks5h") {
         settings.socks5h_port = param.second;
         std::clog << "will use the socks5h proxy at: 127.0.0.1:" << param.second << std::endl;
@@ -199,18 +202,31 @@ int main(int, char **argv) {
         exit(EXIT_FAILURE);
       }
     }
+    if (settings.scheme != "ws" && settings.scheme != "wss" ) {
+      std::clog << "fatal: invalid scheme: " << settings.scheme << std::endl;
+      usage();
+      exit(EXIT_FAILURE);
+    }
+    if (settings.scheme == "wss") {
+      settings.protocol_flags |= libndt::protocol_flag_tls;
+      std::clog << "will secure communications using TLS" << std::endl;
+    }
     auto sz = cmdline.pos_args().size();
     if (sz != 1 && sz != 2) {
       usage();
       exit(EXIT_FAILURE);
     }
-    if (sz == 2) {
-      settings.hostname = cmdline.pos_args()[1];
-      std::clog << "will use this NDT server: " << cmdline.pos_args()[1] << std::endl;
+    if (!settings.hostname.empty()) {
+      std::clog << "will use this static NDT server: " << \
+        settings.scheme << "://" << settings.hostname << ":" << settings.port << std::endl;
     } else {
       std::clog << "will auto-select a suitable server" << std::endl;
     }
   }
+
+  // Set the client name provided to the Locate API.
+  settings.metadata["client_name"] = CLIENT_NAME;
+  settings.metadata["client_version"] = CLIENT_VERSION;
 
   if (settings.nettest_flags == 0) {
     std::clog << "FATAL: No test selected" << std::endl;
