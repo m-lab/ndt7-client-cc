@@ -91,13 +91,13 @@ void BatchClient::summary() noexcept {
 
 static void usage() {
   // clang-format off
-  std::clog << R"(Usage: libndt-client <-upload|-download> [options]
+  std::clog << R"(Usage: ndt7-client-cc <-upload|-download> [options]
 
 You MUST specify what subtest to enable:
  * `-download` enables the download subtest
  * `-upload` enables the upload subtest
 
-By default, libndt-client uses M-Lab's Locate API for unregistered clients
+By default, ndt7-client-cc uses M-Lab's Locate API for unregistered clients
 (without an API key) to find a suitable target server. For registered clients,
 you may specify an API key for the Locate API using:
 * `-locate-api-key=<key>`
@@ -230,7 +230,7 @@ int main(int, char **argv) {
 
   if (settings.nettest_flags == 0) {
     std::clog << "FATAL: No test selected" << std::endl;
-    std::clog << "Run `libndt-client --help` for more help" << std::endl;
+    std::clog << "Run `ndt7-client-cc --help` for more help" << std::endl;
     exit(EXIT_FAILURE);
   }
 
