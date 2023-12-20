@@ -4,7 +4,7 @@
 #ifndef MEASUREMENT_KIT_LIBNDT7_TIMEOUT_HPP
 #define MEASUREMENT_KIT_LIBNDT7_TIMEOUT_HPP
 
-// libndt/timeout.hpp - definition of timeout
+// libndt7/timeout.hpp - definition of timeout
 
 namespace measurement_kit {
 namespace libndt7 {
