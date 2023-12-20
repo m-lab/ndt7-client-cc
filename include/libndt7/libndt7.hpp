@@ -39,8 +39,8 @@
 /// client.run();
 /// ```
 ///
-/// \warning Not including nlohmann/json before including libndt will cause
-/// the build to fail, because libndt uses nlohmann/json symbols.
+/// \warning Not including nlohmann/json before including libndt7 will cause
+/// the build to fail, because libndt7 uses nlohmann/json symbols.
 
 #ifndef LIBNDT7_SINGLE_INCLUDE
 #include "libndt7/internal/err.hpp"
@@ -2128,7 +2128,7 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
     //::SSL_free(ssl); // MUST NOT be called because of fd_to_ssl
     return internal::Err::ssl_generic;
   }
-  LIBNDT7_EMIT_DEBUG("libndt BIO created");
+  LIBNDT7_EMIT_DEBUG("libndt7 BIO created");
   // We use BIO_NOCLOSE because it's the socket that owns the BIO and the SSL
   // via fd_to_ssl rather than the other way around. Note that sockets are
   // always `int` in OpenSSL notwithstanding their definition on Windows, so
