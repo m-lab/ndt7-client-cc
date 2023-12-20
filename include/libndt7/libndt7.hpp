@@ -6,9 +6,9 @@
 
 // TODO(bassosimone): run through cppcheck and attempt to minimize warnings.
 
-/// \file libndt.hpp
+/// \file libndt7.hpp
 ///
-/// \brief Public header of measurement-kit/libndt. The basic usage is a simple
+/// \brief Public header of m-lab/ndt7-client-cc libndt7. The basic usage is a simple
 /// as creating a `libndt7::Client c` instance and then calling `c.run()`. More
 /// advanced usage may require you to create a subclass of `libndt7::Client` and
 /// override specific virtual methods to customize the behaviour.
@@ -30,11 +30,11 @@
 /// recommend you to only use documented interfaces.
 ///
 /// Usage example follows. We assume that you have downloaded the single include
-/// headers of nlohmann/json >= 3.0.0 and of libndt.
+/// headers of nlohmann/json >= 3.0.0 and of libndt7.
 ///
 /// ```
 /// #include "json.hpp"
-/// #include "libndt.hpp"
+/// #include "libndt7.hpp"
 /// measurement_kit::libndt7::Client client;
 /// client.run();
 /// ```
@@ -52,10 +52,10 @@
 // Check dependencies
 // ``````````````````
 #ifndef NLOHMANN_JSON_VERSION_MAJOR
-#error "Libndt depends on nlohmann/json. Include nlohmann/json before including libndt."
+#error "Libndt7 depends on nlohmann/json. Include nlohmann/json before including libndt7."
 #endif  // !NLOHMANN_JSON_VERSION_MAJOR
 #if NLOHMANN_JSON_VERSION_MAJOR < 3
-#error "Libndt requires nlohmann/json >= 3"
+#error "Libndt7 requires nlohmann/json >= 3"
 #endif
 
 // TODO(bassosimone): these headers should be in impl.hpp and here we
@@ -129,13 +129,13 @@ static std::string curl_urlencode(const std::string& raw);
 /// Type containing a version number.
 using Version = unsigned int;
 
-/// Major API version number of measurement-kit/libndt.
+/// Major API version number of m-lab/ndt7-client-cc libndt7.
 constexpr Version version_major = Version{0};
 
-/// Minor API version number of measurement-kit/libndt.
+/// Minor API version number of m-lab/ndt7-client-cc libndt7.
 constexpr Version version_minor = Version{27};
 
-/// Patch API version number of measurement-kit/libndt.
+/// Patch API version number of m-lab/ndt7-client-cc libndt7.
 constexpr Version version_patch = Version{0};
 
 // Flags for selecting subtests
@@ -291,7 +291,7 @@ class Settings {
   };
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
-  /// cause libndt to use different default settings for the port or for
+  /// cause libndt7 to use different default settings for the port or for
   /// the Locate API. Clear text ndt7 uses port 80, ndt7-over-TLS uses 443.
   ProtocolFlags protocol_flags = ProtocolFlags{0};
 
@@ -383,7 +383,7 @@ class Client : public EventHandler {
   \___|_||_\__,_| \___/_|   | .__/\_,_|_.__/_|_\__| \__,_| .__/_|
                             |_|                          |_|
   */
-  // If you're just interested to use measurement-kit/libndt, you can stop
+  // If you're just interested to use m-lab/ndt7-client-cc libndt7, you can stop
   // reading right here. All the remainder of this file is not documented on
   // purpose and contains functionality that you'll typically don't care about
   // unless you're looking into heavily customizing this library.
