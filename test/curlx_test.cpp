@@ -5,8 +5,7 @@
 #include "libndt7/internal/curlx.hpp"
 
 #define CATCH_CONFIG_MAIN
-// We need to disable -Wmaybe-uninitialized because of https://github.com/m-lab/ndt7-client-cc/pull/9. We
-// may want to check whether we could remove this restriction in the future.
+// TODO(github.com/m-lab/ndt7-client-cc/issues/10): Remove pragma ignoring warning when possible.
 #ifndef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
