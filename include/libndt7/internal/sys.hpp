@@ -4,7 +4,7 @@
 #ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_SYS_HPP
 #define MEASUREMENT_KIT_LIBNDT7_INTERNAL_SYS_HPP
 
-// libndt/internal/sys.hpp - system dependent routines
+// libndt7/internal/sys.hpp - system dependent routines
 
 #ifdef _WIN32
 #include <winsock2.h>

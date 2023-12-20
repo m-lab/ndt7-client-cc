@@ -4,7 +4,7 @@
 #ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_ASSERT_HPP
 #define MEASUREMENT_KIT_LIBNDT7_INTERNAL_ASSERT_HPP
 
-// libndt/internal/assert.hpp - assert API
+// libndt7/internal/assert.hpp - assert API
 
 #include <cstdlib>
 

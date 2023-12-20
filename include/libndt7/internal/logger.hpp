@@ -4,7 +4,7 @@
 #ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_LOGGER_HPP
 #define MEASUREMENT_KIT_LIBNDT7_INTERNAL_LOGGER_HPP
 
-// libndt/internal/logger.hpp - logger API
+// libndt7/internal/logger.hpp - logger API
 
 #include <sstream>
 #include <string>

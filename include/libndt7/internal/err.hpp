@@ -4,7 +4,7 @@
 #ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP
 #define MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP
 
-// libndt/internal/err.hpp - definition of error
+// libndt7/internal/err.hpp - definition of error
 
 #include <climits>
 #include <sstream>
