@@ -23,14 +23,19 @@ fi
 
 set -x
 
+if [[ "`docker images -q local/debian-testing 2> /dev/null`" == "" ]]; then
+  # Create image for running tests.
+  exec docker build -t local/debian-testing .
+fi
+
 if [ $INTERNAL -eq 0 ]; then
   exec docker run --cap-add=NET_ADMIN \
                   --cap-add=SYS_PTRACE \
                   -e CODECOV_TOKEN=$CODECOV_TOKEN \
                   -e TRAVIS_BRANCH=$TRAVIS_BRANCH \
-                  -v "$(pwd):/mk" \
-                  --workdir /mk \
-                  -t bassosimone/mk-debian \
+                  -v "$(pwd):/workdir" \
+                  --workdir /workdir \
+                  -t local/debian-testing \
                   ./docker.sh -internal "$1"
 fi
 
