@@ -1862,8 +1862,8 @@ internal::Err Client::ws_recvmsg(  //
 // Helper used to route read and write calls to Client's I/O methods. We
 // disregard the const qualifier of the `base` argument for the write operation,
 // but that is not a big deal since we add it again before calling the real
-// Socket op (see libndt_bio_write() below).
-static int libndt_bio_operation(
+// Socket op (see libndt7_bio_write() below).
+static int libndt7_bio_operation(
     BIO *bio, char *base, int count,
     std::function<internal::Ssize(Client *, internal::Socket, char *, internal::Size)> operation,
     std::function<void(BIO *)> set_retry) noexcept {
@@ -1902,9 +1902,9 @@ static int libndt_bio_operation(
 }
 
 // Write data using the underlying socket.
-static int libndt_bio_write(BIO *bio, const char *base, int count) noexcept {
+static int libndt7_bio_write(BIO *bio, const char *base, int count) noexcept {
   // clang-format off
-  return libndt_bio_operation(
+  return libndt7_bio_operation(
       bio, (char *)base, count,
       [](Client *clnt, internal::Socket sock, char *base, internal::Size count) noexcept {
         return clnt->sys->Send(sock, (const char *)base, count);
@@ -1914,9 +1914,9 @@ static int libndt_bio_write(BIO *bio, const char *base, int count) noexcept {
 }
 
 // Read data using the underlying socket.
-static int libndt_bio_read(BIO *bio, char *base, int count) noexcept {
+static int libndt7_bio_read(BIO *bio, char *base, int count) noexcept {
   // clang-format off
-  return libndt_bio_operation(
+  return libndt7_bio_operation(
       bio, base, count,
       [](Client *clnt, internal::Socket sock, char *base, internal::Size count) noexcept {
         return clnt->sys->Recv(sock, base, count);
@@ -1935,14 +1935,14 @@ class BioMethodDeleter {
 };
 using UniqueBioMethod = std::unique_ptr<BIO_METHOD, BioMethodDeleter>;
 
-static BIO_METHOD *libndt_bio_method() noexcept {
+static BIO_METHOD *libndt7_bio_method() noexcept {
   static std::atomic_bool initialized{false};
   static UniqueBioMethod method;
   static std::mutex mutex;
   if (!initialized) {
     std::unique_lock<std::mutex> _{mutex};
     if (!initialized) {
-      BIO_METHOD *mm = ::BIO_meth_new(BIO_TYPE_SOCKET, "libndt_bio_method");
+      BIO_METHOD *mm = ::BIO_meth_new(BIO_TYPE_SOCKET, "libndt7_bio_method");
       if (mm == nullptr) {
         return nullptr;
       }
@@ -1953,8 +1953,8 @@ static BIO_METHOD *libndt_bio_method() noexcept {
       BIO_meth_set_destroy(mm, BIO_meth_get_destroy(m));
       BIO_meth_set_ctrl(mm, BIO_meth_get_ctrl(m));
       BIO_meth_set_callback_ctrl(mm, BIO_meth_get_callback_ctrl(m));
-      BIO_meth_set_read(mm, libndt_bio_read);
-      BIO_meth_set_write(mm, libndt_bio_write);
+      BIO_meth_set_read(mm, libndt7_bio_read);
+      BIO_meth_set_write(mm, libndt7_bio_write);
       BIO_meth_set_gets(mm, BIO_meth_get_gets(m));
       BIO_meth_set_puts(mm, BIO_meth_get_puts(m));
       method.reset(mm);
@@ -2013,7 +2013,7 @@ again:
   }
   // Otherwise let the caller know
   if (err != internal::Err::none) {
-    LIBNDT7_EMIT_WARNING_EX(client, opname << " failed: " << internal::libndt_perror(err));
+    LIBNDT7_EMIT_WARNING_EX(client, opname << " failed: " << internal::libndt7_perror(err));
   }
   return err;
 }
@@ -2121,7 +2121,7 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
     // imply that `::SSL_free(ssl)` is also called.
     fd_to_ssl_[*sock] = ssl;
   }
-  BIO *bio = ::BIO_new(libndt_bio_method());
+  BIO *bio = ::BIO_new(libndt7_bio_method());
   if (bio == nullptr) {
     LIBNDT7_EMIT_WARNING("BIO_new() failed");
     netx_closesocket(*sock);
@@ -2544,7 +2544,7 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
         }
       }
       LIBNDT7_EMIT_WARNING("netx_dial: connect() failed: "
-                   << internal::libndt_perror(netx_map_errno(sys->GetLastError())));
+                   << internal::libndt7_perror(netx_map_errno(sys->GetLastError())));
       sys->Closesocket(*sock);
       *sock = (libndt7::internal::Socket)-1;
     }
@@ -2576,7 +2576,7 @@ again:
     goto again;
   }
   LIBNDT7_EMIT_DEBUG(
-      "netx_recv: netx_recv_nonblocking() failed: " << internal::libndt_perror(err));
+      "netx_recv: netx_recv_nonblocking() failed: " << internal::libndt7_perror(err));
   return err;
 }
 
@@ -2657,7 +2657,7 @@ again:
     goto again;
   }
   LIBNDT7_EMIT_DEBUG(
-      "netx_send: netx_send_nonblocking() failed: " << internal::libndt_perror(err));
+      "netx_send: netx_send_nonblocking() failed: " << internal::libndt7_perror(err));
   return err;
 }
 
@@ -2739,7 +2739,7 @@ internal::Err Client::netx_resolve(const std::string &hostname,
     if (rv != 0) {
       auto err = netx_map_eai(rv);
       LIBNDT7_EMIT_WARNING(
-          "netx_resolve: getaddrinfo() failed: " << internal::libndt_perror(err));
+          "netx_resolve: getaddrinfo() failed: " << internal::libndt7_perror(err));
       return err;
     }
     // FALLTHROUGH

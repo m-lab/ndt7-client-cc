@@ -61,10 +61,10 @@ enum class Err {
   ws_proto,  // WebSocket protocol error
 };
 
-std::string libndt_perror(Err err) noexcept;
+std::string libndt7_perror(Err err) noexcept;
 std::string ssl_format_error() noexcept;
 
-std::string libndt_perror(Err err) noexcept {
+std::string libndt7_perror(Err err) noexcept {
   std::string rv;
   //
 #define LIBNDT7_PERROR(value) \
