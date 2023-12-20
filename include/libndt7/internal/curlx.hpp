@@ -4,7 +4,7 @@
 #ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_CURLX_HPP
 #define MEASUREMENT_KIT_LIBNDT7_INTERNAL_CURLX_HPP
 
-// libndt/internal/curlx.hpp - libcurl wrappers
+// libndt7/internal/curlx.hpp - libcurl wrappers
 
 #include <curl/curl.h>
 
@@ -74,7 +74,7 @@ class Curlx {
 }  // namespace measurement_kit
 extern "C" {
 
-static size_t libndt_curl_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+static size_t libndt7_curl_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
   // Note: I have this habit of using `<= 0` rather than `== 0` even for
   // unsigned numbers because that makes the check robust when there is a
   // refactoring in which the number later becomes signed. In this case
@@ -140,7 +140,7 @@ bool Curlx::Get(UniqueCurl &handle, const std::string &url, long timeout,
     LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set URL: " << url);
     return false;
   }
-  if (this->SetoptWriteFunction(handle, libndt_curl_callback) != CURLE_OK) {
+  if (this->SetoptWriteFunction(handle, libndt7_curl_callback) != CURLE_OK) {
     LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set callback function");
     return false;
   }
