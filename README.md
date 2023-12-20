@@ -3,7 +3,7 @@
 [![GitHub license](https://img.shields.io/github/license/m-lab/ndt7-client-cc.svg)](https://raw.githubusercontent.com/m-lab/ndt7-client-cc/main/LICENSE) [![Github Releases](https://img.shields.io/github/release/m-lab/ndt7-client-cc.svg)](https://github.com/m-lab/ndt7-client-cc/releases) [![Build Status](https://app.travis-ci.com/m-lab/ndt7-client-cc.svg?branch=main)](https://app.travis-ci.com/m-lab/ndt7-client-cc) [![codecov](https://codecov.io/gh/m-lab/ndt7-client-cc/branch/main/graph/badge.svg)](https://codecov.io/gh/m-lab/ndt7-client-cc)
 
 **Note**: This project is community supported and provided as-is for users and
-client integrators. Contributions are welcome.
+client integrators. Contributions are welcome (PRs and issues).
 
 ![tardis](docs/tardis.gif
   "It's not supposed to make that noise. You leave the brakes on.")
@@ -15,7 +15,8 @@ test that measures the download and upload speed, and complements these
 measurements with kernel-level measurements. NDT is the most popular network
 performance test hosted by [Measurement Lab](https://www.measurementlab.net/).
 
-This library implements the ndt7 protocol. The libndt7 code is in alpha stage.
+This library implements the ndt7 protocol. The libndt7 code should be considered
+an alpha release.
 
 ## Getting started
 
@@ -26,8 +27,8 @@ Download [single_include/libndt7.hpp](
 https://github.com/m-lab/ndt7-client-cc/blob/main/single_include/libndt7.hpp) and
 put it in the current working directory.
 
-This example runs a NDT download-only nettest with a nearby server. Create
-a file named `main.cpp` with this content.
+This example runs a download-only ndt7 test with a nearby, healthy server.
+Create a file named `main.cpp` with this content:
 
 ```C++
 #include "libndt7.hpp"
@@ -55,7 +56,7 @@ g++ -std=c++11 -Wall -Wextra -I. \
 For API documentation, see
 [include/libndt7/libndt7.hpp](include/libndt7/libndt7.hpp) for the full API.
 
-See [ndt7-client-cc.cpp](ndt7-client-cc.cpp) for a comprehensive, reference client example.
+See [ndt7-client-cc.cpp](ndt7-client-cc.cpp) for a comprehensive, reference client.
 
 ## Cloning the repository
 
