@@ -1,5 +1,5 @@
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
 
 #include "libndt7/internal/curlx.hpp"
@@ -15,7 +15,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-using namespace measurement_kit::libndt7::internal;
+using namespace measurementlab::libndt7::internal;
 
 static const Logger &NoLoggerInstance() {
   static NoLogger singleton;

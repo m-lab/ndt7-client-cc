@@ -1,5 +1,5 @@
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
 
 #include "third_party/github.com/nlohmann/json/json.hpp"
@@ -28,7 +28,7 @@
 #define CLIENT_VERSION "v0.1.0"
 #endif
 
-using namespace measurement_kit;
+using namespace measurementlab;
 
 // BatchClient only prints JSON messages on stdout.
 class BatchClient : public libndt7::Client {
