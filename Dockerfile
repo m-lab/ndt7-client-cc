@@ -1,5 +1,4 @@
 FROM debian:testing-slim AS build
-RUN rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true
 RUN apt-get update -y
 RUN apt-get install -y autoconf automake clang cmake curl g++ git iproute2     \
       lcov libc++-dev libc++abi-dev libc-ares-dev libcurl4-openssl-dev         \
