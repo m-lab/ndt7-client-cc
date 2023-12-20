@@ -28,12 +28,13 @@ if [ $INTERNAL -eq 0 ]; then
     # Create image for running tests.
     docker build -t local/debian-testing .
   fi
+  ci_env=`curl -s https://codecov.io/env | bash`
   exec docker run --cap-add=NET_ADMIN \
                   --cap-add=SYS_PTRACE \
                   -e CODECOV_TOKEN=$CODECOV_TOKEN \
                   -e TRAVIS_BRANCH=$TRAVIS_BRANCH \
                   -e CI=true \
-                  -e TRAVIS=true \
+                  $ci_env \
                   -v "$(pwd):/workdir" \
                   --workdir /workdir \
                   -t local/debian-testing \
