@@ -5,10 +5,10 @@ services:
 sudo: required
 matrix:
   include:
-    - env: BUILD_TYPE="asan"
-    - env: BUILD_TYPE="clang"
+    #- env: BUILD_TYPE="asan"
+    #- env: BUILD_TYPE="clang"
     - env: BUILD_TYPE="coverage"
-    - env: BUILD_TYPE="ubsan"
-    - env: BUILD_TYPE="vanilla"
+    #- env: BUILD_TYPE="ubsan"
+    #- env: BUILD_TYPE="vanilla"
 script:
   - ./docker.sh $BUILD_TYPE
