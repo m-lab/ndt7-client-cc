@@ -1,3 +1,4 @@
+dist: jammy # 22.04
 language: c++
 services:
   - docker
