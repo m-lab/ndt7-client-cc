@@ -33,6 +33,7 @@ if [ $INTERNAL -eq 0 ]; then
                   -e CODECOV_TOKEN=$CODECOV_TOKEN \
                   -e TRAVIS_BRANCH=$TRAVIS_BRANCH \
                   -e CI=true \
+                  -e TRAVIS=true \
                   -v "$(pwd):/workdir" \
                   --workdir /workdir \
                   -t local/debian-testing \
