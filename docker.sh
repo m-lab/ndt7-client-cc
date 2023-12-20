@@ -23,7 +23,7 @@ fi
 
 set -x
 
-if [[ "`docker images -q local/debian-testing 2> /dev/null`" == "" ]]; then
+if [ "`docker images -q local/debian-testing 2> /dev/null`" == "" ]; then
   # Create image for running tests.
   docker build -t local/debian-testing .
 fi
