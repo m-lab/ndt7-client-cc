@@ -25,7 +25,7 @@ set -x
 
 if [[ "`docker images -q local/debian-testing 2> /dev/null`" == "" ]]; then
   # Create image for running tests.
-  exec docker build -t local/debian-testing .
+  docker build -t local/debian-testing .
 fi
 
 if [ $INTERNAL -eq 0 ]; then
