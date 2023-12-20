@@ -1,16 +1,16 @@
 // Part of Measurement Kit <https://measurement-kit.github.io/>.
 // Measurement Kit is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_LOGGER_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_LOGGER_HPP
+#ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_LOGGER_HPP
+#define MEASUREMENT_KIT_LIBNDT7_INTERNAL_LOGGER_HPP
 
-// libndt/internal/logger.hpp - logger API
+// libndt7/internal/logger.hpp - logger API
 
 #include <sstream>
 #include <string>
 
 namespace measurement_kit {
-namespace libndt {
+namespace libndt7 {
 namespace internal {
 
 class Logger {
@@ -35,21 +35,21 @@ class NoLogger : public Logger {
   ~NoLogger() noexcept override;
 };
 
-#define LIBNDT_LOGGER_LEVEL_(logger, level, statements) \
+#define LIBNDT7_LOGGER_LEVEL_(logger, level, statements) \
   if ((logger).is_##level##_enabled()) {                \
     std::stringstream ss;                               \
     ss << statements;                                   \
     logger.emit_##level(ss.str());                      \
   }
 
-#define LIBNDT_LOGGER_WARNING(logger, statements) \
-  LIBNDT_LOGGER_LEVEL_(logger, warning, statements)
+#define LIBNDT7_LOGGER_WARNING(logger, statements) \
+  LIBNDT7_LOGGER_LEVEL_(logger, warning, statements)
 
-#define LIBNDT_LOGGER_INFO(logger, statements) \
-  LIBNDT_LOGGER_LEVEL_(logger, info, statements)
+#define LIBNDT7_LOGGER_INFO(logger, statements) \
+  LIBNDT7_LOGGER_LEVEL_(logger, info, statements)
 
-#define LIBNDT_LOGGER_DEBUG(logger, statements) \
-  LIBNDT_LOGGER_LEVEL_(logger, debug, statements)
+#define LIBNDT7_LOGGER_DEBUG(logger, statements) \
+  LIBNDT7_LOGGER_LEVEL_(logger, debug, statements)
 
 Logger::~Logger() noexcept {}
 
@@ -74,6 +74,6 @@ void NoLogger::emit_debug(const std::string &) const noexcept {}
 NoLogger::~NoLogger() noexcept {}
 
 }  // namespace internal
-}  // namespace libndt
+}  // namespace libndt7
 }  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT_INTERNAL_LOGGER_HPP
+#endif  // MEASUREMENT_KIT_LIBNDT7_INTERNAL_LOGGER_HPP

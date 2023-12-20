@@ -1,10 +1,10 @@
 // Part of Measurement Kit <https://measurement-kit.github.io/>.
 // Measurement Kit is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_ERR_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_ERR_HPP
+#ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP
+#define MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP
 
-// libndt/internal/err.hpp - definition of error
+// libndt7/internal/err.hpp - definition of error
 
 #include <climits>
 #include <sstream>
@@ -13,7 +13,7 @@
 #include <openssl/err.h>
 
 namespace measurement_kit {
-namespace libndt {
+namespace libndt7 {
 namespace internal {
 
 enum class Err {
@@ -61,47 +61,47 @@ enum class Err {
   ws_proto,  // WebSocket protocol error
 };
 
-std::string libndt_perror(Err err) noexcept;
+std::string libndt7_perror(Err err) noexcept;
 std::string ssl_format_error() noexcept;
 
-std::string libndt_perror(Err err) noexcept {
+std::string libndt7_perror(Err err) noexcept {
   std::string rv;
   //
-#define LIBNDT_PERROR(value) \
+#define LIBNDT7_PERROR(value) \
   case Err::value: rv = #value; break
   //
   switch (err) {
-    LIBNDT_PERROR(none);
-    LIBNDT_PERROR(broken_pipe);
-    LIBNDT_PERROR(connection_aborted);
-    LIBNDT_PERROR(connection_refused);
-    LIBNDT_PERROR(connection_reset);
-    LIBNDT_PERROR(function_not_supported);
-    LIBNDT_PERROR(host_unreachable);
-    LIBNDT_PERROR(interrupted);
-    LIBNDT_PERROR(invalid_argument);
-    LIBNDT_PERROR(io_error);
-    LIBNDT_PERROR(message_size);
-    LIBNDT_PERROR(network_down);
-    LIBNDT_PERROR(network_reset);
-    LIBNDT_PERROR(network_unreachable);
-    LIBNDT_PERROR(operation_in_progress);
-    LIBNDT_PERROR(operation_would_block);
-    LIBNDT_PERROR(timed_out);
-    LIBNDT_PERROR(value_too_large);
-    LIBNDT_PERROR(eof);
-    LIBNDT_PERROR(ai_generic);
-    LIBNDT_PERROR(ai_again);
-    LIBNDT_PERROR(ai_fail);
-    LIBNDT_PERROR(ai_noname);
-    LIBNDT_PERROR(socks5h);
-    LIBNDT_PERROR(ssl_generic);
-    LIBNDT_PERROR(ssl_want_read);
-    LIBNDT_PERROR(ssl_want_write);
-    LIBNDT_PERROR(ssl_syscall);
-    LIBNDT_PERROR(ws_proto);
+    LIBNDT7_PERROR(none);
+    LIBNDT7_PERROR(broken_pipe);
+    LIBNDT7_PERROR(connection_aborted);
+    LIBNDT7_PERROR(connection_refused);
+    LIBNDT7_PERROR(connection_reset);
+    LIBNDT7_PERROR(function_not_supported);
+    LIBNDT7_PERROR(host_unreachable);
+    LIBNDT7_PERROR(interrupted);
+    LIBNDT7_PERROR(invalid_argument);
+    LIBNDT7_PERROR(io_error);
+    LIBNDT7_PERROR(message_size);
+    LIBNDT7_PERROR(network_down);
+    LIBNDT7_PERROR(network_reset);
+    LIBNDT7_PERROR(network_unreachable);
+    LIBNDT7_PERROR(operation_in_progress);
+    LIBNDT7_PERROR(operation_would_block);
+    LIBNDT7_PERROR(timed_out);
+    LIBNDT7_PERROR(value_too_large);
+    LIBNDT7_PERROR(eof);
+    LIBNDT7_PERROR(ai_generic);
+    LIBNDT7_PERROR(ai_again);
+    LIBNDT7_PERROR(ai_fail);
+    LIBNDT7_PERROR(ai_noname);
+    LIBNDT7_PERROR(socks5h);
+    LIBNDT7_PERROR(ssl_generic);
+    LIBNDT7_PERROR(ssl_want_read);
+    LIBNDT7_PERROR(ssl_want_write);
+    LIBNDT7_PERROR(ssl_syscall);
+    LIBNDT7_PERROR(ws_proto);
   }
-#undef LIBNDT_PERROR  // Tidy
+#undef LIBNDT7_PERROR  // Tidy
   //
   if (err == Err::ssl_generic) {
     rv += ": ";
@@ -124,6 +124,6 @@ std::string ssl_format_error() noexcept {
 }
 
 }  // namespace internal
-}  // namespace libndt
+}  // namespace libndt7
 }  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT_INTERNAL_ERR_HPP
+#endif  // MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP

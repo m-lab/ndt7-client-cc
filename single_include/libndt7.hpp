@@ -21266,8 +21266,8 @@ NoLogger::~NoLogger() noexcept {}
 #include <sstream>
 
 #ifndef LIBNDT_SINGLE_INCLUDE
-#include "libndt/internal/assert.hpp"
-#include "libndt/internal/logger.hpp"
+#include "libndt7/internal/assert.hpp"
+#include "libndt7/internal/logger.hpp"
 #endif
 
 namespace measurement_kit {
@@ -21672,10 +21672,10 @@ using Timeout = unsigned int;
 /// the build to fail, because libndt uses nlohmann/json symbols.
 
 #ifndef LIBNDT_SINGLE_INCLUDE
-#include "libndt/internal/err.hpp"
-#include "libndt/internal/sys.hpp"
-#include "libndt/internal/curlx.hpp"
-#include "libndt/timeout.hpp"
+#include "libndt7/internal/err.hpp"
+#include "libndt7/internal/sys.hpp"
+#include "libndt7/internal/curlx.hpp"
+#include "libndt7/timeout.hpp"
 #endif // !LIBNDT_SINGLE_INCLUDE
 
 // Check dependencies
@@ -21738,6 +21738,20 @@ using Timeout = unsigned int;
 namespace measurement_kit {
 namespace libndt {
 
+// Structure to store extracted URL parts
+struct UrlParts {
+  std::string scheme;
+  std::string host;
+  std::string port;
+  std::string path;
+};
+
+UrlParts parse_ws_url(const std::string& url);
+
+std::string format_http_params(const std::map<std::string, std::string>& params);
+
+static std::string curl_urlencode(const std::string& raw);
+
 // Versioning
 // ``````````
 
@@ -21759,24 +21773,11 @@ constexpr Version version_patch = Version{0};
 /// Flags that indicate what subtests to run.
 using NettestFlags = unsigned char;
 
-constexpr NettestFlags nettest_flag_middlebox = NettestFlags{1U << 0};
-
 /// Run the upload subtest.
 constexpr NettestFlags nettest_flag_upload = NettestFlags{1U << 1};
 
 /// Run the download subtest.
 constexpr NettestFlags nettest_flag_download = NettestFlags{1U << 2};
-
-constexpr NettestFlags nettest_flag_simple_firewall = NettestFlags{1U << 3};
-
-constexpr NettestFlags nettest_flag_status = NettestFlags{1U << 4};
-
-constexpr NettestFlags nettest_flag_meta = NettestFlags{1U << 5};
-
-constexpr NettestFlags nettest_flag_upload_ext = NettestFlags{1U << 6};
-
-/// Run the multi-stream download subtest.
-constexpr NettestFlags nettest_flag_download_ext = NettestFlags{1U << 7};
 
 // Verbosity levels
 // ````````````````
@@ -21802,10 +21803,6 @@ constexpr Verbosity verbosity_debug = Verbosity{3};
 /// Flags to select what protocol should be used.
 using ProtocolFlags = unsigned int;
 
-/// When this flag is set we use JSON messages. This specifically means that
-/// we send and receive JSON messages (as opposed to raw strings).
-constexpr ProtocolFlags protocol_flag_json = ProtocolFlags{1 << 0};
-
 /// When this flag is set we use TLS. This specifically means that we will
 /// use TLS channels for the control and the measurement connections.
 constexpr ProtocolFlags protocol_flag_tls = ProtocolFlags{1 << 1};
@@ -21813,46 +21810,6 @@ constexpr ProtocolFlags protocol_flag_tls = ProtocolFlags{1 << 1};
 /// When this flag is set we use WebSocket. This specifically means that
 /// we use the WebSocket framing to encapsulate NDT messages.
 constexpr ProtocolFlags protocol_flag_websocket = ProtocolFlags{1 << 2};
-
-/// When this flag is set, we use ndt7 rather than ndt5. This specifically
-/// means that a totally different protocol is used. You can read more on ndt7
-/// at https://github.com/m-lab/ndt-server/blob/master/spec/ndt7-protocol.md
-constexpr ProtocolFlags protocol_flag_ndt7 = ProtocolFlags{1 << 3};
-
-// Policy for auto-selecting a NDT server
-// ``````````````````````````````````````
-
-/// Flags modifying the behavior of mlab-ns. Mlab-ns is the web service used
-/// to automatically discover NDT's (and other experiments') servers.
-using MlabnsPolicy = unsigned short;
-
-/// Request just the closest NDT server.
-constexpr MlabnsPolicy mlabns_policy_closest = MlabnsPolicy{0};
-
-/// Request for a random NDT server.
-constexpr MlabnsPolicy mlabns_policy_random = MlabnsPolicy{1};
-
-/// Return a list of nearby NDT servers. When more than one server is returned
-/// all the available servers will be tried in case some of them are down.
-constexpr MlabnsPolicy mlabns_policy_geo_options = MlabnsPolicy{2};
-
-// NDT message types
-// `````````````````
-// See <https://github.com/ndt-project/ndt/wiki/NDTProtocol#message-types>.
-
-using MsgType = unsigned char;
-constexpr MsgType msg_comm_failure = MsgType{0};
-constexpr MsgType msg_srv_queue = MsgType{1};
-constexpr MsgType msg_login = MsgType{2};
-constexpr MsgType msg_test_prepare = MsgType{3};
-constexpr MsgType msg_test_start = MsgType{4};
-constexpr MsgType msg_test_msg = MsgType{5};
-constexpr MsgType msg_test_finalize = MsgType{6};
-constexpr MsgType msg_error = MsgType{7};
-constexpr MsgType msg_results = MsgType{8};
-constexpr MsgType msg_logout = MsgType{9};
-constexpr MsgType msg_waiting = MsgType{10};
-constexpr MsgType msg_extended_login = MsgType{11};
 
 // EventHandler
 // ------------
@@ -21923,31 +21880,29 @@ EventHandler::~EventHandler() noexcept {}
 // Settings
 // ````````
 
-constexpr const char *ndt_version_compat = "v3.7.0";
-
 /// NDT client settings. If you do not customize the settings when creating
 /// a Client, the defaults listed below will be used instead.
 class Settings {
  public:
-  /// Base URL to be used to query the mlab-ns service. If you specify an
-  /// explicit hostname, mlab-ns won't be used. Note that the URL specified
+  /// Base URL to be used to query the Locate API service. If you specify an
+  /// explicit hostname, Locate API won't be used. Note that the URL specified
   /// here MUST NOT end with a final slash.
-  std::string mlabns_base_url = "https://locate.measurementlab.net";
-
-  /// Flags that modify the behavior of mlabn-ns. By default we use the
-  /// geo_options policy that is the most robust to random server failures.
-  MlabnsPolicy mlabns_policy = mlabns_policy_geo_options;
+  std::string locate_api_base_url = "https://locate.measurementlab.net";
 
   /// Timeout used for I/O operations.
   Timeout timeout = Timeout{7} /* seconds */;
 
   /// Host name of the NDT server to use. If this is left blank (the default),
-  /// we will use mlab-ns to discover a nearby server.
+  /// we will use Locate API to discover a nearby server.
   std::string hostname;
 
   /// Port of the NDT server to use. If this is not specified, we will use
   /// the most correct port depending on the configuration.
-  std::string port;
+  std::string port = "443";
+
+  /// Scheme to use connecting to the NDT server. If this is not specified, we will use
+  /// the secure websocket configuration.
+  std::string scheme = "wss";
 
   /// The tests you want to run with the NDT server. By default we run
   /// a download test, because that is probably the typical usage.
@@ -21958,17 +21913,15 @@ class Settings {
   Verbosity verbosity = verbosity_quiet;
 
   /// Metadata to include in the server side logs. By default we just identify
-  /// the NDT version and the application.
+  /// the client version and the library.
   std::map<std::string, std::string> metadata{
-      {"client.version", ndt_version_compat},
-      {"client.application", "measurement-kit/libndt"},
+      {"client_library_version", "v0.1.0"},
+      {"client_library_name", "m-lab/libndt7-cc"},
   };
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
   /// cause libndt to use different default settings for the port or for
-  /// mlab-ns. Clear text NDT uses port 3001, NDT-over-TLS uses 3010. There
-  /// will most likely be servers listening on port 443 in the future, but
-  /// they will only support the TLS+WebSocket protocol.
+  /// the Locate API. Clear text ndt7 uses port 80, ndt7-over-TLS uses 443.
   ProtocolFlags protocol_flags = ProtocolFlags{0};
 
   /// Maximum time for which a nettest (i.e. download) is allowed to run. After
@@ -22074,21 +22027,9 @@ class Client : public EventHandler {
 
   // High-level API
   virtual void summary() noexcept;
-  virtual bool query_mlabns(std::vector<std::string> *) noexcept;
-  virtual bool connect() noexcept;
-  virtual bool send_login() noexcept;
-  virtual bool recv_kickoff() noexcept;
-  virtual bool wait_in_queue() noexcept;
-  virtual bool recv_version() noexcept;
-  virtual bool recv_tests_ids() noexcept;
-  virtual bool run_tests() noexcept;
-  virtual bool recv_results_and_logout() noexcept;
-  virtual bool wait_close() noexcept;
-
-  // Mid-level API
-  virtual bool run_download() noexcept;
-  virtual bool run_meta() noexcept;
-  virtual bool run_upload() noexcept;
+  virtual bool query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept;
+  virtual std::string get_static_locate_result(std::string opts, std::string scheme, std::string hostname, std::string port);
+  virtual std::string replace_all_with(std::string templ, std::string pattern, std::string replace);
 
   // ndt7 protocol API
   // `````````````````
@@ -22100,39 +22041,13 @@ class Client : public EventHandler {
 
   // ndt7_download performs a ndt7 download. Returns true if the download
   // succeeds and false in case of failure.
-  bool ndt7_download() noexcept;
+  bool ndt7_download(const UrlParts &url) noexcept;
 
   // ndt7_upload is like ndt7_download but performs an upload.
-  bool ndt7_upload() noexcept;
+  bool ndt7_upload(const UrlParts &url) noexcept;
 
   // ndt7_connect connects to @p url_path.
-  bool ndt7_connect(std::string url_path) noexcept;
-
-  // NDT protocol API
-  // ````````````````
-  //
-  // This API allows to send and receive NDT messages. At the bottom of the
-  // abstraction layer lie functions to send and receive NDT's binary protocol
-  // which here is called "legacy". It's called like this because it's still
-  // the original protocol, AFAIK, even though several additions were layered
-  // on top of it over the years (i.e. websocket, JSON, and TLS).
-
-  bool msg_write_login(const std::string &version) noexcept;
-
-  virtual bool msg_write(MsgType code, std::string &&msg) noexcept;
-
-  virtual bool msg_write_legacy(MsgType code, std::string &&msg) noexcept;
-
-  virtual bool msg_expect_test_prepare(  //
-      std::string *pport, uint8_t *pnflows) noexcept;
-
-  virtual bool msg_expect_empty(MsgType code) noexcept;
-
-  virtual bool msg_expect(MsgType code, std::string *msg) noexcept;
-
-  virtual bool msg_read(MsgType *code, std::string *msg) noexcept;
-
-  virtual bool msg_read_legacy(MsgType *code, std::string *msg) noexcept;
+  bool ndt7_connect(const UrlParts &url) noexcept;
 
   // WebSocket
   // `````````
@@ -22284,7 +22199,7 @@ class Client : public EventHandler {
   // Close a socket.
   virtual internal::Err netx_closesocket(internal::Socket fd) noexcept;
 
-  virtual bool query_mlabns_curl(const std::string &url, long timeout,
+  virtual bool query_locate_api_curl(const std::string &url, long timeout,
                                  std::string *body) noexcept;
 
   // Other helpers
@@ -22549,46 +22464,6 @@ static std::string represent(std::string message) noexcept {
   return ss.str();
 }
 
-static std::string trim(std::string s) noexcept {
-  auto pos = s.find_first_not_of(" \t");
-  if (pos != std::string::npos) {
-    s = s.substr(pos);
-  }
-  pos = s.find_last_not_of(" \t");
-  if (pos != std::string::npos) {
-    s = s.substr(0, pos + 1);
-  }
-  return s;
-}
-
-static bool jsonify_web100(Client *client, nlohmann::json &json,
-                        std::string message) noexcept {
-  std::stringstream ss_line{message};
-  std::string line;
-
-  while ((std::getline(ss_line, line, '\n'))) {
-    std::vector<std::string> keyval;
-
-    // Split for ":" and use the first part as key and the rest of the string
-    // as value.
-    size_t pos = 0;
-    std::string token;
-
-    pos = line.find(":");
-    // Fail if there isn't any ":" or the delimiter is at the end of the str.
-    if (pos == std::string::npos || pos == line.length() - 1) {
-      LIBNDT_EMIT_WARNING_EX(client, "incorrectly formatted message: " << message);
-      continue;
-    }
-
-    keyval.push_back(line.substr(0, pos));
-    keyval.push_back(line.substr(pos + 1));
-
-    json[trim(keyval[0])] = trim(keyval[1]);
-  }
-  return true;
-}
-
 // Private classes
 // ```````````````
 
@@ -22650,80 +22525,43 @@ Client::~Client() noexcept {
 // `````````````
 
 bool Client::run() noexcept {
-  std::vector<std::string> fqdns;
-  if (!query_mlabns(&fqdns)) {
+  std::vector<nlohmann::json> targets;
+  if (!query_locate_api(settings_.metadata, &targets)) {
     return false;
   }
-  for (auto &fqdn : fqdns) {
-    LIBNDT_EMIT_DEBUG("trying to connect to " << fqdn);
-    settings_.hostname = fqdn;
-    // TODO(bassosimone): we will eventually want to refactor the code to
-    // make ndt7 the default and ndt5 the optional case.
-    if ((settings_.protocol_flags & protocol_flag_ndt7) != 0) {
-      LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
-      if ((settings_.nettest_flags & nettest_flag_download) != 0) {
-        // TODO(bassosimone): for now we do not try with more than one host
-        // when using ndt7 and there's a failure. We may want to do that.
-        if (!ndt7_download()) {
-          LIBNDT_EMIT_WARNING("ndt7: download failed");
-          // FALLTHROUGH
-        }
+  std::string scheme = "ws";
+  if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
+    scheme = "wss";
+  }
+  for (auto &urls : targets) {
+    LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
+    if ((settings_.nettest_flags & nettest_flag_download) != 0) {
+      auto key = scheme + ":///ndt/v7/download";
+      if (!urls.contains(key)) {
+        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        continue;
       }
-      if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
-        // TODO(bassosimone): same as above.
-        if (!ndt7_upload()) {
-          LIBNDT_EMIT_WARNING("ndt7: upload failed");
-          // FALLTHROUGH
-        }
+      auto url = urls[key];
+      UrlParts parts = parse_ws_url(url);
+      if (!ndt7_download(parts)) {
+        LIBNDT_EMIT_WARNING("ndt7: download failed");
+       // FALLTHROUGH
       }
-      LIBNDT_EMIT_INFO("ndt7: test complete");
-      // TODO(bassosimone): here we may want to warn if the user selects
-      // subtests that we actually do not implement.
-      return true;
     }
-    if (!connect()) {
-      LIBNDT_EMIT_WARNING("cannot connect to remote host; trying another one");
-      continue;
+    if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
+      auto key = scheme + ":///ndt/v7/upload";
+      if (!urls.contains(key)) {
+        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        continue;
+      }
+      auto url = urls[key];
+      UrlParts parts = parse_ws_url(url);
+      if (!ndt7_upload(parts)) {
+        LIBNDT_EMIT_WARNING("ndt7: upload failed");
+        // FALLTHROUGH
+      }
     }
-    LIBNDT_EMIT_DEBUG("connected to remote host");
-    if (!send_login()) {
-      LIBNDT_EMIT_WARNING("cannot send login; trying another host");
-      continue;
-    }
-    LIBNDT_EMIT_DEBUG("sent login message");
-    if (!recv_kickoff()) {
-      LIBNDT_EMIT_WARNING("failed to receive kickoff; trying another host");
-      continue;
-    }
-    if (!wait_in_queue()) {
-      LIBNDT_EMIT_WARNING("failed to wait in queue; trying another host");
-      continue;
-    }
-    LIBNDT_EMIT_DEBUG("authorized to run test");
-    // From this point on we fail the test in case of error rather than
-    // trying with another host. The rationale of trying with another host
-    // above is that sometimes NDT servers are busy and we would like to
-    // use another one rather than creating queue at the busy one.
-    if (!recv_version()) {
-      return false;
-    }
-    LIBNDT_EMIT_DEBUG("received server version");
-    if (!recv_tests_ids()) {
-      return false;
-    }
-    LIBNDT_EMIT_DEBUG("received tests ids");
-    if (!run_tests()) {
-      return false;
-    }
-    LIBNDT_EMIT_DEBUG("finished running tests; now reading summary data:");
-    if (!recv_results_and_logout()) {
-      return false;
-    }
-    LIBNDT_EMIT_DEBUG("received logout message");
-    if (!wait_close()) {
-      return false;
-    }
-    LIBNDT_EMIT_DEBUG("connection closed");
+    LIBNDT_EMIT_INFO("ndt7: test complete");
     return true;
   }
   LIBNDT_EMIT_WARNING("no more hosts to try; failing the test");
@@ -22801,43 +22639,62 @@ void Client::summary() noexcept {
   }
 }
 
-bool Client::query_mlabns(std::vector<std::string> *fqdns) noexcept {
-  assert(fqdns != nullptr);
-  if (!settings_.hostname.empty()) {
-    LIBNDT_EMIT_DEBUG("no need to query mlab-ns; we have hostname");
-    // When we already know the hostname that we want to use just fake out the
-    // result of a mlabns query as like mlabns returned that hostname.
-    fqdns->push_back(std::move(settings_.hostname));
-    return true;
+std::string Client::get_static_locate_result(
+  std::string opts, std::string scheme, std::string hostname, std::string port) {
+  std::string templ = R"({
+  "results": [
+    {
+      "machine": "{{hostname}}",
+      "location": {
+        "city": "Your City",
+        "country": "US"
+      },
+      "urls": {
+        "{{scheme}}:///ndt/v7/download": "{{scheme}}://{{hostname}}:{{port}}/ndt/v7/download?{{opts}}",
+        "{{scheme}}:///ndt/v7/upload": "{{scheme}}://{{hostname}}:{{port}}/ndt/v7/upload?{{opts}}"
+      }
+    }
+  ]
+})";
+  std::string result = templ;
+  result = replace_all_with(result, "{{hostname}}", hostname);
+  result = replace_all_with(result, "{{scheme}}", scheme);
+  result = replace_all_with(result, "{{port}}", port);
+  result = replace_all_with(result, "{{opts}}", opts);
+  return result;
+}
+
+std::string Client::replace_all_with(std::string templ, std::string pattern, std::string replace) {
+  std::size_t pos = 0;
+  std::string result = templ;
+  while ((pos = result.find(pattern, pos)) != std::string::npos) {
+    result = result.replace(pos, pattern.length(), replace);
   }
-  std::string mlabns_url = settings_.mlabns_base_url;
-  if ((settings_.nettest_flags & nettest_flag_download_ext) != 0) {
-    LIBNDT_EMIT_WARNING("tweaking mlabns settings to allow for multi stream download");
-    LIBNDT_EMIT_WARNING("we need to use the neubot sliver and to force json since");
-    LIBNDT_EMIT_WARNING("this is the only configuration supported by neubot's sliver");
-    settings_.protocol_flags &= ~protocol_flag_tls;
-    settings_.protocol_flags &= ~protocol_flag_websocket;
-    settings_.protocol_flags |= protocol_flag_json;
-    mlabns_url += "/neubot";  // only botticelli implements multi stream dload
+  return result;
+}
+
+bool Client::query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept {
+  assert(urls != nullptr);
+  std::string body;
+  std::string locate_api_url = settings_.locate_api_base_url;
+  if (!settings_.hostname.empty()) {
+    LIBNDT_EMIT_DEBUG("no need to query locate api; we have hostname");
+    // We already know the hostname, scheme and port, so return a static result.
+    body = get_static_locate_result(
+      format_http_params(opts), settings_.scheme, settings_.hostname,
+      settings_.port);
   } else {
-    if ((settings_.protocol_flags & protocol_flag_ndt7) != 0) {
-      mlabns_url += "/ndt7";
-    } else if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
-      mlabns_url += "/ndt_ssl";
-    } else {
-      mlabns_url += "/ndt";
+    locate_api_url += "/v2/nearest/ndt/ndt7";
+    if (opts.size() > 0) {
+      // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
+      locate_api_url += "?" + format_http_params(opts);
+    }
+    LIBNDT_EMIT_INFO("using locate: " << locate_api_url);
+    if (!query_locate_api_curl(locate_api_url, settings_.timeout, &body)) {
+      return false;
     }
   }
-  if (settings_.mlabns_policy == mlabns_policy_random) {
-    mlabns_url += "?policy=random";
-  } else if (settings_.mlabns_policy == mlabns_policy_geo_options) {
-    mlabns_url += "?policy=geo_options";
-  }
-  std::string body;
-  if (!query_mlabns_curl(mlabns_url, settings_.timeout, &body)) {
-    return false;
-  }
-  LIBNDT_EMIT_DEBUG("mlabns reply: " << body);
+  LIBNDT_EMIT_DEBUG("locate_api reply: " << body);
   nlohmann::json json;
   try {
     json = nlohmann::json::parse(body);
@@ -22845,546 +22702,43 @@ bool Client::query_mlabns(std::vector<std::string> *fqdns) noexcept {
     LIBNDT_EMIT_WARNING("cannot parse JSON: " << exc.what());
     return false;
   }
-  // In some cases mlab-ns returns a single object but in other cases (e.g.
-  // with the `geo_options` policy) it returns an array. Always make an
-  // array so that we can write uniform code for processing mlab-ns response.
-  if (json.is_object()) {
-    auto array = nlohmann::json::array();
-    array.push_back(json);
-    std::swap(json, array);
-  }
-  for (auto &entry : json) {
-    std::string fqdn;
-    try {
-      fqdn = entry.at("fqdn").get<std::string>();
-    } catch (const nlohmann::json::exception &exc) {
-      LIBNDT_EMIT_WARNING("cannot access FQDN field: " << exc.what());
+
+  // On success, the Locate API returns an object with a "results" array. On
+  // error, the object includes an "error". On success, there is always at least
+  // one result in an array.
+  if (!json.contains("results")) {
+    if (!json.contains("error")) {
+      LIBNDT_EMIT_WARNING("no results and no error! " << body);
       return false;
     }
-    LIBNDT_EMIT_DEBUG("discovered host: " << fqdn);
-    fqdns->push_back(std::move(fqdn));
-  }
-  return true;
-}
-
-bool Client::connect() noexcept {
-  std::string port;
-  if (!settings_.port.empty()) {
-    port = settings_.port;
-  } else if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
-    port = "3010";
-  } else {
-    port = "3001";
-  }
-  // We may be called more than once when looping over the list returned by
-  // geo_options. Therefore, the socket may already be open. In such case we
-  // want to close it such that we don't leak resources.
-  if (internal::IsSocketValid(sock_)) {
-    LIBNDT_EMIT_DEBUG("closing socket openned in previous attempt");
-    (void)netx_closesocket(sock_);
-    sock_ = (internal::Socket)-1;
-  }
-  return netx_maybews_dial(  //
-             settings_.hostname, port,
-             ws_f_connection | ws_f_upgrade | ws_f_sec_ws_accept |
-                 ws_f_sec_ws_protocol,
-             ws_proto_control, "/ndt_protocol", &sock_) == internal::Err::none;
-}
-
-bool Client::send_login() noexcept {
-  return msg_write_login(ndt_version_compat);
-}
-
-bool Client::recv_kickoff() noexcept {
-  if ((settings_.protocol_flags & protocol_flag_websocket) != 0) {
-    LIBNDT_EMIT_INFO("no kickoff when using websocket");
-    return true;
-  }
-  char buf[msg_kickoff_size];
-  auto err = netx_recvn(sock_, buf, sizeof(buf));
-  if (err != internal::Err::none) {
-    LIBNDT_EMIT_WARNING("recv_kickoff: netx_recvn() failed");
+    auto err = json["error"];
+    LIBNDT_EMIT_WARNING("error response from " << locate_api_url << ": " << err);
     return false;
   }
-  if (memcmp(buf, msg_kickoff, sizeof(buf)) != 0) {
-    LIBNDT_EMIT_WARNING("recv_kickoff: invalid kickoff message");
-    return false;
-  }
-  LIBNDT_EMIT_DEBUG("received kickoff message");
-  return true;
-}
-
-bool Client::wait_in_queue() noexcept {
-  std::string message;
-  if (!msg_expect(msg_srv_queue, &message)) {
-    return false;
-  }
-  // There is consensus among NDT developers that modern NDT should not
-  // wait in queue rather it should fail immediately.
-  if (message != "0") {
-    on_server_busy(std::move(message));
-    return false;
-  }
-  return true;
-}
-
-bool Client::recv_version() noexcept {
-  std::string message;
-  if (!msg_expect(msg_login, &message)) {
-    return false;
-  }
-  // TODO(bassosimone): validate version number?
-  LIBNDT_EMIT_DEBUG("server version: " << message);
-  return true;
-}
-
-bool Client::recv_tests_ids() noexcept {
-  std::string message;
-  if (!msg_expect(msg_login, &message)) {
-    return false;
-  }
-  std::istringstream ss{message};
-  std::string cur;
-  while ((std::getline(ss, cur, ' '))) {
-    const char *errstr = nullptr;
-    static_assert(sizeof(NettestFlags) == sizeof(uint8_t),
-                  "Invalid NettestFlags size");
-    auto tid = (uint8_t)sys->Strtonum(cur.data(), 1, 256, &errstr);
-    if (errstr != nullptr) {
-      LIBNDT_EMIT_WARNING("recv_tests_ids: found invalid test-id: "
-                   << cur.data() << " (error: " << errstr << ")");
-      return false;
+  auto results = json["results"];
+  for (auto &target : results) {
+    if (!target.contains("urls")) {
+      // This should not occur.
+      LIBNDT_EMIT_WARNING("results object is missing urls: " << body);
+      continue;
     }
-    granted_suite_.push_back(NettestFlags{tid});
+    auto result_urls = target["urls"];
+    do {
+      auto it = result_urls.begin();
+      // Any key is fine for debug logging.
+      LIBNDT_EMIT_DEBUG("discovered host: " << result_urls[it.key()]);
+    } while(0);
+    urls->push_back(std::move(result_urls));
   }
-  return true;
-}
-
-bool Client::run_tests() noexcept {
-  for (auto &tid : granted_suite_) {
-    if (tid == nettest_flag_upload) {
-      LIBNDT_EMIT_INFO("running upload test");
-      if (!run_upload()) {
-        return false;
-      }
-    } else if (tid == nettest_flag_meta) {
-      LIBNDT_EMIT_DEBUG("running meta test");  // don't annoy the user with this
-      if (!run_meta()) {
-        return false;
-      }
-    } else if (tid == nettest_flag_download ||
-               tid == nettest_flag_download_ext) {
-      LIBNDT_EMIT_INFO("running download test");
-      if (!run_download()) {
-        return false;
-      }
-    } else {
-      LIBNDT_EMIT_WARNING("run_tests(): unexpected test id");
-      return false;
-    }
-  }
-  return true;
-}
-
-bool Client::recv_results_and_logout() noexcept {
-  // Read summary from the server and put it into a JSON object.
-  nlohmann::json summary;
-
-  for (auto i = 0; i < max_loops; ++i) {  // don't loop forever
-    std::string message;
-    MsgType code = MsgType{0};
-    if (!msg_read(&code, &message)) {
-      return false;
-    }
-    if (code != msg_results && code != msg_logout) {
-      LIBNDT_EMIT_WARNING("recv_results_and_logout: unexpected message type");
-      return false;
-    }
-    if (code == msg_logout) {
-      return true;
-    }
-  }
-  LIBNDT_EMIT_WARNING("recv_results_and_logout: too many msg_results messages");
-  return false;  // Too many loops
-}
-
-bool Client::wait_close() noexcept {
-  // So, the NDT protocol specification just says: "At the end the Server MUST
-  // close the whole test session by sending an empty MSG_LOGOUT message and
-  // closing connection with the Client." The following code gives the server
-  // one second to close the connection, using netx_wait_readable(). Once that
-  // function returns, we unconditionally close the socket. This is simpler
-  // than a previous implementation in that we do not care much about the state
-  // of the socket after netx_wait_readable() returns. I don't think here
-  // we've any "dirty shutdown" concerns, because the NDT protocol includes a
-  // MSG_LOGOUT sent from the server, hence we know we reached the final state.
-  //
-  // Note: after reading RFC6455, I realized why the server SHOULD close the
-  // connection rather than the client: so that the TIME_WAIT state is entered
-  // by the server, such that there is little server side impact.
-  constexpr Timeout wait_for_close = 3;
-  (void)netx_wait_readable(sock_, wait_for_close);
-  (void)netx_closesocket(sock_);
-  return true;
-}
-
-// Mid-level API
-// `````````````
-
-bool Client::run_download() noexcept {
-  SocketVector dload_socks{this};
-  std::string port;
-  uint8_t nflows = 1;
-  if (!msg_expect_test_prepare(&port, &nflows)) {
-    return false;
-  }
-
-  for (uint8_t i = 0; i < nflows; ++i) {
-    internal::Socket sock = (internal::Socket)-1;
-    // Implementation note: here connection attempts are serialized. This is
-    // consistent with <https://tools.ietf.org/html/rfc6455#section-4.1>, and
-    // namely with requirement 2: "If multiple connections to the same IP
-    // address are attempted simultaneously, the client MUST serialize them".
-    internal::Err err = netx_maybews_dial(  //
-        settings_.hostname, port,
-        ws_f_connection | ws_f_upgrade | ws_f_sec_ws_accept
-          | ws_f_sec_ws_protocol, ws_proto_s2c, "/ndt_protocol",
-        &sock);
-    if (err != internal::Err::none) {
-      break;
-    }
-    dload_socks.sockets.push_back(sock);
-  }
-  if (dload_socks.sockets.size() != nflows) {
-    LIBNDT_EMIT_WARNING("run_download: not all connect succeeded");
-    return false;
-  }
-
-  if (!msg_expect_empty(msg_test_start)) {
-    return false;
-  }
-  LIBNDT_EMIT_DEBUG("run_download: got the test_start message");
-
-  summary_.download_speed = 0.0;
-  summary_.download_retrans = 0.0;
-  summary_.min_rtt = 0;
-  {
-    std::atomic<uint8_t> active{0};
-    auto begin = std::chrono::steady_clock::now();
-    std::atomic<uint64_t> total_data{0};
-    auto max_runtime = settings_.max_runtime;
-    auto ws = (settings_.protocol_flags & protocol_flag_websocket) != 0;
-    const Client *const_this = this;
-    for (internal::Socket fd : dload_socks.sockets) {
-      // TODO(bassosimone): increment active inside the thread main function
-      // as this is more consistent with the fact that thread decrements it
-      active += 1;  // atomic
-      auto main = [
-        &active,       // reference to atomic
-        begin,         // copy for safety
-        fd,            // copy for safety
-        max_runtime,   // copy for safety
-        const_this,    // const pointer
-        &total_data,   // reference to atomic
-        ws             // copy for safety
-      ]() noexcept {
-        constexpr size_t ndt_bufsize = 131072;
-        std::unique_ptr<char[]> buf(new char[ndt_bufsize]);
-        for (;;) {
-          auto err = internal::Err::none;
-          internal::Size n = 0;
-          if (ws) {
-            uint8_t op = 0;
-            err = const_this->ws_recvmsg(
-                    fd, &op, (uint8_t *)buf.get(), ndt_bufsize, &n);
-            if (err == internal::Err::none && op != ws_opcode_binary) {
-              LIBNDT_EMIT_WARNING_EX(const_this,
-                "run_download: unexpected opcode: " << (unsigned int)op);
-              break;
-            }
-          } else {
-            err = const_this->netx_recv(fd, buf.get(), ndt_bufsize, &n);
-          }
-          if (err != internal::Err::none) {
-            if (err != internal::Err::eof) {
-              LIBNDT_EMIT_WARNING_EX(const_this,
-                "run_download: receiving: " << internal::libndt_perror(err));
-            }
-            break;
-          }
-          total_data += (uint64_t)n;   // atomic
-          auto now = std::chrono::steady_clock::now();
-          std::chrono::duration<double> elapsed = now - begin;
-          if (elapsed.count() > max_runtime) {
-            break;
-          }
-        }
-        active -= 1;  // atomic
-      };
-      std::thread thread{std::move(main)};
-      thread.detach();
-    }
-    auto prev = begin;
-    for (;;) {
-      constexpr int timeout_msec = 250;
-      std::this_thread::sleep_for(std::chrono::milliseconds(timeout_msec));
-      if (active <= 0) {
-        break;
-      }
-      auto now = std::chrono::steady_clock::now();
-      std::chrono::duration<double> elapsed = now - begin;
-      if (!settings_.summary_only) {
-        on_performance(nettest_flag_download,           //
-                     active,                            // atomic
-                     static_cast<double>(total_data),   // atomic
-                     elapsed.count(),                   //
-                     settings_.max_runtime);
-      }
-      prev = now;
-    }
-    auto now = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed = now - begin;
-    summary_.download_speed = compute_speed_kbits(
-        static_cast<double>(total_data), elapsed.count());
-  }
-
-  {
-    // TODO(bassosimone): emit this information.
-    MsgType code = MsgType{0};
-    std::string message;
-    if (!msg_read_legacy(&code, &message)) {  // legacy on purpose!
-      return false;
-    }
-    if (code != msg_test_msg) {
-      LIBNDT_EMIT_WARNING("run_download: unexpected message type");
-      return false;
-    }
-    LIBNDT_EMIT_DEBUG("run_download: server computed speed: " << message);
-  }
-
-  if (!msg_write(msg_test_msg, std::to_string(summary_.download_speed))) {
-    return false;
-  }
-
-  LIBNDT_EMIT_DEBUG("reading summary web100 variables");
-  for (auto i = 0; i < max_loops; ++i) {  // don't loop forever
-    std::string message;
-    MsgType code = MsgType{0};
-    if (!msg_read(&code, &message)) {
-      return false;
-    }
-    if (code != msg_test_msg && code != msg_test_finalize) {
-      LIBNDT_EMIT_WARNING("run_download: unexpected message type");
-      return false;
-    }
-    if (code == msg_test_finalize) {
-      if (this->get_verbosity() == verbosity_debug) {
-        this->on_result("web100", "web100", web100.dump());
-      }
-
-      // Calculate retransmission rate (BytesRetrans / BytesSent).
-      try {
-        double bytes_retrans = std::stod(web100["TCPInfo.BytesRetrans"].get<std::string>());
-        double bytes_sent = std::stod(web100["TCPInfo.BytesSent"].get<std::string>());
-        summary_.download_retrans = (bytes_sent != 0.0) ? bytes_retrans / bytes_sent : 0.0;
-      } catch(const std::exception& e) {
-        LIBNDT_EMIT_DEBUG("TCPInfo.BytesRetrans and TCPInfo.BytesSent \
-        not available, cannot calculate retransmission rate.");
-      }
-
-      // Use MinRTT as "latency".
-      try {
-        summary_.min_rtt = (uint32_t) std::stoul(web100["TCPInfo.MinRTT"].get<std::string>());
-      } catch(const std::exception& e) {
-        LIBNDT_EMIT_WARNING("Unable to read TCPInfo.MinRTT: " << e.what());
-      }
-
-      return true;
-    }
-    if (!jsonify_web100(this, web100, std::move(message))) {
-      // NOTHING - jsonify_web100 warns the user already if it cannot parse
-      // the message.
-    }
-  }
-
-  LIBNDT_EMIT_WARNING("run_download: too many msg_test_msg messages");
-  return false;  // Too many loops
-}
-
-bool Client::run_meta() noexcept {
-  if (!msg_expect_empty(msg_test_prepare)) {
-    return false;
-  }
-  if (!msg_expect_empty(msg_test_start)) {
-    return false;
-  }
-
-  for (auto &kv : settings_.metadata) {
-    std::stringstream ss;
-    ss << kv.first << ":" << kv.second;
-    if (!msg_write(msg_test_msg, ss.str())) {
-      return false;
-    }
-  }
-  if (!msg_write(msg_test_msg, "")) {
-    return false;
-  }
-
-  if (!msg_expect_empty(msg_test_finalize)) {
-    return false;
-  }
-
-  return true;
-}
-
-bool Client::run_upload() noexcept {
-  SocketVector upload_socks{this};
-
-  std::string port;
-  uint8_t nflows = 1;
-  if (!msg_expect_test_prepare(&port, &nflows)) {
-    return false;
-  }
-  // TODO(bassosimone): implement C2S_EXT
-  if (nflows != 1) {
-    LIBNDT_EMIT_WARNING("run_upload: unexpected number of flows");
-    return false;
-  }
-
-  {
-    internal::Socket sock = (internal::Socket)-1;
-    // Remark: in case we'll ever implement multi-stream here, remember that
-    // WebSocket requires connections to be serialized. See above.
-		internal::Err err = netx_maybews_dial(  //
-        settings_.hostname, port,
-        ws_f_connection | ws_f_upgrade | ws_f_sec_ws_accept
-          | ws_f_sec_ws_protocol, ws_proto_c2s, "/ndt_protocol",
-        &sock);
-    if (err != internal::Err::none) {
-      return false;
-    }
-    upload_socks.sockets.push_back(sock);
-  }
-
-  if (!msg_expect_empty(msg_test_start)) {
-    return false;
-  }
-
-  double client_side_speed = 0.0;
-  {
-    std::atomic<uint8_t> active{0};
-    auto begin = std::chrono::steady_clock::now();
-    std::atomic<uint64_t> total_data{0};
-    auto max_runtime = settings_.max_runtime;
-    auto ws = (settings_.protocol_flags & protocol_flag_websocket) != 0;
-    const Client *const_this = this;
-    for (internal::Socket fd : upload_socks.sockets) {
-      // TODO(bassosimone): increment active inside the thread main function
-      // as this is more consistent with the fact that thread decrements it
-      active += 1;  // atomic
-      auto main = [
-        &active,       // reference to atomic
-        begin,         // copy for safety
-        fd,            // copy for safety
-        max_runtime,   // copy for safety
-        const_this,    // const pointer
-        &total_data,   // reference to atomic
-        ws             // copy for safety
-      ]() noexcept {
-        constexpr size_t ndt_bufsize = 131072;
-        std::unique_ptr<char[]> buf(new char[ndt_bufsize]);
-        {
-          auto start = std::chrono::steady_clock::now();
-          random_printable_fill(buf.get(), ndt_bufsize);
-          auto now = std::chrono::steady_clock::now();
-          std::chrono::duration<double> elapsed = now - start;
-          LIBNDT_EMIT_DEBUG_EX(const_this,
-            "run_upload: time to fill random buffer: " << elapsed.count());
-        }
-        std::string frame = const_this->ws_prepare_frame(
-            ws_opcode_binary | ws_fin_flag, (uint8_t *)buf.get(), ndt_bufsize);
-        for (;;) {
-					internal::Size n = 0;
-          auto err = internal::Err::none;
-          if (ws) {
-            err = const_this->netx_sendn(fd, frame.data(), frame.size());
-            if (err == internal::Err::none) {
-              n = frame.size();
-            }
-          } else {
-            err = const_this->netx_send(fd, buf.get(), ndt_bufsize, &n);
-          }
-          if (err != internal::Err::none) {
-            if (err != internal::Err::broken_pipe) {
-              LIBNDT_EMIT_WARNING_EX(const_this,
-                "run_upload: sending: " << internal::libndt_perror(err));
-            }
-            break;
-          }
-          total_data += (uint64_t)n;   // atomic
-          auto now = std::chrono::steady_clock::now();
-          std::chrono::duration<double> elapsed = now - begin;
-          if (elapsed.count() > max_runtime) {
-            break;
-          }
-        }
-        active -= 1;  // atomic
-      };
-      std::thread thread{std::move(main)};
-      thread.detach();
-    }
-    auto prev = begin;
-    for (;;) {
-      constexpr int timeout_msec = 250;
-      std::this_thread::sleep_for(std::chrono::milliseconds(timeout_msec));
-      if (active <= 0) {
-        break;
-      }
-      auto now = std::chrono::steady_clock::now();
-      std::chrono::duration<double> elapsed = now - begin;
-      if (!settings_.summary_only) {
-        on_performance(nettest_flag_upload,             //
-                     active,                            // atomic
-                     static_cast<double>(total_data),   // atomic
-                     elapsed.count(),                   //
-                     settings_.max_runtime);
-      }
-      prev = now;
-    }
-    auto now = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed = now - begin;
-    client_side_speed = compute_speed_kbits(  //
-        static_cast<double>(total_data), elapsed.count());
-    LIBNDT_EMIT_DEBUG("run_upload: client computed speed: " << client_side_speed);
-  }
-
-  summary_.upload_speed = 0.0;
-  {
-    std::string message;
-    if (!msg_expect(msg_test_msg, &message)) {
-      return false;
-    }
-    try {
-      summary_.upload_speed = std::stod(message);
-      LIBNDT_EMIT_DEBUG("run_upload: server computed speed: " << summary_.upload_speed);
-    } catch(const std::exception& e) {
-      LIBNDT_EMIT_WARNING("run_upload: cannot convert server-computed speed:" << e.what());
-    }
-  }
-
-  if (!msg_expect_empty(msg_test_finalize)) {
-    return false;
-  }
-
-  return true;
+  return urls->size() > 0;
 }
 
 // ndt7 protocol API
 // `````````````````
 
-bool Client::ndt7_download() noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 download test");
-  if (!ndt7_connect("/ndt/v7/download")) {
+bool Client::ndt7_download(const UrlParts &url) noexcept {
+  LIBNDT_EMIT_INFO("ndt7: starting download test: " << url.scheme << "://" << url.host);
+  if (!ndt7_connect(url)) {
     return false;
   }
   // The following value is the maximum amount of bytes that an implementation
@@ -23465,9 +22819,9 @@ bool Client::ndt7_download() noexcept {
   return true;
 }
 
-bool Client::ndt7_upload() noexcept {
-  LIBNDT_EMIT_INFO("starting ndt7 upload test");
-  if (!ndt7_connect("/ndt/v7/upload")) {
+bool Client::ndt7_upload(const UrlParts &url) noexcept {
+  LIBNDT_EMIT_INFO("ndt7: starting upload test: " << url.scheme << "://" << url.host);
+  if (!ndt7_connect(url)) {
     return false;
   }
   // Implementation note: we send messages smaller than the maximum message
@@ -23554,332 +22908,24 @@ bool Client::ndt7_upload() noexcept {
   return true;
 }
 
-bool Client::ndt7_connect(std::string url_path) noexcept {
-  std::string port = "443";
-  if (!settings_.port.empty()) {
-    port = settings_.port;
-  }
+bool Client::ndt7_connect(const UrlParts &url) noexcept {
   // Don't leak resources if the socket is already open.
   if (internal::IsSocketValid(sock_)) {
     LIBNDT_EMIT_DEBUG("ndt7: closing socket openned in previous attempt");
     (void)netx_closesocket(sock_);
     sock_ = (internal::Socket)-1;
   }
-  // Note: ndt7 implies WebSocket and TLS
-  settings_.protocol_flags |= protocol_flag_websocket | protocol_flag_tls;
+  // Note: ndt7 implies WebSocket.
+  settings_.protocol_flags |= protocol_flag_websocket;
 	internal::Err err = netx_maybews_dial(
-      settings_.hostname, port,
+      url.host, url.port,
       ws_f_connection | ws_f_upgrade | ws_f_sec_ws_accept |
           ws_f_sec_ws_protocol,
-      ws_proto_ndt7, url_path, &sock_);
+      ws_proto_ndt7, url.path, &sock_);
   if (err != internal::Err::none) {
     return false;
   }
   LIBNDT_EMIT_DEBUG("ndt7: WebSocket connection established");
-  return true;
-}
-
-// NDT protocol API
-// ````````````````
-
-bool Client::msg_write_login(const std::string &version) noexcept {
-  static_assert(sizeof(settings_.nettest_flags) == 1,
-                "nettest_flags too large");
-  MsgType code = MsgType{0};
-  settings_.nettest_flags |= nettest_flag_status | nettest_flag_meta;
-  // Implementation note: judging from a GCC 8 warning, it seems that bitwise negation
-  // leads to a promotion to `int` (not even `unsigned int`) on Linux. So, after that
-  // we need first to ensure any bit except from 0xff is zero. After that, we can then
-  // reduce again the size to NettestFlags (aka uint8_t; see above) to do the &=.
-  if ((settings_.nettest_flags & nettest_flag_middlebox) != NettestFlags{0}) {
-    LIBNDT_EMIT_WARNING("msg_write_login: nettest_flag_middlebox: not implemented");
-    settings_.nettest_flags &= (NettestFlags)((~nettest_flag_middlebox) & 0xff);
-  }
-  if ((settings_.nettest_flags & nettest_flag_simple_firewall) != NettestFlags{0}) {
-    LIBNDT_EMIT_WARNING(
-        "msg_write_login: nettest_flag_simple_firewall: not implemented");
-    settings_.nettest_flags &= (NettestFlags)((~nettest_flag_simple_firewall) & 0xff);
-  }
-  if ((settings_.nettest_flags & nettest_flag_upload_ext) != NettestFlags{0}) {
-    LIBNDT_EMIT_WARNING("msg_write_login: nettest_flag_upload_ext: not implemented");
-    settings_.nettest_flags &= (NettestFlags)((~nettest_flag_upload_ext) & 0xff);
-  }
-  std::string serio;
-  if ((settings_.protocol_flags & protocol_flag_json) == 0) {
-    serio = std::string{(char *)&settings_.nettest_flags,
-                        sizeof(settings_.nettest_flags)};
-    code = msg_login;
-  } else {
-    code = msg_extended_login;
-    nlohmann::json msg{
-        {"msg", version},
-        {"tests", std::to_string((unsigned)settings_.nettest_flags)},
-    };
-    try {
-      serio = msg.dump();
-    } catch (nlohmann::json::exception &) {
-      LIBNDT_EMIT_WARNING("msg_write_login: cannot serialize JSON");
-      return false;
-    }
-  }
-  assert(code != MsgType{0});
-  if (!msg_write_legacy(code, std::move(serio))) {
-    return false;
-  }
-  return true;
-}
-
-bool Client::msg_write(MsgType code, std::string &&msg) noexcept {
-  LIBNDT_EMIT_DEBUG("msg_write: message to send: " << represent(msg));
-  if ((settings_.protocol_flags & protocol_flag_json) != 0) {
-    nlohmann::json json;
-    json["msg"] = msg;
-    try {
-      msg = json.dump();
-    } catch (const nlohmann::json::exception &) {
-      LIBNDT_EMIT_WARNING("msg_write: cannot serialize JSON");
-      return false;
-    }
-  }
-  if (!msg_write_legacy(code, std::move(msg))) {
-    return false;
-  }
-  return true;
-}
-
-bool Client::msg_write_legacy(MsgType code, std::string &&msg) noexcept {
-  {
-    LIBNDT_EMIT_DEBUG("msg_write_legacy: raw message: " << represent(msg));
-    LIBNDT_EMIT_DEBUG("msg_write_legacy: message length: " << msg.size());
-    char header[3];
-    header[0] = (char)code;  // Sign change safe because we're serializing
-    if (msg.size() > UINT16_MAX) {
-      LIBNDT_EMIT_WARNING("msg_write_legacy: message too long");
-      return false;
-    }
-    uint16_t len = (uint16_t)msg.size();
-    len = htons(len);
-    memcpy(&header[1], &len, sizeof(len));
-    LIBNDT_EMIT_DEBUG("msg_write_legacy: header[0] (type): " << (int)header[0]);
-    LIBNDT_EMIT_DEBUG("msg_write_legacy: header[1] (len-high): " << (int)header[1]);
-    LIBNDT_EMIT_DEBUG("msg_write_legacy: header[2] (len-low): " << (int)header[2]);
-    {
-      auto err = internal::Err::none;
-      if ((settings_.protocol_flags & protocol_flag_websocket) != 0) {
-        err = ws_send_frame(
-            sock_,
-            ws_opcode_binary | ((msg.size() <= 0) ? ws_fin_flag : 0),
-            (uint8_t *)header, sizeof(header));
-      } else {
-        err = netx_sendn(sock_, header, sizeof(header));
-      }
-      if (err != internal::Err::none) {
-        LIBNDT_EMIT_WARNING("msg_write_legacy: cannot send NDT message header");
-        return false;
-      }
-    }
-    LIBNDT_EMIT_DEBUG("msg_write_legacy: sent message header");
-  }
-  if (msg.size() <= 0) {
-    LIBNDT_EMIT_DEBUG("msg_write_legacy: zero length message");
-    return true;
-  }
-  {
-    auto err = internal::Err::none;
-    if ((settings_.protocol_flags & protocol_flag_websocket) != 0) {
-      err = ws_send_frame(sock_, ws_opcode_continue | ws_fin_flag,
-                          (uint8_t *)msg.data(), msg.size());
-    } else {
-      err = netx_sendn(sock_, msg.data(), msg.size());
-    }
-    if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("msg_write_legacy: cannot send NDT message body");
-      return false;
-    }
-  }
-  LIBNDT_EMIT_DEBUG("msg_write_legacy: sent message body");
-  return true;
-}
-
-bool Client::msg_expect_test_prepare(std::string *pport,
-                                     uint8_t *pnflows) noexcept {
-  // Both download and upload tests send the same options vector containing
-  // the port (non-extended case) and other parameters (otherwise). Currently
-  // we only honour the port and the number of flows parameters.
-
-  std::vector<std::string> options;
-  {
-    std::string message;
-    if (!msg_expect(msg_test_prepare, &message)) {
-      return false;
-    }
-    std::istringstream ss{message};
-    std::string cur;
-    while ((std::getline(ss, cur, ' '))) {
-      options.push_back(cur);
-    }
-  }
-  if (options.size() < 1) {
-    LIBNDT_EMIT_WARNING("msg_expect_test_prepare: not enough options in vector");
-    return false;
-  }
-
-  std::string port;
-  {
-    const char *error = nullptr;
-    (void)sys->Strtonum(options[0].data(), 1, UINT16_MAX, &error);
-    if (error != nullptr) {
-      LIBNDT_EMIT_WARNING("msg_expect_test_prepare: cannot parse port");
-      return false;
-    }
-    port = options[0];
-  }
-
-  // Here we are being liberal; in theory we should only accept the
-  // extra parameters when the test is extended.
-  //
-  // Also, we do not parse fields that we don't use.
-
-  uint8_t nflows = 1;
-  if (options.size() >= 6) {
-    const char *error = nullptr;
-    nflows = (uint8_t)sys->Strtonum(options[5].c_str(), 1, 16, &error);
-    if (error != nullptr) {
-      LIBNDT_EMIT_WARNING("msg_expect_test_prepare: cannot parse num-flows");
-      return false;
-    }
-  }
-
-  *pport = port;
-  *pnflows = nflows;
-  return true;
-}
-
-bool Client::msg_expect_empty(MsgType expected_code) noexcept {
-  std::string s;
-  if (!msg_expect(expected_code, &s)) {
-    return false;
-  }
-  if (s != "") {
-    LIBNDT_EMIT_WARNING("msg_expect_empty: non-empty body");
-    return false;
-  }
-  return true;
-}
-
-bool Client::msg_expect(MsgType expected_code, std::string *s) noexcept {
-  assert(s != nullptr);
-  MsgType code = MsgType{0};
-  if (!msg_read(&code, s)) {
-    return false;
-  }
-  if (code != expected_code) {
-    LIBNDT_EMIT_WARNING("msg_expect: unexpected message type");
-    return false;
-  }
-  return true;
-}
-
-bool Client::msg_read(MsgType *code, std::string *msg) noexcept {
-  assert(code != nullptr && msg != nullptr);
-  std::string s;
-  if (!msg_read_legacy(code, &s)) {
-    return false;
-  }
-  if ((settings_.protocol_flags & protocol_flag_json) == 0) {
-    std::swap(s, *msg);
-  } else {
-    nlohmann::json json;
-    try {
-      json = nlohmann::json::parse(s);
-    } catch (const nlohmann::json::exception &) {
-      LIBNDT_EMIT_WARNING("msg_read: cannot parse JSON");
-      return false;
-    }
-    try {
-      *msg = json.at("msg").get<std::string>();
-    } catch (const nlohmann::json::exception &) {
-      LIBNDT_EMIT_WARNING("msg_read: cannot find 'msg' field");
-      return false;
-    }
-  }
-  LIBNDT_EMIT_DEBUG("msg_read: message: " << represent(*msg));
-  return true;
-}
-
-bool Client::msg_read_legacy(MsgType *code, std::string *msg) noexcept {
-  assert(code != nullptr && msg != nullptr);
-  constexpr internal::Size header_size = 3;
-  constexpr internal::Size max_body_size = UINT16_MAX;
-  constexpr internal::Size max_msg_size = header_size + max_body_size;
-  char buffer[max_msg_size];
-  uint16_t len = 0;
-  *msg = "";
-  {
-		internal::Size ws_msg_len = 0;
-    if ((settings_.protocol_flags & protocol_flag_websocket) != 0) {
-      uint8_t opcode = 0;
-      auto err = ws_recvmsg(  //
-          sock_, &opcode, (uint8_t *)buffer, sizeof(buffer), &ws_msg_len);
-      if (err != internal::Err::none) {
-        LIBNDT_EMIT_WARNING(
-            "msg_read_legacy: cannot read NDT message using websocket");
-        return false;
-      }
-      if (ws_msg_len < header_size) {
-        LIBNDT_EMIT_WARNING("msg_read_legacy: message too short");
-        return false;
-      }
-      if (opcode != ws_opcode_binary) {
-        LIBNDT_EMIT_WARNING("msg_ready_legacy: unexpected opcode: "
-                     << (unsigned int)opcode);
-        return false;
-      }
-      assert(ws_msg_len <= sizeof(buffer));
-    } else {
-      static_assert(sizeof(buffer) >= header_size,
-                    "Not enough room in buffer to read the NDT header");
-      auto err = netx_recvn(sock_, buffer, header_size);
-      if (err != internal::Err::none) {
-        LIBNDT_EMIT_WARNING("msg_read_legacy: cannot read NDT message header");
-        return false;
-      }
-    }
-    LIBNDT_EMIT_DEBUG("msg_read_legacy: header[0] (type): " << (int)buffer[0]);
-    LIBNDT_EMIT_DEBUG("msg_read_legacy: header[1] (len-high): " << (int)buffer[1]);
-    LIBNDT_EMIT_DEBUG("msg_read_legacy: header[2] (len-low): " << (int)buffer[2]);
-    static_assert(sizeof(MsgType) == sizeof(unsigned char),
-                  "Unexpected MsgType size");
-    *code = MsgType{(unsigned char)buffer[0]};
-    memcpy(&len, &buffer[1], sizeof(len));
-    len = ntohs(len);
-    if ((settings_.protocol_flags & protocol_flag_websocket) != 0) {
-      assert(ws_msg_len >= header_size);  // Proper check above
-      if (len != ws_msg_len - header_size) {
-        LIBNDT_EMIT_WARNING("msg_read_legacy: got inconsistent websocket message");
-        return false;
-      }
-    }
-    LIBNDT_EMIT_DEBUG("msg_read_legacy: message length: " << len);
-  }
-  if (len <= 0) {
-    LIBNDT_EMIT_DEBUG("msg_read_legacy: zero length message");
-    return true;
-  }
-  if ((settings_.protocol_flags & protocol_flag_websocket) == 0) {
-    assert(sizeof(buffer) >= header_size &&
-           sizeof(buffer) - header_size >= len);
-    auto err = netx_recvn(sock_, &buffer[header_size], len);
-    if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("msg_read_legacy: cannot read NDT message body");
-      return false;
-    }
-  }
-  // This is a stringy copy but we do not care much because the part that needs
-  // to be efficient is the one running measurements not the one where we deal
-  // with incoming and outgoing NDT control messages.
-  *msg = std::string{&buffer[header_size], len};
-  LIBNDT_EMIT_DEBUG("msg_read_legacy: raw message: " << represent(*msg));
   return true;
 }
 
@@ -25536,7 +24582,7 @@ class CurlxLoggerAdapter : public internal::Logger {
   Client *client_;
 };
 
-bool Client::query_mlabns_curl(const std::string &url, long timeout,
+bool Client::query_locate_api_curl(const std::string &url, long timeout,
                                std::string *body) noexcept {
   CurlxLoggerAdapter adapter{this};
   internal::Curlx curlx{adapter};
@@ -25548,6 +24594,68 @@ bool Client::query_mlabns_curl(const std::string &url, long timeout,
 
 Verbosity Client::get_verbosity() const noexcept {
   return settings_.verbosity;
+}
+
+// Function to parse a websocket URL and return its components. The URL must
+// include a resource path.
+// TODO(soltesz): add testing for various input cases.
+UrlParts parse_ws_url(const std::string& url) {
+  UrlParts parts;
+
+  // Find the scheme.
+  auto colon_pos = url.find(":");
+  if (colon_pos != std::string::npos) {
+    parts.scheme = url.substr(0, colon_pos);
+  }
+
+  // Extract the hostname and port.
+  auto slash_pos = url.find("/", colon_pos + 3);
+  if (slash_pos == std::string::npos) {
+    // No resource path.
+    slash_pos = url.length();
+  }
+  auto host_part = url.substr(colon_pos + 3, slash_pos - colon_pos - 3);
+  auto port_pos = host_part.find(":");
+  // Does the host include a port?
+  if (port_pos != std::string::npos) {
+    parts.host = host_part.substr(0, port_pos);
+    parts.port = host_part.substr(port_pos + 1);
+  } else {
+    parts.host = host_part;
+    if (parts.scheme == "ws") {
+      parts.port = "80";
+    } else if (parts.scheme == "wss") {
+      parts.port = "443";
+    }
+  }
+
+  // Extract the path.
+  if (slash_pos != std::string::npos) {
+    parts.path = url.substr(slash_pos);
+  }
+
+  return parts;
+}
+
+static std::string curl_urlencode(const std::string& raw) {
+    const auto encoded_value = curl_easy_escape(nullptr, raw.c_str(), static_cast<int>(raw.length()));
+    std::string result(encoded_value);
+    curl_free(encoded_value);
+    return result;
+}
+
+// format_http_params is only intended for parameters within the library itself.
+std::string format_http_params(const std::map<std::string, std::string>& params) {
+  std::stringstream ss;
+  bool first = true;
+  for (const auto& kv : params) {
+    if (!first) {
+      ss << "&";
+    }
+    ss << curl_urlencode(kv.first) << "=" << curl_urlencode(kv.second);
+    first = false;
+  }
+  return ss.str();
 }
 
 }  // namespace libndt

@@ -4,7 +4,7 @@
 
 #include "third_party/github.com/nlohmann/json/json.hpp"
 
-#include "libndt/libndt.hpp"  // not standalone
+#include "libndt7/libndt7.hpp"  // not standalone
 
 #include <stdlib.h>
 
@@ -31,11 +31,11 @@
 using namespace measurement_kit;
 
 // BatchClient only prints JSON messages on stdout.
-class BatchClient : public libndt::Client {
+class BatchClient : public libndt7::Client {
   public:
-    using libndt::Client::Client;
+    using libndt7::Client::Client;
     void on_result(std::string, std::string, std::string value) noexcept override;
-    void on_performance(libndt::NettestFlags, uint8_t, double, double,
+    void on_performance(libndt7::NettestFlags, uint8_t, double, double,
                         double) noexcept override;
     void summary() noexcept override;
 };
@@ -45,14 +45,14 @@ void BatchClient::on_result(std::string, std::string, std::string value) noexcep
   std::cout << value << std::endl;
 }
 // on_performance is overridded to hide the user-friendly output messages.
-void BatchClient::on_performance(libndt::NettestFlags tid, uint8_t nflows,
+void BatchClient::on_performance(libndt7::NettestFlags tid, uint8_t nflows,
                             double measured_bytes,
                             double elapsed_time, double) noexcept {
   nlohmann::json performance;
   performance["ElapsedTime"] = elapsed_time;
   performance["NumFlows"] = nflows;
   performance["TestId"] = (int)tid;
-  performance["Speed"] = libndt::format_speed_from_kbits(measured_bytes,
+  performance["Speed"] = libndt7::format_speed_from_kbits(measured_bytes,
                                                          elapsed_time);
   std::cout << performance.dump() << std::endl;
 }
@@ -91,13 +91,13 @@ void BatchClient::summary() noexcept {
 
 static void usage() {
   // clang-format off
-  std::clog << R"(Usage: libndt-client <-upload|-download> [options]
+  std::clog << R"(Usage: ndt7-client-cc <-upload|-download> [options]
 
 You MUST specify what subtest to enable:
  * `-download` enables the download subtest
  * `-upload` enables the upload subtest
 
-By default, libndt-client uses M-Lab's Locate API for unregistered clients
+By default, ndt7-client-cc uses M-Lab's Locate API for unregistered clients
 (without an API key) to find a suitable target server. For registered clients,
 you may specify an API key for the Locate API using:
 * `-locate-api-key=<key>`
@@ -128,10 +128,10 @@ The `-version` shows the version number and exits.)" << std::endl;
 }
 
 int main(int, char **argv) {
-  libndt::Settings settings;
-  settings.verbosity = libndt::verbosity_info;
+  libndt7::Settings settings;
+  settings.verbosity = libndt7::verbosity_info;
   // You need to enable tests explicitly by passing command line flags.
-  settings.nettest_flags = libndt::NettestFlags{0};
+  settings.nettest_flags = libndt7::NettestFlags{0};
   bool batch_mode = false;
   bool summary = false;
 
@@ -147,10 +147,10 @@ int main(int, char **argv) {
     cmdline.parse(argv);
     for (auto &flag : cmdline.flags()) {
       if (flag == "download") {
-        settings.nettest_flags |= libndt::nettest_flag_download;
+        settings.nettest_flags |= libndt7::nettest_flag_download;
         std::clog << "will run the download sub-test" << std::endl;
       } else if (flag == "upload") {
-        settings.nettest_flags |= libndt::nettest_flag_upload;
+        settings.nettest_flags |= libndt7::nettest_flag_upload;
         std::clog << "will run the upload sub-test" << std::endl;
       } else if (flag == "help") {
         usage();
@@ -159,11 +159,11 @@ int main(int, char **argv) {
         settings.tls_verify_peer = false;
         std::clog << "WILL NOT verify the TLS peer (INSECURE!)" << std::endl;
       } else if (flag == "verbose") {
-        settings.verbosity = libndt::verbosity_debug;
+        settings.verbosity = libndt7::verbosity_debug;
         std::clog << "will be verbose" << std::endl;
       } else if (flag == "version") {
-        std::cout << libndt::version_major << "." << libndt::version_minor
-                  << "." << libndt::version_patch << std::endl;
+        std::cout << libndt7::version_major << "." << libndt7::version_minor
+                  << "." << libndt7::version_patch << std::endl;
         exit(EXIT_SUCCESS);
       } else if (flag == "batch") {
         batch_mode = true;
@@ -208,7 +208,7 @@ int main(int, char **argv) {
       exit(EXIT_FAILURE);
     }
     if (settings.scheme == "wss") {
-      settings.protocol_flags |= libndt::protocol_flag_tls;
+      settings.protocol_flags |= libndt7::protocol_flag_tls;
       std::clog << "will secure communications using TLS" << std::endl;
     }
     auto sz = cmdline.pos_args().size();
@@ -230,16 +230,16 @@ int main(int, char **argv) {
 
   if (settings.nettest_flags == 0) {
     std::clog << "FATAL: No test selected" << std::endl;
-    std::clog << "Run `libndt-client --help` for more help" << std::endl;
+    std::clog << "Run `ndt7-client-cc --help` for more help" << std::endl;
     exit(EXIT_FAILURE);
   }
 
   settings.summary_only = summary;
-  std::unique_ptr<libndt::Client>  client;
+  std::unique_ptr<libndt7::Client>  client;
   if (batch_mode) {
     client.reset(new BatchClient{settings});
   } else {
-    client.reset(new libndt::Client{settings});
+    client.reset(new libndt7::Client{settings});
   }
   bool rv = client->run();
   if (rv ) {

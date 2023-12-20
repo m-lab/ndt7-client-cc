@@ -1,0 +1,10 @@
+#ifndef MEASUREMENT_KIT_LIBNDT7_PREAMBLE_HPP
+#define MEASUREMENT_KIT_LIBNDT7_PREAMBLE_HPP
+
+// libndt7/preamble.hpp - preamble for single include header
+
+#ifndef LIBNDT77_SINGLE_INCLUDE
+#define LIBNDT77_SINGLE_INCLUDE 1
+#endif
+
+#endif  // MEASUREMENT_KIT_LIBNDT7_PREAMBLE_HPP

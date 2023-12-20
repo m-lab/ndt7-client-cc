@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12.0)
-project("libndt")
+project("libndt7")
 
 include(CheckCXXCompilerFlag)
 include(CheckFunctionExists)
@@ -28,9 +28,9 @@ if((${APPLE}))
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -L/usr/local/lib")
 endif()
 
-check_function_exists(strtonum LIBNDT_HAVE_STRTONUM)
-if(${LIBNDT_HAVE_STRTONUM})
-  add_definitions(-DLIBNDT_HAVE_STRTONUM)
+check_function_exists(strtonum LIBNDT7_HAVE_STRTONUM)
+if(${LIBNDT7_HAVE_STRTONUM})
+  add_definitions(-DLIBNDT7_HAVE_STRTONUM)
 endif()
 
 CHECK_INCLUDE_FILE_CXX("curl/curl.h" MK_HAVE_CURL_CURL_H)
@@ -127,20 +127,20 @@ macro(MKSetRestrictiveCompilerFlags)
 endmacro()
 MKSetRestrictiveCompilerFlags()
 
-set(MK_LIBNDT_AMALGAMATE_DEST single_include/libndt.hpp)
-file(REMOVE ${MK_LIBNDT_AMALGAMATE_DEST})
+set(MK_LIBNDT7_AMALGAMATE_DEST single_include/libndt7.hpp)
+file(REMOVE ${MK_LIBNDT7_AMALGAMATE_DEST})
 foreach(SOURCE IN ITEMS
-        include/libndt/preamble.hpp
+        include/libndt7/preamble.hpp
         third_party/github.com/nlohmann/json/json.hpp
-        include/libndt/internal/assert.hpp
-        include/libndt/internal/sys.hpp
-        include/libndt/internal/logger.hpp
-        include/libndt/internal/curlx.hpp
-        include/libndt/internal/err.hpp
-        include/libndt/timeout.hpp
-        include/libndt/libndt.hpp)
+        include/libndt7/internal/assert.hpp
+        include/libndt7/internal/sys.hpp
+        include/libndt7/internal/logger.hpp
+        include/libndt7/internal/curlx.hpp
+        include/libndt7/internal/err.hpp
+        include/libndt7/timeout.hpp
+        include/libndt7/libndt7.hpp)
   file(READ ${SOURCE} CONTENT)
-  file(APPEND ${MK_LIBNDT_AMALGAMATE_DEST} "${CONTENT}")
+  file(APPEND ${MK_LIBNDT7_AMALGAMATE_DEST} "${CONTENT}")
 endforeach()
 
 add_definitions(${CMAKE_REQUIRED_DEFINITIONS})
@@ -151,16 +151,16 @@ include_directories(${CMAKE_REQUIRED_INCLUDES}
 add_executable(curlx_test test/curlx_test.cpp)
 target_link_libraries(curlx_test ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(libndt-client libndt-client.cpp)
-target_link_libraries(libndt-client ${CMAKE_REQUIRED_LIBRARIES})
+add_executable(ndt7-client-cc ndt7-client-cc.cpp)
+target_link_libraries(ndt7-client-cc ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(libndt-standalone-builds libndt-standalone-builds.cpp)
-target_link_libraries(libndt-standalone-builds ${CMAKE_REQUIRED_LIBRARIES})
+add_executable(libndt7-standalone-builds libndt7-standalone-builds.cpp)
+target_link_libraries(libndt7-standalone-builds ${CMAKE_REQUIRED_LIBRARIES})
 
 add_executable(sys_test test/sys_test.cpp)
 target_link_libraries(sys_test ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(tests-libndt test/libndt_test.cpp)
+add_executable(tests-libndt test/libndt7_test.cpp)
 target_link_libraries(tests-libndt ${CMAKE_REQUIRED_LIBRARIES})
 
 enable_testing()
@@ -169,8 +169,8 @@ add_test(NAME curlx_unit_tests COMMAND curlx_test)
 add_test(NAME other_unit_tests COMMAND tests-libndt)
 add_test(NAME sys_unit_tests COMMAND sys_test)
 
-add_test(NAME simple_test COMMAND libndt-client
+add_test(NAME simple_test COMMAND ndt7-client-cc
          -download -upload -verbose -scheme=ws)
-add_test(NAME modern_test COMMAND libndt-client
+add_test(NAME modern_test COMMAND ndt7-client-cc
          -ca-bundle-path ${CMAKE_SOURCE_DIR}/third_party/curl.haxx.se/ca/cacert.pem
          -verbose -download -upload -scheme=wss)

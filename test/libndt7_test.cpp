@@ -4,7 +4,7 @@
 
 #include "third_party/github.com/nlohmann/json/json.hpp"
 
-#include "libndt/libndt.hpp"
+#include "libndt7/libndt7.hpp"
 
 #ifndef _WIN32
 #include <arpa/inet.h>
@@ -34,7 +34,7 @@
 #define OS_EWOULDBLOCK EWOULDBLOCK
 #endif
 
-using namespace measurement_kit::libndt;
+using namespace measurement_kit::libndt7;
 
 // Unit tests
 // ==========
@@ -777,7 +777,7 @@ TEST_CASE("Client::netx_maybesocks5h_dial() works with IPv6 (mocked)") {
 #endif
 
 TEST_CASE("Client::netx_map_errno() correctly maps all errors") {
-  using namespace measurement_kit::libndt;
+  using namespace measurement_kit::libndt7;
 #ifdef NDEBUG  // There is an assertion that would fail in DEBUG mode
   REQUIRE(Client::netx_map_errno(0) == internal::Err::io_error);
 #endif
@@ -808,7 +808,7 @@ TEST_CASE("Client::netx_map_errno() correctly maps all errors") {
 // ----------------------------
 
 TEST_CASE("Client::netx_map_eai() correctly maps all errors") {
-  using namespace measurement_kit::libndt;
+  using namespace measurement_kit::libndt7;
   Client client;
   REQUIRE(client.netx_map_eai(EAI_AGAIN) == internal::Err::ai_again);
   REQUIRE(client.netx_map_eai(EAI_FAIL) == internal::Err::ai_fail);
