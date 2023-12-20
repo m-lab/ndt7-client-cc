@@ -5,7 +5,10 @@
 #include "libndt7/internal/curlx.hpp"
 
 #define CATCH_CONFIG_MAIN
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include "third_party/github.com/catchorg/Catch2/catch.hpp"
+#pragma GCC diagnostic pop
 
 using namespace measurement_kit::libndt7::internal;
 

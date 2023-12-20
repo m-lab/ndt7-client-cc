@@ -24,7 +24,10 @@
 #include <vector>
 
 #define CATCH_CONFIG_MAIN
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include "third_party/github.com/catchorg/Catch2/catch.hpp"
+#pragma GCC diagnostic pop
 
 #ifdef _WIN32
 #define OS_EINVAL WSAEINVAL
