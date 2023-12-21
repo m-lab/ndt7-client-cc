@@ -1055,7 +1055,11 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
       format_http_params(opts), settings_.scheme, settings_.hostname,
       settings_.port);
   } else {
-    locate_api_url += "/v2/nearest/ndt/ndt7";
+    if (settings_.metadata.count("key")){
+      locate_api_url += "/v2/priority/nearest/ndt/ndt7";
+    } else {
+      locate_api_url += "/v2/nearest/ndt/ndt7";
+    }
     if (opts.size() > 0) {
       // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
       locate_api_url += "?" + format_http_params(opts);
