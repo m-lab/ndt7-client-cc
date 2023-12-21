@@ -1,8 +1,8 @@
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_ASSERT_HPP
-#define MEASUREMENT_KIT_LIBNDT7_INTERNAL_ASSERT_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_ASSERT_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_ASSERT_HPP
 
 // libndt7/internal/assert.hpp - assert API
 

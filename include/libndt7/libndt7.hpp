@@ -1,8 +1,8 @@
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT7_API_HPP
-#define MEASUREMENT_KIT_LIBNDT7_API_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_API_HPP
+#define MEASUREMENTLAB_LIBNDT7_API_HPP
 
 // TODO(bassosimone): run through cppcheck and attempt to minimize warnings.
 
@@ -35,7 +35,7 @@
 /// ```
 /// #include "json.hpp"
 /// #include "libndt7.hpp"
-/// measurement_kit::libndt7::Client client;
+/// measurementlab::libndt7::Client client;
 /// client.run();
 /// ```
 ///
@@ -106,7 +106,7 @@
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
-namespace measurement_kit {
+namespace measurementlab {
 namespace libndt7 {
 
 // Structure to store extracted URL parts
@@ -3034,5 +3034,5 @@ std::string format_http_params(const std::map<std::string, std::string>& params)
 }
 
 }  // namespace libndt7
-}  // namespace measurement_kit
+}  // namespace measurementlab
 #endif

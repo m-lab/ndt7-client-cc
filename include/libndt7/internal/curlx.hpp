@@ -1,8 +1,8 @@
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_CURLX_HPP
-#define MEASUREMENT_KIT_LIBNDT7_INTERNAL_CURLX_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
 
 // libndt7/internal/curlx.hpp - libcurl wrappers
 
@@ -18,7 +18,7 @@
 #include "libndt7/internal/logger.hpp"
 #endif
 
-namespace measurement_kit {
+namespace measurementlab {
 namespace libndt7 {
 namespace internal {
 
@@ -71,7 +71,7 @@ class Curlx {
 
 }  // namespace internal
 }  // namespace libndt7
-}  // namespace measurement_kit
+}  // namespace measurementlab
 extern "C" {
 
 static size_t libndt7_curl_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
@@ -99,7 +99,7 @@ static size_t libndt7_curl_callback(char *ptr, size_t size, size_t nmemb, void *
 }
 
 }  // extern "C"
-namespace measurement_kit {
+namespace measurementlab {
 namespace libndt7 {
 namespace internal {
 
@@ -227,5 +227,5 @@ Curlx::~Curlx() noexcept {}
 
 }  // namespace internal
 }  // namespace libndt7
-}  // namespace measurement_kit
+}  // namespace measurementlab
 #endif

@@ -1,13 +1,13 @@
-#ifndef MEASUREMENT_KIT_LIBNDT_PREAMBLE_HPP
-#define MEASUREMENT_KIT_LIBNDT_PREAMBLE_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_PREAMBLE_HPP
+#define MEASUREMENTLAB_LIBNDT7_PREAMBLE_HPP
 
-// libndt/preamble.hpp - preamble for single include header
+// libndt7/preamble.hpp - preamble for single include header
 
-#ifndef LIBNDT_SINGLE_INCLUDE
-#define LIBNDT_SINGLE_INCLUDE 1
+#ifndef LIBNDT77_SINGLE_INCLUDE
+#define LIBNDT77_SINGLE_INCLUDE 1
 #endif
 
-#endif  // MEASUREMENT_KIT_LIBNDT_PREAMBLE_HPP
+#endif  // MEASUREMENTLAB_LIBNDT7_PREAMBLE_HPP
 /*
     __ _____ _____ _____
  __|  |   __|     |   | |  JSON for Modern C++
@@ -20850,28 +20850,28 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 
 
 #endif  // INCLUDE_NLOHMANN_JSON_HPP_
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_ASSERT_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_ASSERT_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_ASSERT_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_ASSERT_HPP
 
-// libndt/internal/assert.hpp - assert API
+// libndt7/internal/assert.hpp - assert API
 
 #include <cstdlib>
 
-// LIBNDT_ASSERT is an assert you cannot disable.
-#define LIBNDT_ASSERT(condition) \
+// LIBNDT7_ASSERT is an assert you cannot disable.
+#define LIBNDT7_ASSERT(condition) \
   if (!(condition)) abort()
 
 #endif
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_SYS_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_SYS_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_SYS_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_SYS_HPP
 
-// libndt/internal/sys.hpp - system dependent routines
+// libndt7/internal/sys.hpp - system dependent routines
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -20888,8 +20888,8 @@ inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std
 #include <stdint.h>
 #include <stdlib.h>
 
-namespace measurement_kit {
-namespace libndt {
+namespace measurementlab {
+namespace libndt7 {
 namespace internal {
 
 // Size is our definition of size
@@ -20917,11 +20917,11 @@ constexpr bool IsSocketValid(Socket s) noexcept {
 #endif
 }
 
-// LIBNDT_OS_EINVAL is a portable EINVAL
+// LIBNDT7_OS_EINVAL is a portable EINVAL
 #ifdef _WIN32
-#define LIBNDT_OS_EINVAL WSAEINVAL
+#define LIBNDT7_OS_EINVAL WSAEINVAL
 #else
-#define LIBNDT_OS_EINVAL EINVAL
+#define LIBNDT7_OS_EINVAL EINVAL
 #endif
 
 // Sys allow to simulate failures in system dependencies.
@@ -20979,8 +20979,8 @@ class Sys {
   virtual ~Sys() noexcept;
 };
 
-// LIBNDT_HAVE_STRTONUM tells us whether we have strtonum in libc
-#ifndef LIBNDT_HAVE_STRTONUM
+// LIBNDT7_HAVE_STRTONUM tells us whether we have strtonum in libc
+#ifndef LIBNDT7_HAVE_STRTONUM
 // clang-format off
 /*
  * Copyright (c) 2004 Ted Unangst and Todd Miller
@@ -21042,18 +21042,18 @@ strtonum(const char *numstr, long long minval, long long maxval,
 	return (ll);
 }
 // clang-format on
-#endif  // LIBNDT_HAVE_STRTONUM
+#endif  // LIBNDT7_HAVE_STRTONUM
 
 #ifdef _WIN32
-#define LIBNDT_AS_OS_BUFFER(b) ((char *)b)
-#define LIBNDT_AS_OS_BUFFER_LEN(n) ((int)n)
-#define LIBNDT_OS_SSIZE_MAX INT_MAX
-#define LIBNDT_AS_OS_OPTION_VALUE(x) ((char *)x)
+#define LIBNDT7_AS_OS_BUFFER(b) ((char *)b)
+#define LIBNDT7_AS_OS_BUFFER_LEN(n) ((int)n)
+#define LIBNDT7_OS_SSIZE_MAX INT_MAX
+#define LIBNDT7_AS_OS_OPTION_VALUE(x) ((char *)x)
 #else
-#define LIBNDT_AS_OS_BUFFER(b) ((char *)b)
-#define LIBNDT_AS_OS_BUFFER_LEN(n) ((size_t)n)
-#define LIBNDT_OS_SSIZE_MAX SSIZE_MAX
-#define LIBNDT_AS_OS_OPTION_VALUE(x) ((void *)x)
+#define LIBNDT7_AS_OS_BUFFER(b) ((char *)b)
+#define LIBNDT7_AS_OS_BUFFER_LEN(n) ((size_t)n)
+#define LIBNDT7_OS_SSIZE_MAX SSIZE_MAX
+#define LIBNDT7_AS_OS_OPTION_VALUE(x) ((void *)x)
 #endif
 
 int Sys::GetLastError() const noexcept {
@@ -21094,8 +21094,8 @@ int Sys::Connect(Socket fd, const sockaddr *sa, socklen_t len) const noexcept {
 }
 
 Ssize Sys::Recv(Socket fd, void *base, Size count) const noexcept {
-  if (count > LIBNDT_OS_SSIZE_MAX) {
-    this->SetLastError(LIBNDT_OS_EINVAL);
+  if (count > LIBNDT7_OS_SSIZE_MAX) {
+    this->SetLastError(LIBNDT7_OS_EINVAL);
     return -1;
   }
   int flags = 0;
@@ -21104,12 +21104,12 @@ Ssize Sys::Recv(Socket fd, void *base, Size count) const noexcept {
   flags |= MSG_NOSIGNAL;
 #endif
   return (Ssize)::recv(
-      fd, LIBNDT_AS_OS_BUFFER(base), LIBNDT_AS_OS_BUFFER_LEN(count), flags);
+      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
-  if (count > LIBNDT_OS_SSIZE_MAX) {
-    this->SetLastError(LIBNDT_OS_EINVAL);
+  if (count > LIBNDT7_OS_SSIZE_MAX) {
+    this->SetLastError(LIBNDT7_OS_EINVAL);
     return -1;
   }
   int flags = 0;
@@ -21118,7 +21118,7 @@ Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
   flags |= MSG_NOSIGNAL;
 #endif
   return (Ssize)::send(
-      fd, LIBNDT_AS_OS_BUFFER(base), LIBNDT_AS_OS_BUFFER_LEN(count), flags);
+      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 int Sys::Shutdown(Socket fd, int shutdown_how) const noexcept {
@@ -21162,28 +21162,28 @@ int Sys::Fcntl(Socket s, int cmd, int arg) const noexcept {
 int Sys::Getsockopt(Socket socket, int level, int name, void *value,
                     socklen_t *len) const noexcept {
   return ::getsockopt(
-      socket, level, name, LIBNDT_AS_OS_OPTION_VALUE(value), len);
+      socket, level, name, LIBNDT7_AS_OS_OPTION_VALUE(value), len);
 }
 
 Sys::~Sys() noexcept {}
 
 }  // namespace internal
-}  // namespace libndt
-}  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT_INTERNAL_SYS_HPP
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+}  // namespace libndt7
+}  // namespace measurementlab
+#endif  // MEASUREMENTLAB_LIBNDT7_INTERNAL_SYS_HPP
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_LOGGER_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_LOGGER_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_LOGGER_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_LOGGER_HPP
 
-// libndt/internal/logger.hpp - logger API
+// libndt7/internal/logger.hpp - logger API
 
 #include <sstream>
 #include <string>
 
-namespace measurement_kit {
-namespace libndt {
+namespace measurementlab {
+namespace libndt7 {
 namespace internal {
 
 class Logger {
@@ -21208,21 +21208,21 @@ class NoLogger : public Logger {
   ~NoLogger() noexcept override;
 };
 
-#define LIBNDT_LOGGER_LEVEL_(logger, level, statements) \
+#define LIBNDT7_LOGGER_LEVEL_(logger, level, statements) \
   if ((logger).is_##level##_enabled()) {                \
     std::stringstream ss;                               \
     ss << statements;                                   \
     logger.emit_##level(ss.str());                      \
   }
 
-#define LIBNDT_LOGGER_WARNING(logger, statements) \
-  LIBNDT_LOGGER_LEVEL_(logger, warning, statements)
+#define LIBNDT7_LOGGER_WARNING(logger, statements) \
+  LIBNDT7_LOGGER_LEVEL_(logger, warning, statements)
 
-#define LIBNDT_LOGGER_INFO(logger, statements) \
-  LIBNDT_LOGGER_LEVEL_(logger, info, statements)
+#define LIBNDT7_LOGGER_INFO(logger, statements) \
+  LIBNDT7_LOGGER_LEVEL_(logger, info, statements)
 
-#define LIBNDT_LOGGER_DEBUG(logger, statements) \
-  LIBNDT_LOGGER_LEVEL_(logger, debug, statements)
+#define LIBNDT7_LOGGER_DEBUG(logger, statements) \
+  LIBNDT7_LOGGER_LEVEL_(logger, debug, statements)
 
 Logger::~Logger() noexcept {}
 
@@ -21247,16 +21247,16 @@ void NoLogger::emit_debug(const std::string &) const noexcept {}
 NoLogger::~NoLogger() noexcept {}
 
 }  // namespace internal
-}  // namespace libndt
-}  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT_INTERNAL_LOGGER_HPP
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+}  // namespace libndt7
+}  // namespace measurementlab
+#endif  // measurementlab_LIBNDT7_INTERNAL_LOGGER_HPP
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_CURLX_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_CURLX_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
 
-// libndt/internal/curlx.hpp - libcurl wrappers
+// libndt7/internal/curlx.hpp - libcurl wrappers
 
 #include <curl/curl.h>
 
@@ -21265,13 +21265,13 @@ NoLogger::~NoLogger() noexcept {}
 #include <memory>
 #include <sstream>
 
-#ifndef LIBNDT_SINGLE_INCLUDE
+#ifndef LIBNDT7_SINGLE_INCLUDE
 #include "libndt7/internal/assert.hpp"
 #include "libndt7/internal/logger.hpp"
 #endif
 
-namespace measurement_kit {
-namespace libndt {
+namespace measurementlab {
+namespace libndt7 {
 namespace internal {
 
 // CurlDeleter is a deleter for a libcurl handle.
@@ -21322,11 +21322,11 @@ class Curlx {
 };
 
 }  // namespace internal
-}  // namespace libndt
-}  // namespace measurement_kit
+}  // namespace libndt7
+}  // namespace measurementlab
 extern "C" {
 
-static size_t libndt_curl_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+static size_t libndt7_curl_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
   // Note: I have this habit of using `<= 0` rather than `== 0` even for
   // unsigned numbers because that makes the check robust when there is a
   // refactoring in which the number later becomes signed. In this case
@@ -21339,7 +21339,7 @@ static size_t libndt_curl_callback(char *ptr, size_t size, size_t nmemb, void *u
   if (size > SIZE_MAX / nmemb) {
     // Note: if size is zero we end up here because we already excluded with
     // the above check the case where nmemb is zero.
-    LIBNDT_ASSERT(false);
+    LIBNDT7_ASSERT(false);
     return 0;
   }
   auto realsiz = size * nmemb;  // Overflow not possible (see above)
@@ -21351,8 +21351,8 @@ static size_t libndt_curl_callback(char *ptr, size_t size, size_t nmemb, void *u
 }
 
 }  // extern "C"
-namespace measurement_kit {
-namespace libndt {
+namespace measurementlab {
+namespace libndt7 {
 namespace internal {
 
 void CurlDeleter::operator()(CURL *handle) noexcept {
@@ -21367,14 +21367,14 @@ bool Curlx::GetMaybeSOCKS5(const std::string &proxy_port, const std::string &url
                            long timeout, std::string *body) noexcept {
   auto handle = this->NewUniqueCurl();
   if (!handle) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot initialize cURL");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot initialize cURL");
     return false;
   }
   if (!proxy_port.empty()) {
     std::stringstream ss;
     ss << "socks5h://127.0.0.1:" << proxy_port;
     if (this->SetoptProxy(handle, ss.str()) != CURLE_OK) {
-      LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot configure proxy: " << ss.str());
+      LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot configure proxy: " << ss.str());
       return false;
     }
   }
@@ -21384,110 +21384,110 @@ bool Curlx::GetMaybeSOCKS5(const std::string &proxy_port, const std::string &url
 bool Curlx::Get(UniqueCurl &handle, const std::string &url, long timeout,
                 std::string *body) noexcept {
   if (body == nullptr) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: passed a nullptr body");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: passed a nullptr body");
     return false;
   }
   std::stringstream ss;
   if (this->SetoptURL(handle, url) != CURLE_OK) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot set URL: " << url);
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set URL: " << url);
     return false;
   }
-  if (this->SetoptWriteFunction(handle, libndt_curl_callback) != CURLE_OK) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot set callback function");
+  if (this->SetoptWriteFunction(handle, libndt7_curl_callback) != CURLE_OK) {
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set callback function");
     return false;
   }
   if (this->SetoptWriteData(handle, &ss) != CURLE_OK) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot set callback function context");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set callback function context");
     return false;
   }
   if (this->SetoptTimeout(handle, timeout) != CURLE_OK) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot set timeout");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set timeout");
     return false;
   }
   if (this->SetoptFailonerr(handle) != CURLE_OK) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot set fail-on-error option");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set fail-on-error option");
     return false;
   }
-  LIBNDT_LOGGER_DEBUG(logger_, "curlx: performing request");
+  LIBNDT7_LOGGER_DEBUG(logger_, "curlx: performing request");
   auto rv = this->Perform(handle);
   if (rv != CURLE_OK) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cURL failed: " << curl_easy_strerror(rv));
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cURL failed: " << curl_easy_strerror(rv));
     return false;
   }
   long response_code = 0L;
   if (this->GetinfoResponseCode(handle, &response_code) != 0) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: cannot get the response code");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot get the response code");
     return false;
   }
   if (response_code == 204) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: mlab-ns is out of capacity");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: mlab-ns is out of capacity");
     return false;
   }
   if (response_code != 200) {
-    LIBNDT_LOGGER_WARNING(logger_, "curlx: unexpected mlab-ns response");
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: unexpected mlab-ns response");
     return false;
   }
-  LIBNDT_LOGGER_DEBUG(logger_, "curlx: request complete");
+  LIBNDT7_LOGGER_DEBUG(logger_, "curlx: request complete");
   *body = ss.str();
   return true;
 }
 
 CURLcode Curlx::SetoptURL(UniqueCurl &handle, const std::string &url) noexcept {
-  LIBNDT_ASSERT(handle);
+  LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_URL, url.c_str());
 }
 
 CURLcode Curlx::SetoptProxy(UniqueCurl &handle, const std::string &url) noexcept {
-  LIBNDT_ASSERT(handle);
+  LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_PROXY, url.c_str());
 }
 
 CURLcode Curlx::SetoptWriteFunction(UniqueCurl &handle, CurlWriteCb callback) noexcept {
-  LIBNDT_ASSERT(handle);
+  LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_WRITEFUNCTION, callback);
 }
 
 CURLcode Curlx::SetoptWriteData(UniqueCurl &handle, void *pointer) noexcept {
-  LIBNDT_ASSERT(handle);
+  LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_WRITEDATA, pointer);
 }
 
 CURLcode Curlx::SetoptTimeout(UniqueCurl &handle, long timeout) noexcept {
-  LIBNDT_ASSERT(handle);
+  LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_TIMEOUT, timeout);
 }
 
 CURLcode Curlx::SetoptFailonerr(UniqueCurl &handle) noexcept {
-  LIBNDT_ASSERT(handle);
+  LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_FAILONERROR, 1L);
 }
 
 CURLcode Curlx::Perform(UniqueCurl &handle) noexcept {
-  LIBNDT_ASSERT(handle);
+  LIBNDT7_ASSERT(handle);
   return ::curl_easy_perform(handle.get());
 }
 
 UniqueCurl Curlx::NewUniqueCurl() noexcept { return UniqueCurl{::curl_easy_init()}; }
 
 CURLcode Curlx::GetinfoResponseCode(UniqueCurl &handle, long *response_code) noexcept {
-  LIBNDT_ASSERT(handle);
-  LIBNDT_ASSERT(response_code);
+  LIBNDT7_ASSERT(handle);
+  LIBNDT7_ASSERT(response_code);
   return ::curl_easy_getinfo(handle.get(), CURLINFO_RESPONSE_CODE, response_code);
 }
 
 Curlx::~Curlx() noexcept {}
 
 }  // namespace internal
-}  // namespace libndt
-}  // namespace measurement_kit
+}  // namespace libndt7
+}  // namespace measurementlab
 #endif
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_INTERNAL_ERR_HPP
-#define MEASUREMENT_KIT_LIBNDT_INTERNAL_ERR_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_ERR_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_ERR_HPP
 
-// libndt/internal/err.hpp - definition of error
+// libndt7/internal/err.hpp - definition of error
 
 #include <climits>
 #include <sstream>
@@ -21495,8 +21495,8 @@ Curlx::~Curlx() noexcept {}
 
 #include <openssl/err.h>
 
-namespace measurement_kit {
-namespace libndt {
+namespace measurementlab {
+namespace libndt7 {
 namespace internal {
 
 enum class Err {
@@ -21544,47 +21544,47 @@ enum class Err {
   ws_proto,  // WebSocket protocol error
 };
 
-std::string libndt_perror(Err err) noexcept;
+std::string libndt7_perror(Err err) noexcept;
 std::string ssl_format_error() noexcept;
 
-std::string libndt_perror(Err err) noexcept {
+std::string libndt7_perror(Err err) noexcept {
   std::string rv;
   //
-#define LIBNDT_PERROR(value) \
+#define LIBNDT7_PERROR(value) \
   case Err::value: rv = #value; break
   //
   switch (err) {
-    LIBNDT_PERROR(none);
-    LIBNDT_PERROR(broken_pipe);
-    LIBNDT_PERROR(connection_aborted);
-    LIBNDT_PERROR(connection_refused);
-    LIBNDT_PERROR(connection_reset);
-    LIBNDT_PERROR(function_not_supported);
-    LIBNDT_PERROR(host_unreachable);
-    LIBNDT_PERROR(interrupted);
-    LIBNDT_PERROR(invalid_argument);
-    LIBNDT_PERROR(io_error);
-    LIBNDT_PERROR(message_size);
-    LIBNDT_PERROR(network_down);
-    LIBNDT_PERROR(network_reset);
-    LIBNDT_PERROR(network_unreachable);
-    LIBNDT_PERROR(operation_in_progress);
-    LIBNDT_PERROR(operation_would_block);
-    LIBNDT_PERROR(timed_out);
-    LIBNDT_PERROR(value_too_large);
-    LIBNDT_PERROR(eof);
-    LIBNDT_PERROR(ai_generic);
-    LIBNDT_PERROR(ai_again);
-    LIBNDT_PERROR(ai_fail);
-    LIBNDT_PERROR(ai_noname);
-    LIBNDT_PERROR(socks5h);
-    LIBNDT_PERROR(ssl_generic);
-    LIBNDT_PERROR(ssl_want_read);
-    LIBNDT_PERROR(ssl_want_write);
-    LIBNDT_PERROR(ssl_syscall);
-    LIBNDT_PERROR(ws_proto);
+    LIBNDT7_PERROR(none);
+    LIBNDT7_PERROR(broken_pipe);
+    LIBNDT7_PERROR(connection_aborted);
+    LIBNDT7_PERROR(connection_refused);
+    LIBNDT7_PERROR(connection_reset);
+    LIBNDT7_PERROR(function_not_supported);
+    LIBNDT7_PERROR(host_unreachable);
+    LIBNDT7_PERROR(interrupted);
+    LIBNDT7_PERROR(invalid_argument);
+    LIBNDT7_PERROR(io_error);
+    LIBNDT7_PERROR(message_size);
+    LIBNDT7_PERROR(network_down);
+    LIBNDT7_PERROR(network_reset);
+    LIBNDT7_PERROR(network_unreachable);
+    LIBNDT7_PERROR(operation_in_progress);
+    LIBNDT7_PERROR(operation_would_block);
+    LIBNDT7_PERROR(timed_out);
+    LIBNDT7_PERROR(value_too_large);
+    LIBNDT7_PERROR(eof);
+    LIBNDT7_PERROR(ai_generic);
+    LIBNDT7_PERROR(ai_again);
+    LIBNDT7_PERROR(ai_fail);
+    LIBNDT7_PERROR(ai_noname);
+    LIBNDT7_PERROR(socks5h);
+    LIBNDT7_PERROR(ssl_generic);
+    LIBNDT7_PERROR(ssl_want_read);
+    LIBNDT7_PERROR(ssl_want_write);
+    LIBNDT7_PERROR(ssl_syscall);
+    LIBNDT7_PERROR(ws_proto);
   }
-#undef LIBNDT_PERROR  // Tidy
+#undef LIBNDT7_PERROR  // Tidy
   //
   if (err == Err::ssl_generic) {
     rv += ": ";
@@ -21607,39 +21607,39 @@ std::string ssl_format_error() noexcept {
 }
 
 }  // namespace internal
-}  // namespace libndt
-}  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT_INTERNAL_ERR_HPP
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+}  // namespace libndt7
+}  // namespace measurementlab
+#endif  // MEASUREMENTLAB_LIBNDT7_INTERNAL_ERR_HPP
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_TIMEOUT_HPP
-#define MEASUREMENT_KIT_LIBNDT_TIMEOUT_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_TIMEOUT_HPP
+#define MEASUREMENTLAB_LIBNDT7_TIMEOUT_HPP
 
-// libndt/timeout.hpp - definition of timeout
+// libndt7/timeout.hpp - definition of timeout
 
-namespace measurement_kit {
-namespace libndt {
+namespace measurementlab {
+namespace libndt7 {
 
 /// Timeout expressed in seconds.
 using Timeout = unsigned int;
 
-}  // namespace libndt
-}  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT_INTERNAL_TIMEOUT_HPP
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+}  // namespace libndt7
+}  // namespace measurementlab
+#endif  // MEASUREMENTLAB_LIBNDT7_INTERNAL_TIMEOUT_HPP
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT_API_HPP
-#define MEASUREMENT_KIT_LIBNDT_API_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_API_HPP
+#define MEASUREMENTLAB_LIBNDT7_API_HPP
 
 // TODO(bassosimone): run through cppcheck and attempt to minimize warnings.
 
-/// \file libndt.hpp
+/// \file libndt7.hpp
 ///
-/// \brief Public header of measurement-kit/libndt. The basic usage is a simple
-/// as creating a `libndt::Client c` instance and then calling `c.run()`. More
-/// advanced usage may require you to create a subclass of `libndt::Client` and
+/// \brief Public header of m-lab/ndt7-client-cc libndt7. The basic usage is a simple
+/// as creating a `libndt7::Client c` instance and then calling `c.run()`. More
+/// advanced usage may require you to create a subclass of `libndt7::Client` and
 /// override specific virtual methods to customize the behaviour.
 ///
 /// This implementation provides the C2S and S2C NDT subtests. We implement
@@ -21659,32 +21659,32 @@ using Timeout = unsigned int;
 /// recommend you to only use documented interfaces.
 ///
 /// Usage example follows. We assume that you have downloaded the single include
-/// headers of nlohmann/json >= 3.0.0 and of libndt.
+/// headers of nlohmann/json >= 3.0.0 and of libndt7.
 ///
 /// ```
 /// #include "json.hpp"
-/// #include "libndt.hpp"
-/// measurement_kit::libndt::Client client;
+/// #include "libndt7.hpp"
+/// measurementlab::libndt7::Client client;
 /// client.run();
 /// ```
 ///
-/// \warning Not including nlohmann/json before including libndt will cause
-/// the build to fail, because libndt uses nlohmann/json symbols.
+/// \warning Not including nlohmann/json before including libndt7 will cause
+/// the build to fail, because libndt7 uses nlohmann/json symbols.
 
-#ifndef LIBNDT_SINGLE_INCLUDE
+#ifndef LIBNDT7_SINGLE_INCLUDE
 #include "libndt7/internal/err.hpp"
 #include "libndt7/internal/sys.hpp"
 #include "libndt7/internal/curlx.hpp"
 #include "libndt7/timeout.hpp"
-#endif // !LIBNDT_SINGLE_INCLUDE
+#endif // !LIBNDT7_SINGLE_INCLUDE
 
 // Check dependencies
 // ``````````````````
 #ifndef NLOHMANN_JSON_VERSION_MAJOR
-#error "Libndt depends on nlohmann/json. Include nlohmann/json before including libndt."
+#error "Libndt7 depends on nlohmann/json. Include nlohmann/json before including libndt7."
 #endif  // !NLOHMANN_JSON_VERSION_MAJOR
 #if NLOHMANN_JSON_VERSION_MAJOR < 3
-#error "Libndt requires nlohmann/json >= 3"
+#error "Libndt7 requires nlohmann/json >= 3"
 #endif
 
 // TODO(bassosimone): these headers should be in impl.hpp and here we
@@ -21735,8 +21735,8 @@ using Timeout = unsigned int;
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
-namespace measurement_kit {
-namespace libndt {
+namespace measurementlab {
+namespace libndt7 {
 
 // Structure to store extracted URL parts
 struct UrlParts {
@@ -21758,13 +21758,13 @@ static std::string curl_urlencode(const std::string& raw);
 /// Type containing a version number.
 using Version = unsigned int;
 
-/// Major API version number of measurement-kit/libndt.
+/// Major API version number of m-lab/ndt7-client-cc libndt7.
 constexpr Version version_major = Version{0};
 
-/// Minor API version number of measurement-kit/libndt.
+/// Minor API version number of m-lab/ndt7-client-cc libndt7.
 constexpr Version version_minor = Version{27};
 
-/// Patch API version number of measurement-kit/libndt.
+/// Patch API version number of m-lab/ndt7-client-cc libndt7.
 constexpr Version version_patch = Version{0};
 
 // Flags for selecting subtests
@@ -21920,7 +21920,7 @@ class Settings {
   };
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
-  /// cause libndt to use different default settings for the port or for
+  /// cause libndt7 to use different default settings for the port or for
   /// the Locate API. Clear text ndt7 uses port 80, ndt7-over-TLS uses 443.
   ProtocolFlags protocol_flags = ProtocolFlags{0};
 
@@ -22012,7 +22012,7 @@ class Client : public EventHandler {
   \___|_||_\__,_| \___/_|   | .__/\_,_|_.__/_|_\__| \__,_| .__/_|
                             |_|                          |_|
   */
-  // If you're just interested to use measurement-kit/libndt, you can stop
+  // If you're just interested to use m-lab/ndt7-client-cc libndt7, you can stop
   // reading right here. All the remainder of this file is not documented on
   // purpose and contains functionality that you'll typically don't care about
   // unless you're looking into heavily customizing this library.
@@ -22365,7 +22365,7 @@ constexpr size_t msg_kickoff_size = sizeof(msg_kickoff) - 1;
 // `````````````
 
 // Generic macro for emitting logs.
-#define LIBNDT_EMIT_LOG_EX(client, level, statements)      \
+#define LIBNDT7_EMIT_LOG_EX(client, level, statements)      \
   do {                                                     \
     if (client->get_verbosity() >= verbosity_##level) {    \
       std::stringstream ss_log_lines;                      \
@@ -22379,18 +22379,18 @@ constexpr size_t msg_kickoff_size = sizeof(msg_kickoff) - 1;
     }                                                      \
   } while (0)
 
-#define LIBNDT_EMIT_WARNING_EX(clnt, stmnts) LIBNDT_EMIT_LOG_EX(clnt, warning, stmnts)
-#define LIBNDT_EMIT_INFO_EX(clnt, stmnts) LIBNDT_EMIT_LOG_EX(clnt, info, stmnts)
-#define LIBNDT_EMIT_DEBUG_EX(clnt, stmnts) LIBNDT_EMIT_LOG_EX(clnt, debug, stmnts)
+#define LIBNDT7_EMIT_WARNING_EX(clnt, stmnts) LIBNDT7_EMIT_LOG_EX(clnt, warning, stmnts)
+#define LIBNDT7_EMIT_INFO_EX(clnt, stmnts) LIBNDT7_EMIT_LOG_EX(clnt, info, stmnts)
+#define LIBNDT7_EMIT_DEBUG_EX(clnt, stmnts) LIBNDT7_EMIT_LOG_EX(clnt, debug, stmnts)
 
-#define LIBNDT_EMIT_WARNING(statements) LIBNDT_EMIT_WARNING_EX(this, statements)
-#define LIBNDT_EMIT_INFO(statements) LIBNDT_EMIT_INFO_EX(this, statements)
-#define LIBNDT_EMIT_DEBUG(statements) LIBNDT_EMIT_DEBUG_EX(this, statements)
+#define LIBNDT7_EMIT_WARNING(statements) LIBNDT7_EMIT_WARNING_EX(this, statements)
+#define LIBNDT7_EMIT_INFO(statements) LIBNDT7_EMIT_INFO_EX(this, statements)
+#define LIBNDT7_EMIT_DEBUG(statements) LIBNDT7_EMIT_DEBUG_EX(this, statements)
 
 #ifdef _WIN32
-#define LIBNDT_OS_SHUT_RDWR SD_BOTH
+#define LIBNDT7_OS_SHUT_RDWR SD_BOTH
 #else
-#define LIBNDT_OS_SHUT_RDWR SHUT_RDWR
+#define LIBNDT7_OS_SHUT_RDWR SHUT_RDWR
 #endif
 
 static void random_printable_fill(char *buffer, size_t length) noexcept {
@@ -22534,37 +22534,37 @@ bool Client::run() noexcept {
     scheme = "wss";
   }
   for (auto &urls : targets) {
-    LIBNDT_EMIT_DEBUG("using the ndt7 protocol");
+    LIBNDT7_EMIT_DEBUG("using the ndt7 protocol");
     if ((settings_.nettest_flags & nettest_flag_download) != 0) {
       auto key = scheme + ":///ndt/v7/download";
       if (!urls.contains(key)) {
-        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        LIBNDT7_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
         continue;
       }
       auto url = urls[key];
       UrlParts parts = parse_ws_url(url);
       if (!ndt7_download(parts)) {
-        LIBNDT_EMIT_WARNING("ndt7: download failed");
+        LIBNDT7_EMIT_WARNING("ndt7: download failed");
        // FALLTHROUGH
       }
     }
     if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
       auto key = scheme + ":///ndt/v7/upload";
       if (!urls.contains(key)) {
-        LIBNDT_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
+        LIBNDT7_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
         continue;
       }
       auto url = urls[key];
       UrlParts parts = parse_ws_url(url);
       if (!ndt7_upload(parts)) {
-        LIBNDT_EMIT_WARNING("ndt7: upload failed");
+        LIBNDT7_EMIT_WARNING("ndt7: upload failed");
         // FALLTHROUGH
       }
     }
-    LIBNDT_EMIT_INFO("ndt7: test complete");
+    LIBNDT7_EMIT_INFO("ndt7: test complete");
     return true;
   }
-  LIBNDT_EMIT_WARNING("no more hosts to try; failing the test");
+  LIBNDT7_EMIT_WARNING("no more hosts to try; failing the test");
   return false;
 }
 
@@ -22587,11 +22587,11 @@ void Client::on_performance(NettestFlags tid, uint8_t nflows,
   if (max_runtime > 0.0) {
     percent = (elapsed_time * 100.0 / max_runtime);
   }
-  LIBNDT_EMIT_INFO("  [" << std::fixed << std::setprecision(0) << std::setw(2)
+  LIBNDT7_EMIT_INFO("  [" << std::fixed << std::setprecision(0) << std::setw(2)
                   << std::right << percent << "%] speed: "
                   << format_speed_from_kbits(measured_bytes, elapsed_time));
 
-  LIBNDT_EMIT_DEBUG("  [" << std::fixed << std::setprecision(0) << std::setw(2)
+  LIBNDT7_EMIT_DEBUG("  [" << std::fixed << std::setprecision(0) << std::setw(2)
                   << std::right << percent << "%]"
                   << " elapsed: " << std::fixed << std::setprecision(3)
                   << std::setw(6) << elapsed_time << " s;"
@@ -22600,42 +22600,42 @@ void Client::on_performance(NettestFlags tid, uint8_t nflows,
 }
 
 void Client::on_result(std::string scope, std::string name, std::string value) noexcept {
-  LIBNDT_EMIT_INFO("  - [" << scope << "] " << name << ": " << value);
+  LIBNDT7_EMIT_INFO("  - [" << scope << "] " << name << ": " << value);
 }
 
 void Client::on_server_busy(std::string msg) noexcept {
-  LIBNDT_EMIT_WARNING("server is busy: " << msg);
+  LIBNDT7_EMIT_WARNING("server is busy: " << msg);
 }
 
 // High-level API
 // ``````````````
 
 void Client::summary() noexcept {
-  LIBNDT_EMIT_INFO(std::endl << "[Test results]");
+  LIBNDT7_EMIT_INFO(std::endl << "[Test results]");
   if (summary_.download_speed != 0.0) {
-    LIBNDT_EMIT_INFO("Download speed: "
+    LIBNDT7_EMIT_INFO("Download speed: "
       << format_speed_from_kbits(summary_.download_speed));
   }
   if (summary_.upload_speed != 0.0) {
-    LIBNDT_EMIT_INFO("Upload speed: "
+    LIBNDT7_EMIT_INFO("Upload speed: "
       << format_speed_from_kbits(summary_.upload_speed));
   }
   if (summary_.min_rtt != 0) {
-    LIBNDT_EMIT_INFO("Latency: " << std::fixed << std::setprecision(2)
+    LIBNDT7_EMIT_INFO("Latency: " << std::fixed << std::setprecision(2)
       << (summary_.min_rtt / 1000.0) << " ms");
   }
   if (summary_.download_retrans != 0.0) {
-      LIBNDT_EMIT_INFO("Download retransmission: "
+      LIBNDT7_EMIT_INFO("Download retransmission: "
         << std::fixed << std::setprecision(2)
         << (summary_.download_retrans * 100) << "%");
   }
   if (summary_.upload_retrans != 0.0) {
-      LIBNDT_EMIT_INFO("Upload retransmission: "
+      LIBNDT7_EMIT_INFO("Upload retransmission: "
         << std::fixed << std::setprecision(2)
         << (summary_.upload_retrans * 100) << "%");
   }
   if (web100 != nullptr) {
-    LIBNDT_EMIT_DEBUG("web100: " << web100.dump());
+    LIBNDT7_EMIT_DEBUG("web100: " << web100.dump());
   }
 }
 
@@ -22678,28 +22678,32 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
   std::string body;
   std::string locate_api_url = settings_.locate_api_base_url;
   if (!settings_.hostname.empty()) {
-    LIBNDT_EMIT_DEBUG("no need to query locate api; we have hostname");
+    LIBNDT7_EMIT_DEBUG("no need to query locate api; we have hostname");
     // We already know the hostname, scheme and port, so return a static result.
     body = get_static_locate_result(
       format_http_params(opts), settings_.scheme, settings_.hostname,
       settings_.port);
   } else {
-    locate_api_url += "/v2/nearest/ndt/ndt7";
+    if (opts.count("key")){
+      locate_api_url += "/v2/priority/nearest/ndt/ndt7";
+    } else {
+      locate_api_url += "/v2/nearest/ndt/ndt7";
+    }
     if (opts.size() > 0) {
       // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
       locate_api_url += "?" + format_http_params(opts);
     }
-    LIBNDT_EMIT_INFO("using locate: " << locate_api_url);
+    LIBNDT7_EMIT_INFO("using locate: " << locate_api_url);
     if (!query_locate_api_curl(locate_api_url, settings_.timeout, &body)) {
       return false;
     }
   }
-  LIBNDT_EMIT_DEBUG("locate_api reply: " << body);
+  LIBNDT7_EMIT_DEBUG("locate_api reply: " << body);
   nlohmann::json json;
   try {
     json = nlohmann::json::parse(body);
   } catch (const nlohmann::json::exception &exc) {
-    LIBNDT_EMIT_WARNING("cannot parse JSON: " << exc.what());
+    LIBNDT7_EMIT_WARNING("cannot parse JSON: " << exc.what());
     return false;
   }
 
@@ -22708,25 +22712,25 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
   // one result in an array.
   if (!json.contains("results")) {
     if (!json.contains("error")) {
-      LIBNDT_EMIT_WARNING("no results and no error! " << body);
+      LIBNDT7_EMIT_WARNING("no results and no error! " << body);
       return false;
     }
     auto err = json["error"];
-    LIBNDT_EMIT_WARNING("error response from " << locate_api_url << ": " << err);
+    LIBNDT7_EMIT_WARNING("error response from " << locate_api_url << ": " << err);
     return false;
   }
   auto results = json["results"];
   for (auto &target : results) {
     if (!target.contains("urls")) {
       // This should not occur.
-      LIBNDT_EMIT_WARNING("results object is missing urls: " << body);
+      LIBNDT7_EMIT_WARNING("results object is missing urls: " << body);
       continue;
     }
     auto result_urls = target["urls"];
     do {
       auto it = result_urls.begin();
       // Any key is fine for debug logging.
-      LIBNDT_EMIT_DEBUG("discovered host: " << result_urls[it.key()]);
+      LIBNDT7_EMIT_DEBUG("discovered host: " << result_urls[it.key()]);
     } while(0);
     urls->push_back(std::move(result_urls));
   }
@@ -22737,7 +22741,7 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
 // `````````````````
 
 bool Client::ndt7_download(const UrlParts &url) noexcept {
-  LIBNDT_EMIT_INFO("ndt7: starting download test: " << url.scheme << "://" << url.host);
+  LIBNDT7_EMIT_INFO("ndt7: starting download test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
   }
@@ -22756,7 +22760,7 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
     auto now = std::chrono::steady_clock::now();
     elapsed = now - begin;
     if (elapsed.count() > settings_.max_runtime) {
-      LIBNDT_EMIT_WARNING("ndt7: download running for too much time");
+      LIBNDT7_EMIT_WARNING("ndt7: download running for too much time");
       return false;
     }
     constexpr auto measurement_interval = 0.25;
@@ -22801,11 +22805,11 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
             summary_.download_retrans = (bytes_sent != 0.0) ? bytes_retrans / bytes_sent : 0.0;
             summary_.min_rtt = tcpinfo_json["MinRTT"].get<uint32_t>();
           } catch(const std::exception& e) {
-            LIBNDT_EMIT_WARNING("TCPInfo not available, cannot get \
+            LIBNDT7_EMIT_WARNING("TCPInfo not available, cannot get \
               retransmission rate and latency: " << e.what());
           }
         } catch (nlohmann::json::parse_error& e) {
-          LIBNDT_EMIT_WARNING("Unable to parse message as JSON: " << sinfo);
+          LIBNDT7_EMIT_WARNING("Unable to parse message as JSON: " << sinfo);
         }
 
         if (get_verbosity() == verbosity_debug) {
@@ -22820,7 +22824,7 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
 }
 
 bool Client::ndt7_upload(const UrlParts &url) noexcept {
-  LIBNDT_EMIT_INFO("ndt7: starting upload test: " << url.scheme << "://" << url.host);
+  LIBNDT7_EMIT_INFO("ndt7: starting upload test: " << url.scheme << "://" << url.host);
   if (!ndt7_connect(url)) {
     return false;
   }
@@ -22845,7 +22849,7 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
     std::chrono::duration<double, std::micro> elapsed_usec =
       std::chrono::duration_cast<std::chrono::microseconds>(elapsed);
     if (elapsed.count() > max_upload_time) {
-      LIBNDT_EMIT_DEBUG("ndt7: upload has run for enough time");
+      LIBNDT7_EMIT_DEBUG("ndt7: upload has run for enough time");
       break;
     }
     constexpr auto measurement_interval = 0.25;
@@ -22875,7 +22879,7 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
         double bytes_sent = (double) tcpinfo_json["TcpiBytesSent"].get<int64_t>();
         summary_.upload_retrans = (bytes_sent != 0.0) ? bytes_retrans / bytes_sent : 0.0;
       } catch (const std::exception& e) {
-        LIBNDT_EMIT_WARNING("Cannot calculate retransmission rate: " << e.what());
+        LIBNDT7_EMIT_WARNING("Cannot calculate retransmission rate: " << e.what());
       }
 #endif  // __linux__
       if (!settings_.summary_only) {
@@ -22892,14 +22896,14 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
 			internal::Err err = ws_send_frame(sock_, ws_opcode_text | ws_fin_flag,
                               (uint8_t *)json.data(), json.size());
       if (err != internal::Err::none) {
-        LIBNDT_EMIT_WARNING("ndt7: cannot send measurement");
+        LIBNDT7_EMIT_WARNING("ndt7: cannot send measurement");
         return false;
       }
       latest = now;
     }
 		internal::Err err = netx_sendn(sock_, frame.data(), frame.size());
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("ndt7: cannot send frame");
+      LIBNDT7_EMIT_WARNING("ndt7: cannot send frame");
       return false;
     }
     total += ndt7_bufsiz;  // Assume we won't overflow
@@ -22911,7 +22915,7 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
 bool Client::ndt7_connect(const UrlParts &url) noexcept {
   // Don't leak resources if the socket is already open.
   if (internal::IsSocketValid(sock_)) {
-    LIBNDT_EMIT_DEBUG("ndt7: closing socket openned in previous attempt");
+    LIBNDT7_EMIT_DEBUG("ndt7: closing socket openned in previous attempt");
     (void)netx_closesocket(sock_);
     sock_ = (internal::Socket)-1;
   }
@@ -22925,7 +22929,7 @@ bool Client::ndt7_connect(const UrlParts &url) noexcept {
   if (err != internal::Err::none) {
     return false;
   }
-  LIBNDT_EMIT_DEBUG("ndt7: WebSocket connection established");
+  LIBNDT7_EMIT_DEBUG("ndt7: WebSocket connection established");
   return true;
 }
 
@@ -22939,7 +22943,7 @@ bool Client::ndt7_connect(const UrlParts &url) noexcept {
 // - - - BEGIN WEBSOCKET IMPLEMENTATION - - - {
 
 internal::Err Client::ws_sendln(internal::Socket fd, std::string line) noexcept {
-  LIBNDT_EMIT_DEBUG("> " << line);
+  LIBNDT7_EMIT_DEBUG("> " << line);
   line += "\r\n";
   return netx_sendn(fd, line.c_str(), line.size());
 }
@@ -22960,12 +22964,12 @@ internal::Err Client::ws_recvln(internal::Socket fd, std::string *line, size_t m
       continue;
     }
     if (ch == '\n') {
-      LIBNDT_EMIT_DEBUG("< " << *line);
+      LIBNDT7_EMIT_DEBUG("< " << *line);
       return internal::Err::none;
     }
     *line += ch;
   }
-  LIBNDT_EMIT_WARNING("ws_recvln: line too long");
+  LIBNDT7_EMIT_WARNING("ws_recvln: line too long");
   return internal::Err::value_too_large;
 }
 
@@ -23006,11 +23010,11 @@ internal::Err Client::ws_handshake(internal::Socket fd, std::string port, uint64
         (err = ws_sendln(fd, proto_header)) != internal::Err::none ||
         (err = ws_sendln(fd, "Sec-WebSocket-Version: 13")) != internal::Err::none ||
         (err = ws_sendln(fd, "")) != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("ws_handshake: cannot send HTTP upgrade request");
+      LIBNDT7_EMIT_WARNING("ws_handshake: cannot send HTTP upgrade request");
       return err;
     }
   }
-  LIBNDT_EMIT_DEBUG("ws_handshake: sent HTTP/1.1 upgrade request");
+  LIBNDT7_EMIT_DEBUG("ws_handshake: sent HTTP/1.1 upgrade request");
   //
   // Limitations of the response processing code
   // ```````````````````````````````````````````
@@ -23033,7 +23037,7 @@ internal::Err Client::ws_handshake(internal::Socket fd, std::string port, uint64
     }
     // TODO(bassosimone): ignore text after 101
     if (line != "HTTP/1.1 101 Switching Protocols") {
-      LIBNDT_EMIT_WARNING("ws_handshake: unexpected response line");
+      LIBNDT7_EMIT_WARNING("ws_handshake: unexpected response line");
       return internal::Err::ws_proto;
     }
     uint64_t flags = 0;
@@ -23055,15 +23059,15 @@ internal::Err Client::ws_handshake(internal::Socket fd, std::string port, uint64
         flags |= ws_f_sec_ws_protocol;
       } else if (line == "") {
         if ((flags & ws_flags) != ws_flags) {
-          LIBNDT_EMIT_WARNING("ws_handshake: received incorrect handshake");
+          LIBNDT7_EMIT_WARNING("ws_handshake: received incorrect handshake");
           return internal::Err::ws_proto;
         }
-        LIBNDT_EMIT_DEBUG("ws_handshake: complete");
+        LIBNDT7_EMIT_DEBUG("ws_handshake: complete");
         return internal::Err::none;
       }
     }
   }
-  LIBNDT_EMIT_DEBUG("ws_handshake: got too many headers");
+  LIBNDT7_EMIT_DEBUG("ws_handshake: got too many headers");
   return internal::Err::value_too_large;
 }
 
@@ -23083,16 +23087,16 @@ std::string Client::ws_prepare_frame(uint8_t first_byte, uint8_t *base,
     {
       // TODO(bassosimone): add sanity checks for first byte
       ss << first_byte;
-      LIBNDT_EMIT_DEBUG("ws_prepare_frame: FIN: " << std::boolalpha
+      LIBNDT7_EMIT_DEBUG("ws_prepare_frame: FIN: " << std::boolalpha
                                         << ((first_byte & ws_fin_flag) != 0));
-      LIBNDT_EMIT_DEBUG(
+      LIBNDT7_EMIT_DEBUG(
           "ws_prepare_frame: reserved: " << (first_byte & ws_reserved_mask));
-      LIBNDT_EMIT_DEBUG("ws_prepare_frame: opcode: " << (first_byte & ws_opcode_mask));
+      LIBNDT7_EMIT_DEBUG("ws_prepare_frame: opcode: " << (first_byte & ws_opcode_mask));
     }
     // Length
     {
-      LIBNDT_EMIT_DEBUG("ws_prepare_frame: mask flag: " << std::boolalpha << true);
-      LIBNDT_EMIT_DEBUG("ws_prepare_frame: length: " << count);
+      LIBNDT7_EMIT_DEBUG("ws_prepare_frame: mask flag: " << std::boolalpha << true);
+      LIBNDT7_EMIT_DEBUG("ws_prepare_frame: length: " << count);
       // Since this is a client implementation, we always include the MASK flag
       // as part of the second byte that we send on the wire. Also, the spec
       // says that we must emit the length in network byte order, which means
@@ -23102,7 +23106,7 @@ std::string Client::ws_prepare_frame(uint8_t first_byte, uint8_t *base,
       //     <https://tools.ietf.org/html/rfc6455#section-5.2>.
 #define LB(value)                                                        \
   do {                                                                   \
-    LIBNDT_EMIT_DEBUG("ws_prepare_frame: length byte: " << (unsigned int)(value)); \
+    LIBNDT7_EMIT_DEBUG("ws_prepare_frame: length byte: " << (unsigned int)(value)); \
     ss << (value);                                                       \
   } while (0)
       if (count < 126) {
@@ -23127,7 +23131,7 @@ std::string Client::ws_prepare_frame(uint8_t first_byte, uint8_t *base,
     // Mask
     {
       for (internal::Size i = 0; i < mask_size; ++i) {
-        LIBNDT_EMIT_DEBUG("ws_prepare_frame: mask byte: " << (unsigned int)mask[i]
+        LIBNDT7_EMIT_DEBUG("ws_prepare_frame: mask byte: " << (unsigned int)mask[i]
                                                 << " ('" << mask[i] << "')");
         ss << (uint8_t)mask[i];
       }
@@ -23157,14 +23161,14 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
   // TODO(bassosimone): in this function we should consider an EOF as an
   // error, because with WebSocket we have explicit FIN mechanism.
   if (opcode == nullptr || fin == nullptr || count == nullptr) {
-    LIBNDT_EMIT_WARNING("ws_recv_any_frame: passed invalid return arguments");
+    LIBNDT7_EMIT_WARNING("ws_recv_any_frame: passed invalid return arguments");
     return internal::Err::invalid_argument;
   }
   *opcode = 0;
   *fin = false;
   *count = 0;
   if (base == nullptr || total <= 0) {
-    LIBNDT_EMIT_WARNING("ws_recv_any_frame: passed invalid buffer arguments");
+    LIBNDT7_EMIT_WARNING("ws_recv_any_frame: passed invalid buffer arguments");
     return internal::Err::invalid_argument;
   }
   // Message header
@@ -23179,22 +23183,22 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
     uint8_t buf[2];
     auto err = netx_recvn(sock, buf, sizeof(buf));
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("ws_recv_any_frame: netx_recvn() failed for header");
+      LIBNDT7_EMIT_WARNING("ws_recv_any_frame: netx_recvn() failed for header");
       return err;
     }
-    LIBNDT_EMIT_DEBUG("ws_recv_any_frame: ws header: "
+    LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: ws header: "
                << represent(std::string{(char *)buf, sizeof(buf)}));
     *fin = (buf[0] & ws_fin_flag) != 0;
-    LIBNDT_EMIT_DEBUG("ws_recv_any_frame: FIN: " << std::boolalpha << *fin);
+    LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: FIN: " << std::boolalpha << *fin);
     uint8_t reserved = (uint8_t)(buf[0] & ws_reserved_mask);
     if (reserved != 0) {
       // They only make sense for extensions, which we don't use. So we return
       // error. See <https://tools.ietf.org/html/rfc6455#section-5.2>.
-      LIBNDT_EMIT_WARNING("ws_recv_any_frame: invalid reserved bits: " << reserved);
+      LIBNDT7_EMIT_WARNING("ws_recv_any_frame: invalid reserved bits: " << reserved);
       return internal::Err::ws_proto;
     }
     *opcode = (uint8_t)(buf[0] & ws_opcode_mask);
-    LIBNDT_EMIT_DEBUG("ws_recv_any_frame: opcode: " << (unsigned int)*opcode);
+    LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: opcode: " << (unsigned int)*opcode);
     switch (*opcode) {
       // clang-format off
       case ws_opcode_continue:
@@ -23206,7 +23210,7 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
       // clang-format off
       default:
         // See <https://tools.ietf.org/html/rfc6455#section-5.2>.
-        LIBNDT_EMIT_WARNING("ws_recv_any_frame: invalid opcode");
+        LIBNDT7_EMIT_WARNING("ws_recv_any_frame: invalid opcode");
         return internal::Err::ws_proto;
     }
     auto hasmask = (buf[1] & ws_mask_flag) != 0;
@@ -23215,7 +23219,7 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
     //
     // See <https://tools.ietf.org/html/rfc6455#section-5.1>.
     if (hasmask) {
-      LIBNDT_EMIT_WARNING("ws_recv_any_frame: received masked frame");
+      LIBNDT7_EMIT_WARNING("ws_recv_any_frame: received masked frame");
       return internal::Err::invalid_argument;
     }
     length = (buf[1] & ws_len_mask);
@@ -23224,7 +23228,7 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
       case ws_opcode_ping:
       case ws_opcode_pong:
         if (length > 125 || *fin == false) {
-          LIBNDT_EMIT_WARNING("ws_recv_any_frame: control messages MUST have a "
+          LIBNDT7_EMIT_WARNING("ws_recv_any_frame: control messages MUST have a "
                        "payload length of 125 bytes or less and MUST NOT "
                        "be fragmented (see RFC6455 Sect 5.5.)");
           return internal::Err::ws_proto;
@@ -23234,7 +23238,7 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
     // As mentioned above, length is transmitted using big endian encoding.
 #define AL(value)                                                            \
   do {                                                                       \
-    LIBNDT_EMIT_DEBUG("ws_recv_any_frame: length byte: " << (unsigned int)(value)); \
+    LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: length byte: " << (unsigned int)(value)); \
     length += (value);                                                       \
   } while (0)
     // The following should not happen because the lenght is over 7 bits but
@@ -23244,11 +23248,11 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
       uint8_t len_buf[2];
       auto recvn_err = netx_recvn(sock, len_buf, sizeof(len_buf));
       if (recvn_err != internal::Err::none) {
-        LIBNDT_EMIT_WARNING(
+        LIBNDT7_EMIT_WARNING(
             "ws_recv_any_frame: netx_recvn() failed for 16 bit length");
         return recvn_err;
       }
-      LIBNDT_EMIT_DEBUG("ws_recv_any_frame: 16 bit length: "
+      LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: 16 bit length: "
                  << represent(std::string{(char *)len_buf, sizeof(len_buf)}));
       length = 0;  // Need to reset the length as AL() does +=
       AL(((internal::Size)len_buf[0]) << 8);
@@ -23257,18 +23261,18 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
       uint8_t len_buf[8];
       auto recvn_err = netx_recvn(sock, len_buf, sizeof(len_buf));
       if (recvn_err != internal::Err::none) {
-        LIBNDT_EMIT_WARNING(
+        LIBNDT7_EMIT_WARNING(
             "ws_recv_any_frame: netx_recvn() failed for 64 bit length");
         return recvn_err;
       }
-      LIBNDT_EMIT_DEBUG("ws_recv_any_frame: 64 bit length: "
+      LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: 64 bit length: "
                  << represent(std::string{(char *)len_buf, sizeof(len_buf)}));
       length = 0;  // Need to reset the length as AL() does +=
       AL(((internal::Size)len_buf[0]) << 56);
       if ((len_buf[0] & 0x80) != 0) {
         // See <https://tools.ietf.org/html/rfc6455#section-5.2>: "[...] the
         // most significant bit MUST be 0."
-        LIBNDT_EMIT_WARNING("ws_recv_any_frame: 64 bit length: invalid first bit");
+        LIBNDT7_EMIT_WARNING("ws_recv_any_frame: 64 bit length: invalid first bit");
         return internal::Err::ws_proto;
       }
       AL(((internal::Size)len_buf[1]) << 48);
@@ -23281,29 +23285,29 @@ internal::Err Client::ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, 
     }
 #undef AL  // Tidy
     if (length > total) {
-      LIBNDT_EMIT_WARNING("ws_recv_any_frame: buffer too small");
+      LIBNDT7_EMIT_WARNING("ws_recv_any_frame: buffer too small");
       return internal::Err::message_size;
     }
-    LIBNDT_EMIT_DEBUG("ws_recv_any_frame: length: " << length);
+    LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: length: " << length);
   }
-  LIBNDT_EMIT_DEBUG("ws_recv_any_frame: received header");
+  LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: received header");
   // Message body
   if (length > 0) {
     assert(length <= total);
     auto err = netx_recvn(sock, base, length);
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("ws_recv_any_frame: netx_recvn() failed for body");
+      LIBNDT7_EMIT_WARNING("ws_recv_any_frame: netx_recvn() failed for body");
       return err;
     }
     // This makes the code too noisy when using -verbose. It may still be
     // useful to remove the comment when debugging.
     /*
-    LIBNDT_EMIT_DEBUG("ws_recv_any_frame: received body: "
+    LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: received body: "
                << represent(std::string{(char *)base, length}));
     */
     *count = length;
   } else {
-    LIBNDT_EMIT_DEBUG("ws_recv_any_frame: no body in this message");
+    LIBNDT7_EMIT_DEBUG("ws_recv_any_frame: no body in this message");
     assert(*count == 0);
   }
   return internal::Err::none;
@@ -23315,11 +23319,11 @@ internal::Err Client::ws_recv_frame(internal::Socket sock, uint8_t *opcode, bool
   // a fragmented message.  Control frames themselves MUST NOT be fragmented."
   //    -- RFC6455 Section 5.4.
   if (opcode == nullptr || fin == nullptr || count == nullptr) {
-    LIBNDT_EMIT_WARNING("ws_recv_frame: passed invalid return arguments");
+    LIBNDT7_EMIT_WARNING("ws_recv_frame: passed invalid return arguments");
     return internal::Err::invalid_argument;
   }
   if (base == nullptr || total <= 0) {
-    LIBNDT_EMIT_WARNING("ws_recv_frame: passed invalid buffer arguments");
+    LIBNDT7_EMIT_WARNING("ws_recv_frame: passed invalid buffer arguments");
     return internal::Err::invalid_argument;
   }
   auto err = internal::Err::none;
@@ -23329,7 +23333,7 @@ again:
   *count = 0;
   err = ws_recv_any_frame(sock, opcode, fin, base, total, count);
   if (err != internal::Err::none) {
-    LIBNDT_EMIT_WARNING("ws_recv_frame: ws_recv_any_frame() failed");
+    LIBNDT7_EMIT_WARNING("ws_recv_frame: ws_recv_any_frame() failed");
     return err;
   }
   // "The application MUST NOT send any more data frames after sending a
@@ -23338,7 +23342,7 @@ again:
   // with an error, which will cause the connection to be closed. Note that
   // we MUST reply with CLOSE here (again Sect. 5.5.1).
   if (*opcode == ws_opcode_close) {
-    LIBNDT_EMIT_DEBUG("ws_recv_frame: received CLOSE frame; sending CLOSE back");
+    LIBNDT7_EMIT_DEBUG("ws_recv_frame: received CLOSE frame; sending CLOSE back");
     // Setting the FIN flag because control messages MUST NOT be fragmented
     // as specified in Section 5.5 of RFC6455.
     (void)ws_send_frame(sock, ws_opcode_close | ws_fin_flag, nullptr, 0);
@@ -23348,20 +23352,20 @@ again:
   }
   if (*opcode == ws_opcode_pong) {
     // RFC6455 Sect. 5.5.3 says that we must ignore a PONG.
-    LIBNDT_EMIT_DEBUG("ws_recv_frame: received PONG frame; continuing to read");
+    LIBNDT7_EMIT_DEBUG("ws_recv_frame: received PONG frame; continuing to read");
     goto again;
   }
   if (*opcode == ws_opcode_ping) {
     // TODO(bassosimone): in theory a malicious server could DoS us by sending
     // a constant stream of PING frames for a long time.
-    LIBNDT_EMIT_DEBUG("ws_recv_frame: received PING frame; PONGing back");
+    LIBNDT7_EMIT_DEBUG("ws_recv_frame: received PING frame; PONGing back");
     assert(*count <= total);
     err = ws_send_frame(sock, ws_opcode_pong | ws_fin_flag, base, *count);
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("ws_recv_frame: ws_send_frame() failed for PONG frame");
+      LIBNDT7_EMIT_WARNING("ws_recv_frame: ws_send_frame() failed for PONG frame");
       return err;
     }
-    LIBNDT_EMIT_DEBUG("ws_recv_frame: continuing to read after PONG");
+    LIBNDT7_EMIT_DEBUG("ws_recv_frame: continuing to read after PONG");
     goto again;
   }
   return internal::Err::none;
@@ -23379,11 +23383,11 @@ internal::Err Client::ws_recvmsg(  //
   // not only for the control protocol but also for c2s and s2c, where in
   // general we attempt to use messages smaller than 256K.
   if (opcode == nullptr || count == nullptr) {
-    LIBNDT_EMIT_WARNING("ws_recv: passed invalid return arguments");
+    LIBNDT7_EMIT_WARNING("ws_recv: passed invalid return arguments");
     return internal::Err::invalid_argument;
   }
   if (base == nullptr || total <= 0) {
-    LIBNDT_EMIT_WARNING("ws_recv: passed invalid buffer arguments");
+    LIBNDT7_EMIT_WARNING("ws_recv: passed invalid buffer arguments");
     return internal::Err::invalid_argument;
   }
   bool fin = false;
@@ -23393,46 +23397,46 @@ internal::Err Client::ws_recvmsg(  //
   if (err != internal::Err::none) {
     // We don't want to scary the user in case of clean EOF
     if (err != internal::Err::eof) {
-      LIBNDT_EMIT_WARNING("ws_recv: ws_recv_frame() failed for first frame");
+      LIBNDT7_EMIT_WARNING("ws_recv: ws_recv_frame() failed for first frame");
     }
     return err;
   }
   if (*opcode != ws_opcode_binary && *opcode != ws_opcode_text) {
-    LIBNDT_EMIT_WARNING("ws_recv: received unexpected opcode: " << *opcode);
+    LIBNDT7_EMIT_WARNING("ws_recv: received unexpected opcode: " << *opcode);
     return internal::Err::ws_proto;
   }
   if (fin) {
-    LIBNDT_EMIT_DEBUG("ws_recv: the first frame is also the last frame");
+    LIBNDT7_EMIT_DEBUG("ws_recv: the first frame is also the last frame");
     return internal::Err::none;
   }
   while (*count < total) {
     if ((uintptr_t)base > UINTPTR_MAX - *count) {
-      LIBNDT_EMIT_WARNING("ws_recv: avoiding pointer overflow");
+      LIBNDT7_EMIT_WARNING("ws_recv: avoiding pointer overflow");
       return internal::Err::value_too_large;
     }
     uint8_t op = 0;
 		internal::Size n = 0;
     err = ws_recv_frame(sock, &op, &fin, base + *count, total - *count, &n);
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("ws_recv: ws_recv_frame() failed for continuation frame");
+      LIBNDT7_EMIT_WARNING("ws_recv: ws_recv_frame() failed for continuation frame");
       return err;
     }
     if (*count > internal::SizeMax - n) {
-      LIBNDT_EMIT_WARNING("ws_recv: avoiding integer overflow");
+      LIBNDT7_EMIT_WARNING("ws_recv: avoiding integer overflow");
       return internal::Err::value_too_large;
     }
     *count += n;
     if (op != ws_opcode_continue) {
-      LIBNDT_EMIT_WARNING("ws_recv: received unexpected opcode: " << op);
+      LIBNDT7_EMIT_WARNING("ws_recv: received unexpected opcode: " << op);
       return internal::Err::ws_proto;
     }
     if (fin) {
-      LIBNDT_EMIT_DEBUG("ws_recv: this is the last frame");
+      LIBNDT7_EMIT_DEBUG("ws_recv: this is the last frame");
       return internal::Err::none;
     }
-    LIBNDT_EMIT_DEBUG("ws_recv: this is not the last frame");
+    LIBNDT7_EMIT_DEBUG("ws_recv: this is not the last frame");
   }
-  LIBNDT_EMIT_WARNING("ws_recv: buffer smaller than incoming message");
+  LIBNDT7_EMIT_WARNING("ws_recv: buffer smaller than incoming message");
   return internal::Err::message_size;
 }
 
@@ -23491,20 +23495,20 @@ internal::Err Client::ws_recvmsg(  //
 // Helper used to route read and write calls to Client's I/O methods. We
 // disregard the const qualifier of the `base` argument for the write operation,
 // but that is not a big deal since we add it again before calling the real
-// Socket op (see libndt_bio_write() below).
-static int libndt_bio_operation(
+// Socket op (see libndt7_bio_write() below).
+static int libndt7_bio_operation(
     BIO *bio, char *base, int count,
     std::function<internal::Ssize(Client *, internal::Socket, char *, internal::Size)> operation,
     std::function<void(BIO *)> set_retry) noexcept {
   // Implementation note: before we have a valid Client pointer we cannot
   // of course use mocked functions. Hence OS_SET_LAST_ERROR().
   if (bio == nullptr || base == nullptr || count <= 0) {
-    OS_SET_LAST_ERROR(LIBNDT_OS_EINVAL);
+    OS_SET_LAST_ERROR(LIBNDT7_OS_EINVAL);
     return -1;
   }
   auto clnt = static_cast<Client *>(::BIO_get_data(bio));
   if (clnt == nullptr) {
-    OS_SET_LAST_ERROR(LIBNDT_OS_EINVAL);
+    OS_SET_LAST_ERROR(LIBNDT7_OS_EINVAL);
     return -1;
   }
   // Using a `int` to store a `SOCKET` is safe for internal non documented
@@ -23531,9 +23535,9 @@ static int libndt_bio_operation(
 }
 
 // Write data using the underlying socket.
-static int libndt_bio_write(BIO *bio, const char *base, int count) noexcept {
+static int libndt7_bio_write(BIO *bio, const char *base, int count) noexcept {
   // clang-format off
-  return libndt_bio_operation(
+  return libndt7_bio_operation(
       bio, (char *)base, count,
       [](Client *clnt, internal::Socket sock, char *base, internal::Size count) noexcept {
         return clnt->sys->Send(sock, (const char *)base, count);
@@ -23543,9 +23547,9 @@ static int libndt_bio_write(BIO *bio, const char *base, int count) noexcept {
 }
 
 // Read data using the underlying socket.
-static int libndt_bio_read(BIO *bio, char *base, int count) noexcept {
+static int libndt7_bio_read(BIO *bio, char *base, int count) noexcept {
   // clang-format off
-  return libndt_bio_operation(
+  return libndt7_bio_operation(
       bio, base, count,
       [](Client *clnt, internal::Socket sock, char *base, internal::Size count) noexcept {
         return clnt->sys->Recv(sock, base, count);
@@ -23564,14 +23568,14 @@ class BioMethodDeleter {
 };
 using UniqueBioMethod = std::unique_ptr<BIO_METHOD, BioMethodDeleter>;
 
-static BIO_METHOD *libndt_bio_method() noexcept {
+static BIO_METHOD *libndt7_bio_method() noexcept {
   static std::atomic_bool initialized{false};
   static UniqueBioMethod method;
   static std::mutex mutex;
   if (!initialized) {
     std::unique_lock<std::mutex> _{mutex};
     if (!initialized) {
-      BIO_METHOD *mm = ::BIO_meth_new(BIO_TYPE_SOCKET, "libndt_bio_method");
+      BIO_METHOD *mm = ::BIO_meth_new(BIO_TYPE_SOCKET, "libndt7_bio_method");
       if (mm == nullptr) {
         return nullptr;
       }
@@ -23582,8 +23586,8 @@ static BIO_METHOD *libndt_bio_method() noexcept {
       BIO_meth_set_destroy(mm, BIO_meth_get_destroy(m));
       BIO_meth_set_ctrl(mm, BIO_meth_get_ctrl(m));
       BIO_meth_set_callback_ctrl(mm, BIO_meth_get_callback_ctrl(m));
-      BIO_meth_set_read(mm, libndt_bio_read);
-      BIO_meth_set_write(mm, libndt_bio_write);
+      BIO_meth_set_read(mm, libndt7_bio_read);
+      BIO_meth_set_write(mm, libndt7_bio_write);
       BIO_meth_set_gets(mm, BIO_meth_get_gets(m));
       BIO_meth_set_puts(mm, BIO_meth_get_puts(m));
       method.reset(mm);
@@ -23642,7 +23646,7 @@ again:
   }
   // Otherwise let the caller know
   if (err != internal::Err::none) {
-    LIBNDT_EMIT_WARNING_EX(client, opname << " failed: " << internal::libndt_perror(err));
+    LIBNDT7_EMIT_WARNING_EX(client, opname << " failed: " << internal::libndt7_perror(err));
   }
   return err;
 }
@@ -23655,19 +23659,19 @@ internal::Err Client::netx_maybews_dial(const std::string &hostname,
   if (err != internal::Err::none) {
     return err;
   }
-  LIBNDT_EMIT_DEBUG("netx_maybews_dial: netx_maybessl_dial() returned successfully");
+  LIBNDT7_EMIT_DEBUG("netx_maybews_dial: netx_maybessl_dial() returned successfully");
   if ((settings_.protocol_flags & protocol_flag_websocket) == 0) {
-    LIBNDT_EMIT_DEBUG("netx_maybews_dial: websocket not enabled");
+    LIBNDT7_EMIT_DEBUG("netx_maybews_dial: websocket not enabled");
     return internal::Err::none;
   }
-  LIBNDT_EMIT_DEBUG("netx_maybews_dial: about to start websocket handhsake");
+  LIBNDT7_EMIT_DEBUG("netx_maybews_dial: about to start websocket handhsake");
   err = ws_handshake(*sock, port, ws_flags, ws_protocol, url_path);
   if (err != internal::Err::none) {
     (void)netx_closesocket(*sock);
     *sock = (internal::Socket)-1;
     return err;
   }
-  LIBNDT_EMIT_DEBUG("netx_maybews_dial: established websocket channel");
+  LIBNDT7_EMIT_DEBUG("netx_maybews_dial: established websocket channel");
   return internal::Err::none;
 }
 
@@ -23683,13 +23687,13 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
   if (err != internal::Err::none) {
     return err;
   }
-  LIBNDT_EMIT_DEBUG(
+  LIBNDT7_EMIT_DEBUG(
       "netx_maybessl_dial: netx_maybesocks5h_dial() returned successfully");
   if ((settings_.protocol_flags & protocol_flag_tls) == 0) {
-    LIBNDT_EMIT_DEBUG("netx_maybessl_dial: TLS not enabled");
+    LIBNDT7_EMIT_DEBUG("netx_maybessl_dial: TLS not enabled");
     return internal::Err::none;
   }
-  LIBNDT_EMIT_DEBUG("netx_maybetls_dial: about to start TLS handshake");
+  LIBNDT7_EMIT_DEBUG("netx_maybetls_dial: about to start TLS handshake");
   if (settings_.ca_bundle_path.empty() && settings_.tls_verify_peer) {
 #ifndef _WIN32
     // See <https://serverfault.com/a/722646>
@@ -23699,14 +23703,14 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
     };
     for (auto &candidate : candidates) {
       if (access(candidate.c_str(), R_OK) == 0) {
-        LIBNDT_EMIT_DEBUG("Using '" << candidate.c_str() << "' as CA");
+        LIBNDT7_EMIT_DEBUG("Using '" << candidate.c_str() << "' as CA");
         settings_.ca_bundle_path = candidate;
         break;
       }
     }
     if (settings_.ca_bundle_path.empty()) {
 #endif
-      LIBNDT_EMIT_WARNING(
+      LIBNDT7_EMIT_WARNING(
           "You did not provide me with a CA bundle path. Without this "
           "information I cannot validate the other TLS endpoint. So, "
           "I will not continue to run this test.");
@@ -23721,43 +23725,43 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
     // taking into account that the NDT server runs on very old code.
     SSL_CTX *ctx = ::SSL_CTX_new(SSLv23_client_method());
     if (ctx == nullptr) {
-      LIBNDT_EMIT_WARNING("SSL_CTX_new() failed");
+      LIBNDT7_EMIT_WARNING("SSL_CTX_new() failed");
       netx_closesocket(*sock);
       return internal::Err::ssl_generic;
     }
-    LIBNDT_EMIT_DEBUG("SSL_CTX created");
+    LIBNDT7_EMIT_DEBUG("SSL_CTX created");
     if (settings_.tls_verify_peer) {
       if (!::SSL_CTX_load_verify_locations(  //
               ctx, settings_.ca_bundle_path.c_str(), nullptr)) {
-        LIBNDT_EMIT_WARNING("Cannot load the CA bundle path from the file system");
+        LIBNDT7_EMIT_WARNING("Cannot load the CA bundle path from the file system");
         ::SSL_CTX_free(ctx);
         netx_closesocket(*sock);
         return internal::Err::ssl_generic;
       }
-      LIBNDT_EMIT_DEBUG("Loaded the CA bundle path");
+      LIBNDT7_EMIT_DEBUG("Loaded the CA bundle path");
     }
     ssl = ::SSL_new(ctx);
     if (ssl == nullptr) {
-      LIBNDT_EMIT_WARNING("SSL_new() failed");
+      LIBNDT7_EMIT_WARNING("SSL_new() failed");
       ::SSL_CTX_free(ctx);
       netx_closesocket(*sock);
       return internal::Err::ssl_generic;
     }
-    LIBNDT_EMIT_DEBUG("SSL created");
+    LIBNDT7_EMIT_DEBUG("SSL created");
     ::SSL_CTX_free(ctx);  // Referenced by `ssl` so safe to free here
     assert(fd_to_ssl_.count(*sock) == 0);
     // Implementation note: after this point `netx_closesocket(*sock)` will
     // imply that `::SSL_free(ssl)` is also called.
     fd_to_ssl_[*sock] = ssl;
   }
-  BIO *bio = ::BIO_new(libndt_bio_method());
+  BIO *bio = ::BIO_new(libndt7_bio_method());
   if (bio == nullptr) {
-    LIBNDT_EMIT_WARNING("BIO_new() failed");
+    LIBNDT7_EMIT_WARNING("BIO_new() failed");
     netx_closesocket(*sock);
     //::SSL_free(ssl); // MUST NOT be called because of fd_to_ssl
     return internal::Err::ssl_generic;
   }
-  LIBNDT_EMIT_DEBUG("libndt BIO created");
+  LIBNDT7_EMIT_DEBUG("libndt7 BIO created");
   // We use BIO_NOCLOSE because it's the socket that owns the BIO and the SSL
   // via fd_to_ssl rather than the other way around. Note that sockets are
   // always `int` in OpenSSL notwithstanding their definition on Windows, so
@@ -23772,7 +23776,7 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
   ::SSL_set_bio(ssl, bio, bio);
   ::BIO_set_data(bio, this);
   ::SSL_set_connect_state(ssl);
-  LIBNDT_EMIT_DEBUG("Socket added to SSL context");
+  LIBNDT7_EMIT_DEBUG("Socket added to SSL context");
   if (settings_.tls_verify_peer) {
     // This approach for validating the hostname should work with versions
     // of OpenSSL greater than v1.0.2 and with LibreSSL. Code taken from the
@@ -23781,13 +23785,13 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
     assert(p != nullptr);
     X509_VERIFY_PARAM_set_hostflags(p, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
     if (!::X509_VERIFY_PARAM_set1_host(p, hostname.data(), hostname.size())) {
-      LIBNDT_EMIT_WARNING("Cannot set the hostname for hostname validation");
+      LIBNDT7_EMIT_WARNING("Cannot set the hostname for hostname validation");
       netx_closesocket(*sock);
       //::SSL_free(ssl); // MUST NOT be called because of fd_to_ssl
       return internal::Err::ssl_generic;
     }
     SSL_set_verify(ssl, SSL_VERIFY_PEER, nullptr);
-    LIBNDT_EMIT_DEBUG("SSL_VERIFY_PEER configured");
+    LIBNDT7_EMIT_DEBUG("SSL_VERIFY_PEER configured");
   }
   err = ssl_retry_unary_op("SSL_do_handshake", this, ssl, *sock,
                            settings_.timeout, [](SSL *ssl) -> int {
@@ -23799,7 +23803,7 @@ internal::Err Client::netx_maybessl_dial(const std::string &hostname,
     //::SSL_free(ssl); // MUST NOT be called because of fd_to_ssl
     return internal::Err::ssl_generic;
   }
-  LIBNDT_EMIT_DEBUG("SSL handshake complete");
+  LIBNDT7_EMIT_DEBUG("SSL handshake complete");
   return internal::Err::none;
 }
 
@@ -23807,7 +23811,7 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
                                    const std::string &port,
                                    internal::Socket *sock) noexcept {
   if (settings_.socks5h_port.empty()) {
-    LIBNDT_EMIT_DEBUG("socks5h: not configured, connecting directly");
+    LIBNDT7_EMIT_DEBUG("socks5h: not configured, connecting directly");
     return netx_dial(hostname, port, sock);
   }
   {
@@ -23816,7 +23820,7 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
       return err;
     }
   }
-  LIBNDT_EMIT_INFO("socks5h: connected to proxy");
+  LIBNDT7_EMIT_INFO("socks5h: connected to proxy");
   {
     char auth_request[] = {
         5,  // version
@@ -23825,12 +23829,12 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
     };
     auto err = netx_sendn(*sock, auth_request, sizeof(auth_request));
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("socks5h: cannot send auth_request");
+      LIBNDT7_EMIT_WARNING("socks5h: cannot send auth_request");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return err;
     }
-    LIBNDT_EMIT_DEBUG("socks5h: sent this auth request: "
+    LIBNDT7_EMIT_DEBUG("socks5h: sent this auth request: "
                << represent(std::string{auth_request, sizeof(auth_request)}));
   }
   {
@@ -23840,26 +23844,26 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
     };
     auto err = netx_recvn(*sock, auth_response, sizeof(auth_response));
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("socks5h: cannot recv auth_response");
+      LIBNDT7_EMIT_WARNING("socks5h: cannot recv auth_response");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return err;
     }
     constexpr uint8_t version = 5;
     if (auth_response[0] != version) {
-      LIBNDT_EMIT_WARNING("socks5h: received unexpected version number");
+      LIBNDT7_EMIT_WARNING("socks5h: received unexpected version number");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return internal::Err::socks5h;
     }
     constexpr uint8_t auth_method = 0;
     if (auth_response[1] != auth_method) {
-      LIBNDT_EMIT_WARNING("socks5h: received unexpected auth_method");
+      LIBNDT7_EMIT_WARNING("socks5h: received unexpected auth_method");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return internal::Err::socks5h;
     }
-    LIBNDT_EMIT_DEBUG("socks5h: authenticated with proxy; response: "
+    LIBNDT7_EMIT_DEBUG("socks5h: authenticated with proxy; response: "
                << represent(std::string{auth_response, sizeof(auth_response)}));
   }
   {
@@ -23871,9 +23875,9 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
       ss << (uint8_t)0;  // reserved
       ss << (uint8_t)3;  // ATYPE_DOMAINNAME
       if (hostname.size() > UINT8_MAX) {
-        LIBNDT_EMIT_WARNING("socks5h: hostname is too long");
+        LIBNDT7_EMIT_WARNING("socks5h: hostname is too long");
         netx_closesocket(*sock);
-        *sock = (libndt::internal::Socket)-1;
+        *sock = (libndt7::internal::Socket)-1;
         return internal::Err::invalid_argument;
       }
       ss << (uint8_t)hostname.size();
@@ -23883,26 +23887,26 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
         const char *errstr = nullptr;
         portno = (uint16_t)sys->Strtonum(port.c_str(), 0, UINT16_MAX, &errstr);
         if (errstr != nullptr) {
-          LIBNDT_EMIT_WARNING("socks5h: invalid port number: " << errstr);
+          LIBNDT7_EMIT_WARNING("socks5h: invalid port number: " << errstr);
           netx_closesocket(*sock);
-          *sock = (libndt::internal::Socket)-1;
+          *sock = (libndt7::internal::Socket)-1;
           return internal::Err::invalid_argument;
         }
       }
       portno = htons(portno);
       ss << (uint8_t)((char *)&portno)[0] << (uint8_t)((char *)&portno)[1];
       connect_request = ss.str();
-      LIBNDT_EMIT_DEBUG("socks5h: connect_request: " << represent(connect_request));
+      LIBNDT7_EMIT_DEBUG("socks5h: connect_request: " << represent(connect_request));
     }
     auto err = netx_sendn(  //
         *sock, connect_request.data(), connect_request.size());
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("socks5h: cannot send connect_request");
+      LIBNDT7_EMIT_WARNING("socks5h: cannot send connect_request");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return err;
     }
-    LIBNDT_EMIT_DEBUG("socks5h: sent connect request");
+    LIBNDT7_EMIT_DEBUG("socks5h: sent connect request");
   }
   {
     char connect_response_hdr[] = {
@@ -23914,32 +23918,32 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
     auto err = netx_recvn(  //
         *sock, connect_response_hdr, sizeof(connect_response_hdr));
     if (err != internal::Err::none) {
-      LIBNDT_EMIT_WARNING("socks5h: cannot recv connect_response_hdr");
+      LIBNDT7_EMIT_WARNING("socks5h: cannot recv connect_response_hdr");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return err;
     }
-    LIBNDT_EMIT_DEBUG("socks5h: connect_response_hdr: " << represent(std::string{
+    LIBNDT7_EMIT_DEBUG("socks5h: connect_response_hdr: " << represent(std::string{
                    connect_response_hdr, sizeof(connect_response_hdr)}));
     constexpr uint8_t version = 5;
     if (connect_response_hdr[0] != version) {
-      LIBNDT_EMIT_WARNING("socks5h: invalid message version");
+      LIBNDT7_EMIT_WARNING("socks5h: invalid message version");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return internal::Err::socks5h;
     }
     if (connect_response_hdr[1] != 0) {
       // TODO(bassosimone): map the socks5 error to a system error
-      LIBNDT_EMIT_WARNING("socks5h: connect() failed: "
+      LIBNDT7_EMIT_WARNING("socks5h: connect() failed: "
                    << (unsigned)(uint8_t)connect_response_hdr[1]);
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return internal::Err::io_error;
     }
     if (connect_response_hdr[2] != 0) {
-      LIBNDT_EMIT_WARNING("socks5h: invalid reserved field");
+      LIBNDT7_EMIT_WARNING("socks5h: invalid reserved field");
       netx_closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
       return internal::Err::socks5h;
     }
     // receive IP or domain
@@ -23950,9 +23954,9 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
         char buf[expected];
         auto recvn_err = netx_recvn(*sock, buf, sizeof(buf));
         if (recvn_err != internal::Err::none) {
-          LIBNDT_EMIT_WARNING("socks5h: cannot recv ipv4 address");
+          LIBNDT7_EMIT_WARNING("socks5h: cannot recv ipv4 address");
           netx_closesocket(*sock);
-          *sock = (libndt::internal::Socket)-1;
+          *sock = (libndt7::internal::Socket)-1;
           return recvn_err;
         }
         // TODO(bassosimone): log the ipv4 address. However tor returns a zero
@@ -23964,21 +23968,21 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
         uint8_t len = 0;
         auto recvn_err = netx_recvn(*sock, &len, sizeof(len));
         if (recvn_err != internal::Err::none) {
-          LIBNDT_EMIT_WARNING("socks5h: cannot recv domain length");
+          LIBNDT7_EMIT_WARNING("socks5h: cannot recv domain length");
           netx_closesocket(*sock);
-          *sock = (libndt::internal::Socket)-1;
+          *sock = (libndt7::internal::Socket)-1;
           return recvn_err;
         }
         char domain[UINT8_MAX + 1];  // space for final '\0'
         recvn_err = netx_recvn(*sock, domain, len);
         if (recvn_err != internal::Err::none) {
-          LIBNDT_EMIT_WARNING("socks5h: cannot recv domain");
+          LIBNDT7_EMIT_WARNING("socks5h: cannot recv domain");
           netx_closesocket(*sock);
-          *sock = (libndt::internal::Socket)-1;
+          *sock = (libndt7::internal::Socket)-1;
           return recvn_err;
         }
         domain[len] = 0;
-        LIBNDT_EMIT_DEBUG("socks5h: domain: " << domain);
+        LIBNDT7_EMIT_DEBUG("socks5h: domain: " << domain);
         break;
       }
       case 4:  // ipv6
@@ -23987,9 +23991,9 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
         char buf[expected];
         auto recvn_err = netx_recvn(*sock, buf, sizeof(buf));
         if (recvn_err != internal::Err::none) {
-          LIBNDT_EMIT_WARNING("socks5h: cannot recv ipv6 address");
+          LIBNDT7_EMIT_WARNING("socks5h: cannot recv ipv6 address");
           netx_closesocket(*sock);
-          *sock = (libndt::internal::Socket)-1;
+          *sock = (libndt7::internal::Socket)-1;
           return recvn_err;
         }
         // TODO(bassosimone): log the ipv6 address. However tor returns a zero
@@ -23997,9 +24001,9 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
         break;
       }
       default:
-        LIBNDT_EMIT_WARNING("socks5h: invalid address type");
+        LIBNDT7_EMIT_WARNING("socks5h: invalid address type");
         netx_closesocket(*sock);
-        *sock = (libndt::internal::Socket)-1;
+        *sock = (libndt7::internal::Socket)-1;
         return internal::Err::socks5h;
     }
     // receive the port
@@ -24007,16 +24011,16 @@ internal::Err Client::netx_maybesocks5h_dial(const std::string &hostname,
       uint16_t real_port = 0;
       auto recvn_err = netx_recvn(*sock, &real_port, sizeof(real_port));
       if (recvn_err != internal::Err::none) {
-        LIBNDT_EMIT_WARNING("socks5h: cannot recv port");
+        LIBNDT7_EMIT_WARNING("socks5h: cannot recv port");
         netx_closesocket(*sock);
-        *sock = (libndt::internal::Socket)-1;
+        *sock = (libndt7::internal::Socket)-1;
         return recvn_err;
       }
       real_port = ntohs(real_port);
-      LIBNDT_EMIT_DEBUG("socks5h: port number: " << real_port);
+      LIBNDT7_EMIT_DEBUG("socks5h: port number: " << real_port);
     }
   }
-  LIBNDT_EMIT_INFO("socks5h: the proxy has successfully connected");
+  LIBNDT7_EMIT_INFO("socks5h: the proxy has successfully connected");
   return internal::Err::none;
 }
 
@@ -24089,7 +24093,7 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
                       internal::Socket *sock) noexcept {
   assert(sock != nullptr);
   if (*sock != -1) {
-    LIBNDT_EMIT_WARNING("netx_dial: socket already connected");
+    LIBNDT7_EMIT_WARNING("netx_dial: socket already connected");
     return internal::Err::invalid_argument;
   }
   // Implementation note: we could perform getaddrinfo() in one pass but having
@@ -24108,7 +24112,7 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
     addrinfo *rp = nullptr;
     int rv = sys->Getaddrinfo(addr.data(), port.data(), &hints, &rp);
     if (rv != 0) {
-      LIBNDT_EMIT_WARNING("netx_dial: unexpected getaddrinfo() failure");
+      LIBNDT7_EMIT_WARNING("netx_dial: unexpected getaddrinfo() failure");
       return netx_map_eai(rv);
     }
     assert(rp);
@@ -24116,7 +24120,7 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
       sys->SetLastError(0);
       *sock = sys->NewSocket(aip->ai_family, aip->ai_socktype, 0);
       if (!internal::IsSocketValid(*sock)) {
-        LIBNDT_EMIT_WARNING("netx_dial: socket() failed");
+        LIBNDT7_EMIT_WARNING("netx_dial: socket() failed");
         continue;
       }
 #ifdef SO_NOSIGPIPE
@@ -24126,7 +24130,7 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
         auto on = 1;
         if (::setsockopt(  //
                 *sock, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on)) != 0) {
-          LIBNDT_EMIT_WARNING("netx_dial: setsockopt(..., SO_NOSIGPIPE) failed");
+          LIBNDT7_EMIT_WARNING("netx_dial: setsockopt(..., SO_NOSIGPIPE) failed");
           sys->Closesocket(*sock);
           *sock = -1;
           continue;
@@ -24134,9 +24138,9 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
       }
 #endif  // SO_NOSIGPIPE
       if (netx_setnonblocking(*sock, true) != internal::Err::none) {
-        LIBNDT_EMIT_WARNING("netx_dial: netx_setnonblocking() failed");
+        LIBNDT7_EMIT_WARNING("netx_dial: netx_setnonblocking() failed");
         sys->Closesocket(*sock);
-        *sock = (libndt::internal::Socket)-1;
+        *sock = (libndt7::internal::Socket)-1;
         continue;
       }
       // While on Unix ai_addrlen is socklen_t, it's size_t on Windows. Just
@@ -24145,14 +24149,14 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
       // that size_t is `ULONG_PTR` while socklen_t is most likely `int`.
 #ifdef _WIN32
       if (aip->ai_addrlen > sizeof(sockaddr_in6)) {
-        LIBNDT_EMIT_WARNING("netx_dial: unexpected size of aip->ai_addrlen");
+        LIBNDT7_EMIT_WARNING("netx_dial: unexpected size of aip->ai_addrlen");
         sys->Closesocket(*sock);
-        *sock = (libndt::internal::Socket)-1;
+        *sock = (libndt7::internal::Socket)-1;
         continue;
       }
 #endif
       if (sys->Connect(*sock, aip->ai_addr, (socklen_t)aip->ai_addrlen) == 0) {
-        LIBNDT_EMIT_DEBUG("netx_dial: connect(): okay immediately");
+        LIBNDT7_EMIT_DEBUG("netx_dial: connect(): okay immediately");
         break;
       }
       auto connect_err = netx_map_errno(sys->GetLastError());
@@ -24165,17 +24169,17 @@ internal::Err Client::netx_dial(const std::string &hostname, const std::string &
                              &soerrlen) == 0) {
             assert(soerrlen == sizeof(soerr));
             if (soerr == 0) {
-              LIBNDT_EMIT_DEBUG("netx_dial: connect(): okay");
+              LIBNDT7_EMIT_DEBUG("netx_dial: connect(): okay");
               break;
             }
             sys->SetLastError(soerr);
           }
         }
       }
-      LIBNDT_EMIT_WARNING("netx_dial: connect() failed: "
-                   << internal::libndt_perror(netx_map_errno(sys->GetLastError())));
+      LIBNDT7_EMIT_WARNING("netx_dial: connect() failed: "
+                   << internal::libndt7_perror(netx_map_errno(sys->GetLastError())));
       sys->Closesocket(*sock);
-      *sock = (libndt::internal::Socket)-1;
+      *sock = (libndt7::internal::Socket)-1;
     }
     sys->Freeaddrinfo(rp);
     if (*sock != -1) {
@@ -24204,8 +24208,8 @@ again:
   if (err == internal::Err::none) {
     goto again;
   }
-  LIBNDT_EMIT_DEBUG(
-      "netx_recv: netx_recv_nonblocking() failed: " << internal::libndt_perror(err));
+  LIBNDT7_EMIT_DEBUG(
+      "netx_recv: netx_recv_nonblocking() failed: " << internal::libndt7_perror(err));
   return err;
 }
 
@@ -24214,7 +24218,7 @@ internal::Err Client::netx_recv_nonblocking(internal::Socket fd, void *base, int
   assert(base != nullptr && actual != nullptr);
   *actual = 0;
   if (count <= 0) {
-    LIBNDT_EMIT_WARNING(
+    LIBNDT7_EMIT_WARNING(
         "netx_recv_nonblocking: explicitly disallowing zero read; use "
         "netx_poll() to check the state of a socket");
     return internal::Err::invalid_argument;
@@ -24285,8 +24289,8 @@ again:
   if (err == internal::Err::none) {
     goto again;
   }
-  LIBNDT_EMIT_DEBUG(
-      "netx_send: netx_send_nonblocking() failed: " << internal::libndt_perror(err));
+  LIBNDT7_EMIT_DEBUG(
+      "netx_send: netx_send_nonblocking() failed: " << internal::libndt7_perror(err));
   return err;
 }
 
@@ -24295,7 +24299,7 @@ internal::Err Client::netx_send_nonblocking(internal::Socket fd, const void *bas
   assert(base != nullptr && actual != nullptr);
   *actual = 0;
   if (count <= 0) {
-    LIBNDT_EMIT_WARNING(
+    LIBNDT7_EMIT_WARNING(
         "netx_send_nonblocking: explicitly disallowing zero send; use "
         "netx_poll() to check the state of a socket");
     return internal::Err::invalid_argument;
@@ -24355,7 +24359,7 @@ internal::Err Client::netx_sendn(internal::Socket fd, const void *base, internal
 internal::Err Client::netx_resolve(const std::string &hostname,
                          std::vector<std::string> *addrs) noexcept {
   assert(addrs != nullptr);
-  LIBNDT_EMIT_DEBUG("netx_resolve: " << hostname);
+  LIBNDT7_EMIT_DEBUG("netx_resolve: " << hostname);
   addrinfo hints{};
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags |= AI_NUMERICHOST | AI_NUMERICSERV;
@@ -24367,14 +24371,14 @@ internal::Err Client::netx_resolve(const std::string &hostname,
     rv = sys->Getaddrinfo(hostname.data(), portno, &hints, &rp);
     if (rv != 0) {
       auto err = netx_map_eai(rv);
-      LIBNDT_EMIT_WARNING(
-          "netx_resolve: getaddrinfo() failed: " << internal::libndt_perror(err));
+      LIBNDT7_EMIT_WARNING(
+          "netx_resolve: getaddrinfo() failed: " << internal::libndt7_perror(err));
       return err;
     }
     // FALLTHROUGH
   }
   assert(rp);
-  LIBNDT_EMIT_DEBUG("netx_resolve: getaddrinfo(): okay");
+  LIBNDT7_EMIT_DEBUG("netx_resolve: getaddrinfo(): okay");
 	internal::Err result = internal::Err::none;
   for (auto aip = rp; (aip); aip = aip->ai_next) {
     char address[NI_MAXHOST], port[NI_MAXSERV];
@@ -24388,7 +24392,7 @@ internal::Err Client::netx_resolve(const std::string &hostname,
     // needs to be handled as we do above for getaddrinfo().
 #ifdef _WIN32
     if (aip->ai_addrlen > sizeof(sockaddr_in6)) {
-      LIBNDT_EMIT_WARNING("netx_resolve: unexpected size of aip->ai_addrlen");
+      LIBNDT7_EMIT_WARNING("netx_resolve: unexpected size of aip->ai_addrlen");
       result = internal::Err::value_too_large;
       break;
     }
@@ -24397,12 +24401,12 @@ internal::Err Client::netx_resolve(const std::string &hostname,
                         (socklen_t)sizeof(address), port,
                         (socklen_t)sizeof(port),
                         NI_NUMERICHOST | NI_NUMERICSERV) != 0) {
-      LIBNDT_EMIT_WARNING("netx_resolve: unexpected getnameinfo() failure");
+      LIBNDT7_EMIT_WARNING("netx_resolve: unexpected getnameinfo() failure");
       result = internal::Err::ai_generic;
       break;
     }
     addrs->push_back(address);  // we only care about address
-    LIBNDT_EMIT_DEBUG("netx_resolve: - " << address);
+    LIBNDT7_EMIT_DEBUG("netx_resolve: - " << address);
   }
   sys->Freeaddrinfo(rp);
   return result;
@@ -24472,7 +24476,7 @@ internal::Err Client::netx_wait_writeable(internal::Socket fd, Timeout timeout) 
 internal::Err Client::netx_poll(
       std::vector<pollfd> *pfds, int timeout_msec) const noexcept {
   if (pfds == nullptr) {
-    LIBNDT_EMIT_WARNING("netx_poll: passed a null vector of descriptors");
+    LIBNDT7_EMIT_WARNING("netx_poll: passed a null vector of descriptors");
     return internal::Err::invalid_argument;
   }
   for (auto &pfd : *pfds) {
@@ -24487,7 +24491,7 @@ again:
   // representation of the fdset size and letting the compiler promote
   // it to the correct integer. We don't need many fds in any case.
   if (pfds->size() > UINT8_MAX) {
-    LIBNDT_EMIT_WARNING("netx_poll: avoiding overflow");
+    LIBNDT7_EMIT_WARNING("netx_poll: avoiding overflow");
     return internal::Err::value_too_large;
   }
   rv = sys->Poll(pfds->data(), (uint8_t)pfds->size(), timeout_msec);
@@ -24525,7 +24529,7 @@ internal::Err Client::netx_shutdown_both(internal::Socket fd) noexcept {
       return err;
     }
   }
-  if (sys->Shutdown(fd, LIBNDT_OS_SHUT_RDWR) != 0) {
+  if (sys->Shutdown(fd, LIBNDT7_OS_SHUT_RDWR) != 0) {
     return netx_map_errno(sys->GetLastError());
   }
   return internal::Err::none;
@@ -24658,6 +24662,6 @@ std::string format_http_params(const std::map<std::string, std::string>& params)
   return ss.str();
 }
 
-}  // namespace libndt
-}  // namespace measurement_kit
+}  // namespace libndt7
+}  // namespace measurementlab
 #endif

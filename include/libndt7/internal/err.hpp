@@ -1,8 +1,8 @@
-// Part of Measurement Kit <https://measurement-kit.github.io/>.
-// Measurement Kit is free software under the BSD license. See AUTHORS
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP
-#define MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_ERR_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_ERR_HPP
 
 // libndt7/internal/err.hpp - definition of error
 
@@ -12,7 +12,7 @@
 
 #include <openssl/err.h>
 
-namespace measurement_kit {
+namespace measurementlab {
 namespace libndt7 {
 namespace internal {
 
@@ -125,5 +125,5 @@ std::string ssl_format_error() noexcept {
 
 }  // namespace internal
 }  // namespace libndt7
-}  // namespace measurement_kit
-#endif  // MEASUREMENT_KIT_LIBNDT7_INTERNAL_ERR_HPP
+}  // namespace measurementlab
+#endif  // MEASUREMENTLAB_LIBNDT7_INTERNAL_ERR_HPP
