@@ -2981,10 +2981,7 @@ Verbosity Client::get_verbosity() const noexcept {
   return settings_.verbosity;
 }
 
-// Function to parse a websocket URL and return its components. The URL should
-// include a resource path.
-UrlParts parse_ws_url(const std::string& url) {
-    std::regex url_regex(
+const std::regex url_regex(
       "^([^:/]+)"              // scheme (group 1)
       "://"                    // constant URI string
          "("                   // hostname (group 2)
@@ -2995,6 +2992,10 @@ UrlParts parse_ws_url(const std::string& url) {
       "(?::(\\d+))?"           // port, if present (group 3)
       "(/.*)?"                 // path and query, if present (group 4)
     );
+
+// Function to parse a websocket URL and return its components. The URL should
+// include a resource path.
+UrlParts parse_ws_url(const std::string& url) {
     std::smatch match;
     UrlParts parts;
 

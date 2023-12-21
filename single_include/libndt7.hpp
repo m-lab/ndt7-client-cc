@@ -21726,12 +21726,12 @@ using Timeout = unsigned int;
 #include <random>
 
 // TODO(github.com/m-lab/ndt7-client-cc/issues/10): Remove pragma ignoring warning when possible.
-#ifndef __clang__
+#if !defined(__clang__) && defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include <regex>
-#ifndef __clang__
+#if !defined(__clang__) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 #include <sstream>
@@ -24610,10 +24610,7 @@ Verbosity Client::get_verbosity() const noexcept {
   return settings_.verbosity;
 }
 
-// Function to parse a websocket URL and return its components. The URL should
-// include a resource path.
-UrlParts parse_ws_url(const std::string& url) {
-    std::regex url_regex(
+const std::regex url_regex(
       "^([^:/]+)"              // scheme (group 1)
       "://"                    // constant URI string
          "("                   // hostname (group 2)
@@ -24624,6 +24621,10 @@ UrlParts parse_ws_url(const std::string& url) {
       "(?::(\\d+))?"           // port, if present (group 3)
       "(/.*)?"                 // path and query, if present (group 4)
     );
+
+// Function to parse a websocket URL and return its components. The URL should
+// include a resource path.
+UrlParts parse_ws_url(const std::string& url) {
     std::smatch match;
     UrlParts parts;
 
