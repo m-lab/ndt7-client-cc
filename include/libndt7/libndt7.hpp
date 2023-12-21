@@ -95,6 +95,16 @@
 #include <memory>
 #include <mutex>
 #include <random>
+
+// TODO(github.com/m-lab/ndt7-client-cc/issues/10): Remove pragma ignoring warning when possible.
+#if !defined(__clang__) && defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+#include <regex>
+#if !defined(__clang__) && defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #include <sstream>
 #include <string>
 #include <thread>
@@ -2971,45 +2981,40 @@ Verbosity Client::get_verbosity() const noexcept {
   return settings_.verbosity;
 }
 
-// Function to parse a websocket URL and return its components. The URL must
+// Function to parse a websocket URL and return its components. The URL should
 // include a resource path.
-// TODO(soltesz): add testing for various input cases.
 UrlParts parse_ws_url(const std::string& url) {
-  UrlParts parts;
+    std::regex url_regex(
+      "^([^:/]+)"              // scheme (group 1)
+      "://"                    // constant URI string
+         "("                   // hostname (group 2)
+           "(?:[^/:]*)"        //   standard hostname, may be empty
+           "|"                 //   OR
+           "(?:\\[[^\\]]+\\])" //   everything between two [] brackets, e.g. ipv6.
+         ")"                   //
+      "(?::(\\d+))?"           // port, if present (group 3)
+      "(/.*)?"                 // path and query, if present (group 4)
+    );
+    std::smatch match;
+    UrlParts parts;
 
-  // Find the scheme.
-  auto colon_pos = url.find(":");
-  if (colon_pos != std::string::npos) {
-    parts.scheme = url.substr(0, colon_pos);
-  }
-
-  // Extract the hostname and port.
-  auto slash_pos = url.find("/", colon_pos + 3);
-  if (slash_pos == std::string::npos) {
-    // No resource path.
-    slash_pos = url.length();
-  }
-  auto host_part = url.substr(colon_pos + 3, slash_pos - colon_pos - 3);
-  auto port_pos = host_part.find(":");
-  // Does the host include a port?
-  if (port_pos != std::string::npos) {
-    parts.host = host_part.substr(0, port_pos);
-    parts.port = host_part.substr(port_pos + 1);
-  } else {
-    parts.host = host_part;
-    if (parts.scheme == "ws") {
-      parts.port = "80";
-    } else if (parts.scheme == "wss") {
-      parts.port = "443";
+    if (!std::regex_match(url, match, url_regex)) {
+      // Failed to match return empty parts.
+      return parts;
     }
-  }
-
-  // Extract the path.
-  if (slash_pos != std::string::npos) {
-    parts.path = url.substr(slash_pos);
-  }
-
-  return parts;
+    parts.scheme = match[1].str();
+    parts.host = match[2].str();
+    parts.port = match[3].str(); // Empty if not present
+    parts.path = match[4].str(); // Includes query
+    std::cout << match[5].str(); // Includes query
+    if (parts.port.empty()) {
+      if (parts.scheme == "ws" || parts.scheme == "http") {
+        parts.port = "80";
+      } else if (parts.scheme == "wss" || parts.scheme == "https") {
+        parts.port = "443";
+      }
+    }
+    return parts;
 }
 
 static std::string curl_urlencode(const std::string& raw) {

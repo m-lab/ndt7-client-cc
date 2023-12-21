@@ -25,12 +25,12 @@
 
 #define CATCH_CONFIG_MAIN
 // TODO(github.com/m-lab/ndt7-client-cc/issues/10): Remove pragma ignoring warning when possible.
-#ifndef __clang__
+#if !defined(__clang__) && defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include "third_party/github.com/catchorg/Catch2/catch.hpp"
-#ifndef __clang__
+#if !defined(__clang__) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 
@@ -83,13 +83,14 @@ TEST_CASE("Client::parse_ws_url() table tests") {
       .url = "://",
       .want = {.scheme = "", .host = "", .port = "", .path = ""},
     },
-    /*
-    TODO(soltesz): support parsing IPv6 hosts.
     {
-      .url = "ws://[::1]/test?foo",
-      .want = {.scheme = "ws", .host = "[::1]", .port = "80", .path = "/test?foo"},
+      .url = "ws://127.0.0.1:8888/test?foo",
+      .want = {.scheme = "ws", .host = "127.0.0.1", .port = "8888", .path = "/test?foo"},
     },
-    */
+    {
+      .url = "wss://[abc::1]/test?foo&x=1",
+      .want = {.scheme = "wss", .host = "[abc::1]", .port = "443", .path = "/test?foo&x=1"},
+    },
   };
   for (unsigned long i = 0; i < sizeof(cases)/sizeof(cases[0]); i++ ) {
     auto parts = parse_ws_url(cases[i].url);
