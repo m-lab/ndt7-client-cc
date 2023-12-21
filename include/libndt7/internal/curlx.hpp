@@ -1,8 +1,8 @@
 // Part of Measurement Lab <https://www.measurementlab.net/>.
 // Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef measurementlab_LIBNDT7_INTERNAL_CURLX_HPP
-#define measurementlab_LIBNDT7_INTERNAL_CURLX_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
 
 // libndt7/internal/curlx.hpp - libcurl wrappers
 
