@@ -21174,8 +21174,8 @@ Sys::~Sys() noexcept {}
 // Part of Measurement Lab <https://www.measurementlab.net/>.
 // Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef measurementlab_LIBNDT7_INTERNAL_LOGGER_HPP
-#define measurementlab_LIBNDT7_INTERNAL_LOGGER_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_LOGGER_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_LOGGER_HPP
 
 // libndt7/internal/logger.hpp - logger API
 
@@ -21253,8 +21253,8 @@ NoLogger::~NoLogger() noexcept {}
 // Part of Measurement Lab <https://www.measurementlab.net/>.
 // Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef measurementlab_LIBNDT7_INTERNAL_CURLX_HPP
-#define measurementlab_LIBNDT7_INTERNAL_CURLX_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
+#define MEASUREMENTLAB_LIBNDT7_INTERNAL_CURLX_HPP
 
 // libndt7/internal/curlx.hpp - libcurl wrappers
 
@@ -22684,7 +22684,11 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
       format_http_params(opts), settings_.scheme, settings_.hostname,
       settings_.port);
   } else {
-    locate_api_url += "/v2/nearest/ndt/ndt7";
+    if (opts.count("key")){
+      locate_api_url += "/v2/priority/nearest/ndt/ndt7";
+    } else {
+      locate_api_url += "/v2/nearest/ndt/ndt7";
+    }
     if (opts.size() > 0) {
       // TODO(soltesz): generalize options for country, region, or lat/lon, etc?
       locate_api_url += "?" + format_http_params(opts);
