@@ -3007,7 +3007,6 @@ UrlParts parse_ws_url(const std::string& url) {
     parts.host = match[2].str();
     parts.port = match[3].str(); // Empty if not present
     parts.path = match[4].str(); // Includes query
-    std::cout << match[5].str(); // Includes query
     if (parts.port.empty()) {
       if (parts.scheme == "ws" || parts.scheme == "http") {
         parts.port = "80";
