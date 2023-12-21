@@ -1,4 +1,4 @@
-# NDT Client Engine
+# NDT7 Client Library and Client
 
 [![GitHub license](https://img.shields.io/github/license/m-lab/ndt7-client-cc.svg)](https://raw.githubusercontent.com/m-lab/ndt7-client-cc/main/LICENSE) [![Github Releases](https://img.shields.io/github/release/m-lab/ndt7-client-cc.svg)](https://github.com/m-lab/ndt7-client-cc/releases) [![Build Status](https://app.travis-ci.com/m-lab/ndt7-client-cc.svg?branch=main)](https://app.travis-ci.com/m-lab/ndt7-client-cc) [![codecov](https://codecov.io/gh/m-lab/ndt7-client-cc/branch/main/graph/badge.svg)](https://codecov.io/gh/m-lab/ndt7-client-cc)
 
