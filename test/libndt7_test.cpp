@@ -91,6 +91,10 @@ TEST_CASE("Client::parse_ws_url() table tests") {
       .url = "wss://[abc::1]/test?foo&x=1",
       .want = {.scheme = "wss", .host = "[abc::1]", .port = "443", .path = "/test?foo&x=1"},
     },
+    {
+      .url = "ws://[abc::1]:9999/test?foo&x=1",
+      .want = {.scheme = "ws", .host = "[abc::1]", .port = "9999", .path = "/test?foo&x=1"},
+    },
   };
   for (unsigned long i = 0; i < sizeof(cases)/sizeof(cases[0]); i++ ) {
     auto parts = parse_ws_url(cases[i].url);
