@@ -5,9 +5,6 @@
 **Note**: This project is community supported and provided as-is for users and
 client integrators. Contributions are welcome (PRs and issues).
 
-![tardis](docs/tardis.gif
-  "It's not supposed to make that noise. You leave the brakes on.")
-
 ndt7-client-cc is a [Network-Diagnostic-Tool](
 https://github.com/ndt-project/ndt/wiki/NDTProtocol) (NDT) single-include C++11
 client library and command line client. NDT is a widely used network performance
