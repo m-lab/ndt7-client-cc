@@ -105,6 +105,7 @@
 #if !defined(__clang__) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
+
 #include <sstream>
 #include <string>
 #include <thread>
@@ -2990,31 +2991,31 @@ const std::regex url_regex(
            "(?:\\[[^\\]]+\\])" //   everything between two [] brackets, e.g. ipv6.
          ")"                   //
       "(?::(\\d+))?"           // port, if present (group 3)
-      "(/.*)?"                 // path and query, if present (group 4)
+      "(/.*)?$"                // path and query, if present (group 4)
     );
 
 // Function to parse a websocket URL and return its components. The URL should
 // include a resource path.
 UrlParts parse_ws_url(const std::string& url) {
-    std::smatch match;
-    UrlParts parts;
+  std::smatch match;
+  UrlParts parts;
 
-    if (!std::regex_match(url, match, url_regex)) {
-      // Failed to match return empty parts.
-      return parts;
-    }
-    parts.scheme = match[1].str();
-    parts.host = match[2].str();
-    parts.port = match[3].str(); // Empty if not present
-    parts.path = match[4].str(); // Includes query
-    if (parts.port.empty()) {
-      if (parts.scheme == "ws" || parts.scheme == "http") {
-        parts.port = "80";
-      } else if (parts.scheme == "wss" || parts.scheme == "https") {
-        parts.port = "443";
-      }
-    }
+  if (!std::regex_match(url, match, url_regex)) {
+    // Failed to match return empty parts.
     return parts;
+  }
+  parts.scheme = match[1].str();
+  parts.host = match[2].str();
+  parts.port = match[3].str(); // Empty if not present
+  parts.path = match[4].str(); // Includes query
+  if (parts.port.empty()) {
+    if (parts.scheme == "ws" || parts.scheme == "http") {
+      parts.port = "80";
+    } else if (parts.scheme == "wss" || parts.scheme == "https") {
+      parts.port = "443";
+    }
+  }
+  return parts;
 }
 
 static std::string curl_urlencode(const std::string& raw) {
