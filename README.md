@@ -15,6 +15,9 @@ performance test hosted by [Measurement Lab](https://www.measurementlab.net/).
 This library implements the ndt7 protocol. The libndt7 code should be considered
 an alpha release.
 
+We forked this library from [measurement-kit/libndt@6a9040c21fc](
+https://github.com/measurement-kit/libndt/commit/6a9040c21fcf43a40eb8e0d139be0d6b2a493b0a).
+
 ## Getting started
 
 libndt7 depends on OpenSSL (for TLS support and in the future for WebSocket
