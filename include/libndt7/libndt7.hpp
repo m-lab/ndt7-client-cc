@@ -2983,16 +2983,16 @@ Verbosity Client::get_verbosity() const noexcept {
 }
 
 const std::regex url_regex(
-      "^([^:/]+)"              // scheme (group 1)
-      "://"                    // constant URI string
-         "("                   // hostname (group 2)
-           "(?:[^/:]*)"        //   standard hostname, may be empty
-           "|"                 //   OR
-           "(?:\\[[^\\]]+\\])" //   everything between two [] brackets, e.g. ipv6.
-         ")"                   //
-      "(?::(\\d+))?"           // port, if present (group 3)
-      "(/.*)?$"                // path and query, if present (group 4)
-    );
+  "^([^:/]+)"           // scheme (group 1)
+  "://"                 // constant URI string
+  "("                   // hostname (group 2)
+    "(?:[^/:]*)"        //   standard hostname, may be empty
+    "|"                 //   OR
+    "(?:\\[[^\\]]+\\])" //   everything between two [] brackets, e.g. ipv6.
+  ")"                   //
+  "(?::(\\d+))?"        // port, if present (group 3)
+  "(/.*)?$"             // path and query, if present (group 4)
+);
 
 // Function to parse a websocket URL and return its components. The URL should
 // include a resource path.
