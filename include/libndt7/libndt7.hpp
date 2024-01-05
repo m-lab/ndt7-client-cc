@@ -323,6 +323,27 @@ class Settings {
   bool summary_only = false;
 };
 
+// SummaryData
+// ```````````
+
+// SummaryData contains the fields that summarize a completed test.
+struct SummaryData {
+  // Download speed in kbit/s.
+  double download_speed;
+
+  // Upload speed in kbit/s.
+  double upload_speed;
+
+  // Download retransmission rate (bytes_retrans / bytes_sent).
+  double download_retrans;
+
+  // Upload retransmission rate (bytes_retrans / bytes_sent).
+  double upload_retrans;
+
+  // TCPInfo's MinRTT (microseconds).
+  uint32_t min_rtt;
+};
+
 
 // Client
 // ``````
@@ -358,6 +379,10 @@ class Client : public EventHandler {
 
   /// Runs a NDT test using the configured (or default) settings.
   bool run() noexcept;
+
+  // After running a successful test with `run`, `get_summary` returns the test
+  // summary metrics.
+  SummaryData get_summary() noexcept;
 
   void on_warning(const std::string &s) const noexcept override;
 
@@ -581,25 +606,6 @@ class Client : public EventHandler {
   std::unique_ptr<internal::Sys> sys{new internal::Sys{}};
 
  protected:
-  // SummaryData contains the fields that are needed to generate the summary
-  // at the end of the tests.
-  struct SummaryData {
-      // download speed in kbit/s.
-      double download_speed;
-
-      // upload speed in kbit/s.
-      double upload_speed;
-
-      // download retransmission rate (bytes_retrans / bytes_sent).
-      double download_retrans;
-
-      // upload retransmission rate (bytes_retrans / bytes_sent).
-      double upload_retrans;
-
-      // TCPInfo's MinRTT (microseconds).
-      uint32_t min_rtt;
-  };
-
   SummaryData summary_;
 
   // NDT web100 summary data.
@@ -980,6 +986,10 @@ void Client::on_server_busy(std::string msg) noexcept {
 
 // High-level API
 // ``````````````
+
+SummaryData Client::get_summary() noexcept {
+  return summary_;
+}
 
 void Client::summary() noexcept {
   LIBNDT7_EMIT_INFO(std::endl << "[Test results]");
