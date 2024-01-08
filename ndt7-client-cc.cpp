@@ -85,6 +85,24 @@ void BatchClient::summary() noexcept {
   std::cout << summary.dump() << std::endl;
 }
 
+struct KV {
+  std::string first;
+  std::string last;
+};
+
+static bool token(std::string s, std::string sep, KV& kv) {
+  if (s == "") {
+    return false;
+  }
+  auto p = s.find(sep);
+  kv.first = s.substr(0, p);
+  kv.last = "";
+  if (p != std::string::npos) {
+    kv.last = s.substr(p+1);
+  }
+  return true;
+}
+
 static void usage() {
   // clang-format off
   std::clog << R"(Usage: ndt7-client-cc <-upload|-download> [options]
@@ -98,7 +116,7 @@ By default, ndt7-client-cc uses M-Lab's Locate API for unregistered clients
 you may specify an API key for the Locate API using:
 * `-locate-api-key=<key>`
 * `-locate-api-url=<url>`
-* `-locate-param=<name>=<value>`
+* `-locate-params=<name>=<value>[[,<name2>=<value2>],...]`
 
 Instead of the Locate API, you may specify a specific server using a combination
 of the flags:
@@ -140,7 +158,7 @@ int main(int, char **argv) {
     cmdline.add_param("socks5h");
     cmdline.add_param("locate-api-key");
     cmdline.add_param("locate-api-url");
-    cmdline.add_param("locate-param");
+    cmdline.add_param("locate-params");
     cmdline.add_param("port");
     cmdline.add_param("scheme");
     cmdline.add_param("hostname");
@@ -184,11 +202,17 @@ int main(int, char **argv) {
       } else if (param.first == "locate-api-key") {
         settings.metadata["key"] = param.second;
         std::clog << "will use this locate api key: " << param.second << std::endl;
-      } else if (param.first == "locate-param") {
-        std::string name = param.second.substr(0, param.second.find("="));
-        std::string value = param.second.substr(param.second.find("=")+1);
-        settings.metadata[name] = value;
-        std::clog << "will use this locate param: " << name << " == " << value << std::endl;
+      } else if (param.first == "locate-params") {
+        KV commas = {.first = param.second};
+        while (token(commas.first, ",", commas)) {
+          KV param;
+          if (token(commas.first, "=", param)) {
+            std::clog << "will use this locate param: " << param.first << " == " << param.last << std::endl;
+            settings.metadata[param.first] = param.last;
+          }
+          // Process next parameter.
+          commas.first = commas.last;
+        }
       } else if (param.first == "locate-api-url") {
         settings.locate_api_base_url = param.second;
         std::clog << "will use this locate api url: " << param.second << std::endl;
