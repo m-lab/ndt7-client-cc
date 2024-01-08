@@ -174,3 +174,8 @@ add_test(NAME simple_test COMMAND ndt7-client-cc
 add_test(NAME modern_test COMMAND ndt7-client-cc
          -ca-bundle-path ${CMAKE_SOURCE_DIR}/third_party/curl.haxx.se/ca/cacert.pem
          -verbose -download -upload -scheme=wss)
+
+INSTALL(PROGRAMS ndt7-client-cc
+        DESTINATION bin)
+INSTALL(FILES ${MK_LIBNDT7_AMALGAMATE_DEST}
+        DESTINATION include/libndt7)

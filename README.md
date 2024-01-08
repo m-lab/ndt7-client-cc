@@ -76,6 +76,24 @@ cmake --build .
 ctest -a --output-on-failure .
 ```
 
+## Install artifacts
+
+By default the reference client (`ndt7-client-cc`) and the single include
+libndt7.hpp are installed to system a default location like `/usr/local/`.
+
+```sh
+$ cmake --install .
+-- Install configuration: ""
+-- Installing: /usr/local/bin/ndt7-client-cc
+-- Installing: /usr/local/include/libndt7/libndt7.hpp
+```
+
+You may specify an alternate prefix.
+
+```sh
+cmake --install . --prefix </my/install/prefix>
+```
+
 ## Command line client
 
 Building with CMake also builds a simple command line client. Get usage info
