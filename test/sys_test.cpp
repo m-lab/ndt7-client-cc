@@ -8,12 +8,12 @@
 
 #define CATCH_CONFIG_MAIN
 // TODO(github.com/m-lab/ndt7-client-cc/issues/10): Remove pragma ignoring warning when possible.
-#ifndef __clang__
+#if !defined(__clang__) && defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include "third_party/github.com/catchorg/Catch2/catch.hpp"
-#ifndef __clang__
+#if !defined(__clang__) && defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
 
