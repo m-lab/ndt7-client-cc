@@ -66,10 +66,6 @@ void BatchClient::summary() noexcept {
     download["Speed"] = summary_.download_speed;
     download["Retransmission"] = summary_.download_retrans;
 
-    if (web100 != nullptr) {
-      download["Web100"] = web100;
-    }
-
     if (measurement_ != nullptr) {
       download["ConnectionInfo"] = connection_info_;
       download["LastMeasurement"] = measurement_;

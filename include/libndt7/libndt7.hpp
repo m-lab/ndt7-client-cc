@@ -13,17 +13,13 @@
 /// advanced usage may require you to create a subclass of `libndt7::Client` and
 /// override specific virtual methods to customize the behaviour.
 ///
-/// This implementation provides the C2S and S2C NDT subtests. We implement
-/// NDT over TLS and NDT over websocket. For more information on the NDT
-/// protocol, \see https://github.com/ndt-project/ndt/wiki/NDTProtocol.
+/// This implementation provides version 7 of the NDT protocol (aka ndt7). The
+/// code in this library includes C2S (upload) and S2C (download) ndt7 subtests
+/// based on the ndt7 specification, which is described at \see
+/// https://github.com/m-lab/ndt-server/blob/master/spec/ndt7-protocol.md.
 ///
-/// The NDT protocol described above is version 5 (aka ndt5). The code in this
-/// library also implements the ndt7 specification, which is described at
-/// \see https://github.com/m-lab/ndt-server/blob/master/spec/ndt7-protocol.md.
-///
-/// Throughout this file, we'll use NDT to indicate ndt5 and ndt7 explicitly
-/// to indicate version 7 of the protocol. Please, use ndt7 in newer code and
-/// stick to ndt5 only if backwards compatibility is necessary.
+/// Throughout this file, we'll use NDT or ndt7 interchangably to indicate
+/// version 7 of the protocol.
 ///
 /// \remark As a general rule, what is not documented using Doxygen comments
 /// inside of this file is considered either internal or experimental. We
@@ -230,19 +226,18 @@ class EventHandler {
                               double measured_bytes, double elapsed,
                               double max_runtime) noexcept = 0;
 
-  /// Called to provide you with NDT results. The default behavior is
-  /// to write the provided information as an info message. @param scope is
-  /// "web100", when we're passing you Web 100 variables, "tcp_info" when
-  /// we're passing you TCP info variables, "summary" when we're passing you
-  /// summary variables, or "ndt7" when we're passing you results returned
-  /// by a ndt7 server. @param name is the name of the variable; if @p scope
-  /// is "ndt7", then @p name should be "download". @param value is the
-  /// variable value; variables are typically int, float, or string when
-  /// running ndt5 tests, instead they are serialized JSON returned by the
-  /// server when running a ndt7 test. \warning This method could be called
-  /// from another thread context.
-  virtual void on_result(std::string scope, std::string name,
-                         std::string value) noexcept = 0;
+  /// Called to provide you with NDT results. The default behavior is to write
+  /// the provided information as an info message. @param scope is "tcp_info"
+  /// when we're passing you TCP info variables, "summary" when we're passing
+  /// you summary variables, or "ndt7" when we're passing you results returned
+  /// by a ndt7 server. @param name is the name of the variable; if @p scope is
+  /// "ndt7", then @p name should be "download". @param value is the variable
+  /// value; variables are typically int, float, or string when running ndt5
+  /// tests, instead they are serialized JSON returned by the server when
+  /// running a ndt7 test. \warning This method could be called from another
+  /// thread context.
+  virtual void on_result(std::string scope, std::string name, std::string value)
+  noexcept = 0;
 
   /// Called when the server is busy. The default behavior is to write a
   /// warning message. @param msg is the reason why the server is busy, encoded
@@ -367,7 +362,10 @@ class Client : public EventHandler {
   /// Destroys a Client.
   virtual ~Client() noexcept;
 
-  /// Runs a NDT test using the configured (or default) settings.
+  /// Runs an ndt7 test based on the configured settings. On success, `run`
+  /// returns true. When using the Locate API, `run` will attempt a test with
+  /// multiple servers, stopping on the first success or continue trying the
+  /// next server on failure. If all attempts fail, `run` returns false.
   bool run() noexcept;
 
   void on_warning(const std::string &s) const noexcept override;
@@ -612,9 +610,6 @@ class Client : public EventHandler {
   };
 
   SummaryData summary_;
-
-  // NDT web100 summary data.
-  nlohmann::json web100;
 
   // ndt7 Measurement object.
   nlohmann::json measurement_;
@@ -915,9 +910,10 @@ bool Client::run() noexcept {
   if ((settings_.protocol_flags & protocol_flag_tls) != 0) {
     scheme = "wss";
   }
-  for (auto &urls : targets) {
-    LIBNDT7_EMIT_DEBUG("using the ndt7 protocol");
-    if ((settings_.nettest_flags & nettest_flag_download) != 0) {
+  bool success = true;
+  LIBNDT7_EMIT_DEBUG("using the ndt7 protocol");
+  if ((settings_.nettest_flags & nettest_flag_download) != 0) {
+    for (auto &urls : targets) {
       auto key = scheme + ":///ndt/v7/download";
       if (!urls.contains(key)) {
         LIBNDT7_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
@@ -925,12 +921,22 @@ bool Client::run() noexcept {
       }
       auto url = urls[key];
       UrlParts parts = parse_ws_url(url);
-      if (!ndt7_download(parts)) {
+      success = ndt7_download(parts);
+      if (!success) {
         LIBNDT7_EMIT_WARNING("ndt7: download failed");
-       // FALLTHROUGH
+        // try next server.
+        continue;
       }
+      // download succeeded.
+      break;
     }
-    if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
+  }
+  if (!success) {
+    LIBNDT7_EMIT_WARNING("no more hosts to try; failing the test");
+    return false;
+  }
+  if ((settings_.nettest_flags & nettest_flag_upload) != 0) {
+    for (auto &urls : targets) {
       auto key = scheme + ":///ndt/v7/upload";
       if (!urls.contains(key)) {
         LIBNDT7_EMIT_WARNING("ndt7: scheme not found in results: " << scheme);
@@ -938,16 +944,22 @@ bool Client::run() noexcept {
       }
       auto url = urls[key];
       UrlParts parts = parse_ws_url(url);
-      if (!ndt7_upload(parts)) {
+      success = ndt7_upload(parts);
+      if (!success) {
         LIBNDT7_EMIT_WARNING("ndt7: upload failed");
-        // FALLTHROUGH
+        // Try next server.
+        continue;
       }
+      // upload succeeded.
+      break;
     }
-    LIBNDT7_EMIT_INFO("ndt7: test complete");
-    return true;
   }
-  LIBNDT7_EMIT_WARNING("no more hosts to try; failing the test");
-  return false;
+  if (success) {
+    LIBNDT7_EMIT_INFO("ndt7: test complete");
+  } else {
+    LIBNDT7_EMIT_WARNING("no more hosts to try; failing the test");
+  }
+  return success;
 }
 
 void Client::on_warning(const std::string &msg) const noexcept {
@@ -1015,9 +1027,6 @@ void Client::summary() noexcept {
       LIBNDT7_EMIT_INFO("Upload retransmission: "
         << std::fixed << std::setprecision(2)
         << (summary_.upload_retrans * 100) << "%");
-  }
-  if (web100 != nullptr) {
-    LIBNDT7_EMIT_DEBUG("web100: " << web100.dump());
   }
 }
 
