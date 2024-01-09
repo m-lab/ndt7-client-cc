@@ -91,7 +91,7 @@ $ cmake --install .
 You may specify an alternate prefix.
 
 ```sh
-cmake --install . --prefix </my/install/prefix>
+cmake --install . --prefix /my/install/prefix
 ```
 
 ## Command line client
