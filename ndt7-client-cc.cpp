@@ -203,7 +203,7 @@ int main(int, char **argv) {
         settings.metadata["key"] = param.second;
         std::clog << "will use this locate api key: " << param.second << std::endl;
       } else if (param.first == "locate-params") {
-        KV commas = {.first = param.second};
+        KV commas = {.first = param.second, .last = ""};
         while (token(commas.first, ",", commas)) {
           KV param;
           if (token(commas.first, "=", param)) {
