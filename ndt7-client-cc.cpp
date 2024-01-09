@@ -93,15 +93,15 @@ struct KeyValueParserState {
 // getNextToken returns true if the string @p s contains @p sep and false otherwise. On successful
 // return, the @p kv parser state is mutated and will contain the first token in its .first entry and the rest
 // of the string yet to parse into its .rest entry.
-static bool getNextToken(std::string s, std::string sep, KV &kv) {
+static bool getNextToken(std::string s, std::string sep, KeyValueParserState &kv) {
   if (s == "") {
     return false;
   }
   auto p = s.find(sep);
   kv.first = s.substr(0, p);
-  kv.last = "";
+  kv.rest = "";
   if (p != std::string::npos) {
-    kv.last = s.substr(p+1);
+    kv.rest = s.substr(p+1);
   }
   return true;
 }
@@ -206,15 +206,15 @@ int main(int, char **argv) {
         settings.metadata["key"] = param.second;
         std::clog << "will use this locate api key: " << param.second << std::endl;
       } else if (param.first == "locate-params") {
-        KV commas = {.first = param.second, .last = ""};
-        while (token(commas.first, ",", commas)) {
-          KV param;
-          if (token(commas.first, "=", param)) {
-            std::clog << "will use this locate param: " << param.first << " == " << param.last << std::endl;
-            settings.metadata[param.first] = param.last;
+        KeyValueParserState commas = {.first = param.second, .rest = ""};
+        while (getNextToken(commas.first, ",", commas)) {
+          KeyValueParserState param;
+          if (getNextToken(commas.first, "=", param)) {
+            std::clog << "will use this locate param: " << param.first << " == " << param.rest << std::endl;
+            settings.metadata[param.first] = param.rest;
           }
           // Process next parameter.
-          commas.first = commas.last;
+          commas.first = commas.rest;
         }
       } else if (param.first == "locate-api-url") {
         settings.locate_api_base_url = param.second;
