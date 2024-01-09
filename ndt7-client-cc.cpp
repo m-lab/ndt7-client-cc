@@ -85,7 +85,7 @@ void BatchClient::summary() noexcept {
   std::cout << summary.dump() << std::endl;
 }
 
-struct KV {
+struct KeyValueParserState {
   std::string first;
   std::string last;
 };
