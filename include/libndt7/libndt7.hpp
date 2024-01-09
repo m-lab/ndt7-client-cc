@@ -232,9 +232,8 @@ class EventHandler {
   /// you summary variables, or "ndt7" when we're passing you results returned
   /// by a ndt7 server. @param name is the name of the variable; if @p scope is
   /// "ndt7", then @p name should be "download". @param value is the variable
-  /// value; variables are typically int, float, or string when running ndt5
-  /// tests, instead they are serialized JSON returned by the server when
-  /// running a ndt7 test. \warning This method could be called from another
+  /// value; variables are serialized JSON returned by the server when
+  /// running an ndt7 test. \warning This method could be called from another
   /// thread context.
   virtual void on_result(std::string scope, std::string name, std::string value)
   noexcept = 0;
@@ -1000,7 +999,7 @@ void Client::on_performance(NettestFlags tid, uint8_t nflows,
 }
 
 void Client::on_result(std::string scope, std::string name, std::string value) noexcept {
-  LIBNDT7_EMIT_INFO("  - [" << scope << "] " << name << ": " << value);
+  LIBNDT7_EMIT_DEBUG("  - [" << scope << "] " << name << ": " << value);
 }
 
 void Client::on_server_busy(std::string msg) noexcept {
@@ -1213,9 +1212,7 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
           LIBNDT7_EMIT_WARNING("Unable to parse message as JSON: " << sinfo);
         }
 
-        if (get_verbosity() == verbosity_debug) {
-          on_result("ndt7", "download", std::move(sinfo));
-        }
+        on_result("ndt7", "download", std::move(sinfo));
       }
     }
     total += count;  // Assume we won't overflow
@@ -1290,9 +1287,7 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
       // This could fail if there are non-utf8 characters. This structure just
       // contains integers and ASCII strings, so we should be good.
       std::string json = measurement.dump();
-      if (get_verbosity() == verbosity_debug) {
-        on_result("ndt7", "upload", json);
-      }
+      on_result("ndt7", "upload", json);
       // Send measurement to the server.
 			internal::Err err = ws_send_frame(sock_, ws_opcode_text | ws_fin_flag,
                               (uint8_t *)json.data(), json.size());
