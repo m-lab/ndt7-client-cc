@@ -90,7 +90,10 @@ struct KeyValueParserState {
   std::string last;
 };
 
-static bool token(std::string s, std::string sep, KV& kv) {
+// getNextToken returns true if the string @p s contains @p sep and false otherwise. On successful
+// return, the @p kv parser state is mutated and will contain the first token in its .first entry and the rest
+// of the string yet to parse into its .rest entry.
+static bool getNextToken(std::string s, std::string sep, KV &kv) {
   if (s == "") {
     return false;
   }
