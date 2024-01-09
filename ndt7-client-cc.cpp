@@ -87,7 +87,7 @@ void BatchClient::summary() noexcept {
 
 struct KeyValueParserState {
   std::string first;
-  std::string last;
+  std::string rest;
 };
 
 // getNextToken returns true if the string @p s contains @p sep and false otherwise. On successful
