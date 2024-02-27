@@ -22723,7 +22723,9 @@ bool Client::query_locate_api(const std::map<std::string, std::string>& opts, st
       locate_api_url += "?" + format_http_params(opts);
     }
     LIBNDT7_EMIT_INFO("using locate: " << locate_api_url);
-    if (!query_locate_api_curl(locate_api_url, settings_.timeout, &body)) {
+    if (!query_locate_api_curl(locate_api_url,
+                               static_cast<long>(settings_.timeout),
+                               &body)) {
       return false;
     }
   }
