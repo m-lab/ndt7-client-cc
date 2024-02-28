@@ -21742,6 +21742,11 @@ using Timeout = unsigned int;
 #include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0)
+#define NDT7_UPLOAD_RETRANSMISSION_SUPPORT
+#endif  // LINUX_VERSION_CODE
+
 namespace measurementlab {
 namespace libndt7 {
 
@@ -22274,61 +22279,66 @@ class Client : public EventHandler {
 
 #ifdef __linux__
 #include <linux/tcp.h>
-#define NDT7_ENUM_TCP_INFO \
-  XX(tcpi_state, TcpiState) \
-  XX(tcpi_ca_state, TcpiCaState) \
-  XX(tcpi_retransmits, TcpiRetransmits) \
-  XX(tcpi_probes, TcpiProbes) \
-  XX(tcpi_backoff, TcpiBackoff) \
-  XX(tcpi_options, TcpiOptions) \
-  XX(tcpi_snd_wscale, TcpiSndWscale) \
-  XX(tcpi_rcv_wscale, TcpiRcvWscale) \
+#define NDT7_ENUM_TCP_INFO                                       \
+  XX(tcpi_state, TcpiState)                                      \
+  XX(tcpi_ca_state, TcpiCaState)                                 \
+  XX(tcpi_retransmits, TcpiRetransmits)                          \
+  XX(tcpi_probes, TcpiProbes)                                    \
+  XX(tcpi_backoff, TcpiBackoff)                                  \
+  XX(tcpi_options, TcpiOptions)                                  \
+  XX(tcpi_snd_wscale, TcpiSndWscale)                             \
+  XX(tcpi_rcv_wscale, TcpiRcvWscale)                             \
   XX(tcpi_delivery_rate_app_limited, TcpiDeliveryRateAppLimited) \
-  XX(tcpi_rto, TcpiRto) \
-  XX(tcpi_ato, TcpiAto) \
-  XX(tcpi_snd_mss, TcpiSndMss) \
-  XX(tcpi_rcv_mss, TcpiRcvMss) \
-  XX(tcpi_unacked, TcpiUnacked) \
-  XX(tcpi_sacked, TcpiSacked) \
-  XX(tcpi_lost, TcpiLost) \
-  XX(tcpi_retrans, TcpiRetrans) \
-  XX(tcpi_fackets, TcpiFackets) \
-  XX(tcpi_last_data_sent, TcpiLastDataSent) \
-  XX(tcpi_last_ack_sent, TcpiLastAckSent) \
-  XX(tcpi_last_data_recv, TcpiLastDataRecv) \
-  XX(tcpi_last_ack_recv, TcpiLastAckRecv) \
-  XX(tcpi_pmtu, TcpiPmtu) \
-  XX(tcpi_rcv_ssthresh, TcpiRcvSsthresh) \
-  XX(tcpi_rtt, TcpiRtt) \
-  XX(tcpi_rttvar, TcpiRttvar) \
-  XX(tcpi_snd_ssthresh, TcpiSndSsthresh) \
-  XX(tcpi_snd_cwnd, TcpiSndCwnd) \
-  XX(tcpi_advmss, TcpiAdvmss) \
-  XX(tcpi_reordering, TcpiReordering) \
-  XX(tcpi_rcv_rtt, TcpiRcvRtt) \
-  XX(tcpi_rcv_space, TcpiRcvSpace) \
-  XX(tcpi_total_retrans, TcpiTotalRetrans) \
-  XX(tcpi_pacing_rate, TcpiPacingRate) \
-  XX(tcpi_max_pacing_rate, TcpiMaxPacingRate) \
-  XX(tcpi_bytes_acked, TcpiBytesAcked) \
-  XX(tcpi_bytes_received, TcpiBytesReceived) \
-  XX(tcpi_segs_out, TcpiSegsOut) \
-  XX(tcpi_segs_in, TcpiSegsIn) \
-  XX(tcpi_notsent_bytes, TcpiNotsentBytes) \
-  XX(tcpi_min_rtt, TcpiMinRtt) \
-  XX(tcpi_data_segs_in, TcpiDataSegsIn) \
-  XX(tcpi_data_segs_out, TcpiDataSegsOut) \
-  XX(tcpi_delivery_rate, TcpiDeliveryRate) \
-  XX(tcpi_busy_time, TcpiBusyTime) \
-  XX(tcpi_rwnd_limited, TcpiRwndLimited) \
-  XX(tcpi_sndbuf_limited, TcpiSndbufLimited) \
-  XX(tcpi_delivered, TcpiDelivered) \
-  XX(tcpi_delivered_ce, TcpiDeliveredCe) \
-  XX(tcpi_bytes_sent, TcpiBytesSent) \
+  XX(tcpi_rto, TcpiRto)                                          \
+  XX(tcpi_ato, TcpiAto)                                          \
+  XX(tcpi_snd_mss, TcpiSndMss)                                   \
+  XX(tcpi_rcv_mss, TcpiRcvMss)                                   \
+  XX(tcpi_unacked, TcpiUnacked)                                  \
+  XX(tcpi_sacked, TcpiSacked)                                    \
+  XX(tcpi_lost, TcpiLost)                                        \
+  XX(tcpi_retrans, TcpiRetrans)                                  \
+  XX(tcpi_fackets, TcpiFackets)                                  \
+  XX(tcpi_last_data_sent, TcpiLastDataSent)                      \
+  XX(tcpi_last_ack_sent, TcpiLastAckSent)                        \
+  XX(tcpi_last_data_recv, TcpiLastDataRecv)                      \
+  XX(tcpi_last_ack_recv, TcpiLastAckRecv)                        \
+  XX(tcpi_pmtu, TcpiPmtu)                                        \
+  XX(tcpi_rcv_ssthresh, TcpiRcvSsthresh)                         \
+  XX(tcpi_rtt, TcpiRtt)                                          \
+  XX(tcpi_rttvar, TcpiRttvar)                                    \
+  XX(tcpi_snd_ssthresh, TcpiSndSsthresh)                         \
+  XX(tcpi_snd_cwnd, TcpiSndCwnd)                                 \
+  XX(tcpi_advmss, TcpiAdvmss)                                    \
+  XX(tcpi_reordering, TcpiReordering)                            \
+  XX(tcpi_rcv_rtt, TcpiRcvRtt)                                   \
+  XX(tcpi_rcv_space, TcpiRcvSpace)                               \
+  XX(tcpi_total_retrans, TcpiTotalRetrans)                       \
+  XX(tcpi_pacing_rate, TcpiPacingRate)                           \
+  XX(tcpi_max_pacing_rate, TcpiMaxPacingRate)                    \
+  XX(tcpi_bytes_acked, TcpiBytesAcked)                           \
+  XX(tcpi_bytes_received, TcpiBytesReceived)                     \
+  XX(tcpi_segs_out, TcpiSegsOut)                                 \
+  XX(tcpi_segs_in, TcpiSegsIn)                                   \
+  XX(tcpi_notsent_bytes, TcpiNotsentBytes)                       \
+  XX(tcpi_min_rtt, TcpiMinRtt)                                   \
+  XX(tcpi_data_segs_in, TcpiDataSegsIn)                          \
+  XX(tcpi_data_segs_out, TcpiDataSegsOut)                        \
+  XX(tcpi_delivery_rate, TcpiDeliveryRate)                       \
+  XX(tcpi_busy_time, TcpiBusyTime)                               \
+  XX(tcpi_rwnd_limited, TcpiRwndLimited)                         \
+  XX(tcpi_sndbuf_limited, TcpiSndbufLimited)
+
+// `tcpi_delivered` and `tcpi_delivered_ce` are introduced in linux 4.18.0.
+// `tcpi_bytes_sent`, `tcpi_bytes_retrans`, `tcpi_dsack_dups` and
+// `tcpi_reord_seen` are introduced in linux 4.19.0.
+#define NDT7_ENUM_TCP_INFO_ADVANCED        \
+  XX(tcpi_delivered, TcpiDelivered)        \
+  XX(tcpi_delivered_ce, TcpiDeliveredCe)   \
+  XX(tcpi_bytes_sent, TcpiBytesSent)       \
   XX(tcpi_bytes_retrans, TcpiBytesRetrans) \
-  XX(tcpi_dsack_dups, TcpiDsackDups) \
+  XX(tcpi_dsack_dups, TcpiDsackDups)       \
   XX(tcpi_reord_seen, TcpiReordSeen)
-#endif // __linux__
+#endif  // __linux__
 
 // WebSocket constants
 // ```````````````````
@@ -22896,9 +22906,13 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
         measurement["TCPInfo"]["ElapsedTime"] = (std::uint64_t) elapsed_usec.count();
 #define XX(lower_, upper_) measurement["TCPInfo"][#upper_] = (uint64_t)tcpinfo.lower_;
         NDT7_ENUM_TCP_INFO
+#ifdef NDT7_UPLOAD_RETRANSMISSION_SUPPORT
+        NDT7_ENUM_TCP_INFO_ADVANCED
+#endif  // NDT7_UPLOAD_RETRANSMISSION_SUPPORT
 #undef XX
       }
 
+#ifdef NDT7_UPLOAD_RETRANSMISSION_SUPPORT
       // Calculate retransmission rate.
       try {
         nlohmann::json tcpinfo_json = measurement["TCPInfo"];
@@ -22908,6 +22922,7 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
       } catch (const std::exception& e) {
         LIBNDT7_EMIT_WARNING("Cannot calculate retransmission rate: " << e.what());
       }
+#endif  // NDT7_UPLOAD_RETRANSMISSION_SUPPORT
 #endif  // __linux__
       if (!settings_.summary_only) {
         on_performance(nettest_flag_upload, 1, static_cast<double>(total),
