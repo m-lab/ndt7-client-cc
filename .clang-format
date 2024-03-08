@@ -1,4 +1,4 @@
 BasedOnStyle: Google
-ColumnLimit: 90
+ColumnLimit: 80
 AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
