@@ -2,15 +2,12 @@
 // Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
 
-#include "third_party/github.com/nlohmann/json/json.hpp"
-
-#include "libndt7/libndt7.hpp"  // not standalone
-
 #include <stdlib.h>
 
 #include <iostream>
-#include <sstream>
-#include <memory>
+
+#include "third_party/github.com/nlohmann/json/json.hpp"
+#include "libndt7/libndt7.h"  // not standalone
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -67,8 +64,8 @@ void BatchClient::summary() noexcept {
     download["Retransmission"] = summary_.download_retrans;
 
     if (measurement_ != nullptr) {
-      download["ConnectionInfo"] = connection_info_;
-      download["LastMeasurement"] = measurement_;
+      download["ConnectionInfo"] = *connection_info_;
+      download["LastMeasurement"] = *measurement_;
     }
 
     summary["Download"] = download;
