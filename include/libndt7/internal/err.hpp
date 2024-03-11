@@ -6,11 +6,11 @@
 
 // libndt7/internal/err.hpp - definition of error
 
+#include <openssl/err.h>
+
 #include <climits>
 #include <sstream>
 #include <string>
-
-#include <openssl/err.h>
 
 namespace measurementlab {
 namespace libndt7 {
