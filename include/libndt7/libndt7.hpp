@@ -741,17 +741,7 @@ constexpr uint64_t ws_f_sec_ws_protocol = 1 << 2;
 constexpr uint64_t ws_f_upgrade = 1 << 3;
 
 // Values of Sec-WebSocket-Protocol used by ndt-project/ndt.
-constexpr const char *ws_proto_control = "ndt";
-constexpr const char *ws_proto_c2s = "c2s";
-constexpr const char *ws_proto_s2c = "s2c";
 constexpr const char *ws_proto_ndt7 = "net.measurementlab.ndt.v7";
-
-// Private constants
-// `````````````````
-
-constexpr auto max_loops = 256;
-constexpr char msg_kickoff[] = "123456 654321";
-constexpr size_t msg_kickoff_size = sizeof(msg_kickoff) - 1;
 
 // Private utils
 // `````````````
