@@ -20931,25 +20931,23 @@ class Sys {
 
   virtual void SetLastError(int err) const noexcept;
 
-  virtual int Getaddrinfo(
-      const char *domain, const char *port, const addrinfo *hints,
-      addrinfo **res) const noexcept;
+  virtual int Getaddrinfo(const char *domain, const char *port,
+                          const addrinfo *hints, addrinfo **res) const noexcept;
 
-  virtual int Getnameinfo(
-      const sockaddr *sa, socklen_t salen, char *host, socklen_t hostlen,
-      char *serv, socklen_t servlen, int flags) const noexcept;
+  virtual int Getnameinfo(const sockaddr *sa, socklen_t salen, char *host,
+                          socklen_t hostlen, char *serv, socklen_t servlen,
+                          int flags) const noexcept;
 
   virtual void Freeaddrinfo(addrinfo *aip) const noexcept;
 
   virtual Socket NewSocket(int domain, int type, int protocol) const noexcept;
 
-  virtual int Connect(
-      Socket fd, const sockaddr *sa, socklen_t n) const noexcept;
+  virtual int Connect(Socket fd, const sockaddr *sa,
+                      socklen_t n) const noexcept;
 
   virtual Ssize Recv(Socket fd, void *base, Size count) const noexcept;
 
-  virtual Ssize Send(
-      Socket fd, const void *base, Size count) const noexcept;
+  virtual Ssize Send(Socket fd, const void *base, Size count) const noexcept;
 
   virtual int Shutdown(Socket fd, int shutdown_how) const noexcept;
 
@@ -20961,9 +20959,8 @@ class Sys {
   virtual int Poll(pollfd *fds, nfds_t nfds, int timeout) const noexcept;
 #endif
 
-  virtual long long Strtonum(
-      const char *s, long long minval, long long maxval,
-      const char **err) const noexcept;
+  virtual long long Strtonum(const char *s, long long minval, long long maxval,
+                             const char **err) const noexcept;
 
 #ifdef _WIN32
   virtual int Ioctlsocket(Socket s, long cmd, u_long *argp) const noexcept;
@@ -20972,9 +20969,8 @@ class Sys {
   virtual int Fcntl(Socket s, int cmd, int arg) const noexcept;
 #endif
 
-  virtual int Getsockopt(
-      Socket socket, int level, int name, void *value,
-      socklen_t *len) const noexcept;
+  virtual int Getsockopt(Socket socket, int level, int name, void *value,
+                         socklen_t *len) const noexcept;
 
   virtual ~Sys() noexcept;
 };
@@ -21103,8 +21099,8 @@ Ssize Sys::Recv(Socket fd, void *base, Size count) const noexcept {
   // On Linux systems this flag prevents socket ops from raising SIGPIPE.
   flags |= MSG_NOSIGNAL;
 #endif
-  return (Ssize)::recv(
-      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
+  return (Ssize)::recv(fd, LIBNDT7_AS_OS_BUFFER(base),
+                       LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
@@ -21117,8 +21113,8 @@ Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
   // On Linux systems this flag prevents socket ops from raising SIGPIPE.
   flags |= MSG_NOSIGNAL;
 #endif
-  return (Ssize)::send(
-      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
+  return (Ssize)::send(fd, LIBNDT7_AS_OS_BUFFER(base),
+                       LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 int Sys::Shutdown(Socket fd, int shutdown_how) const noexcept {
@@ -21143,8 +21139,8 @@ int Sys::Poll(pollfd *fds, nfds_t nfds, int timeout) const noexcept {
 }
 #endif
 
-long long Sys::Strtonum(const char *s, long long minval,
-                        long long maxval, const char **errp) const noexcept {
+long long Sys::Strtonum(const char *s, long long minval, long long maxval,
+                        const char **errp) const noexcept {
   return strtonum(s, minval, maxval, errp);
 }
 
@@ -21161,8 +21157,8 @@ int Sys::Fcntl(Socket s, int cmd, int arg) const noexcept {
 
 int Sys::Getsockopt(Socket socket, int level, int name, void *value,
                     socklen_t *len) const noexcept {
-  return ::getsockopt(
-      socket, level, name, LIBNDT7_AS_OS_OPTION_VALUE(value), len);
+  return ::getsockopt(socket, level, name, LIBNDT7_AS_OS_OPTION_VALUE(value),
+                      len);
 }
 
 Sys::~Sys() noexcept {}
@@ -21209,10 +21205,10 @@ class NoLogger : public Logger {
 };
 
 #define LIBNDT7_LOGGER_LEVEL_(logger, level, statements) \
-  if ((logger).is_##level##_enabled()) {                \
-    std::stringstream ss;                               \
-    ss << statements;                                   \
-    logger.emit_##level(ss.str());                      \
+  if ((logger).is_##level##_enabled()) {                 \
+    std::stringstream ss;                                \
+    ss << statements;                                    \
+    logger.emit_##level(ss.str());                       \
   }
 
 #define LIBNDT7_LOGGER_WARNING(logger, statements) \
@@ -21226,17 +21222,11 @@ class NoLogger : public Logger {
 
 Logger::~Logger() noexcept {}
 
-bool NoLogger::is_warning_enabled() const noexcept {
-  return false;
-}
+bool NoLogger::is_warning_enabled() const noexcept { return false; }
 
-bool NoLogger::is_info_enabled() const noexcept {
-  return false;
-}
+bool NoLogger::is_info_enabled() const noexcept { return false; }
 
-bool NoLogger::is_debug_enabled() const noexcept {
-  return false;
-}
+bool NoLogger::is_debug_enabled() const noexcept { return false; }
 
 void NoLogger::emit_warning(const std::string &) const noexcept {}
 
@@ -21284,24 +21274,29 @@ class CurlDeleter {
 using UniqueCurl = std::unique_ptr<CURL, CurlDeleter>;
 
 // CurlWriteCb is the signature of the callback used by curl.
-using CurlWriteCb = size_t (*)(char *ptr, size_t size, size_t nmemb, void *userdata);
+using CurlWriteCb = size_t (*)(char *ptr, size_t size, size_t nmemb,
+                               void *userdata);
 
 // Curlx allows to emulate failures in libcurl code.
 class Curlx {
  public:
   explicit Curlx(const Logger &logger) noexcept;
 
-  virtual bool GetMaybeSOCKS5(const std::string &proxy_port, const std::string &url,
-                              long timeout, std::string *body) noexcept;
+  virtual bool GetMaybeSOCKS5(const std::string &proxy_port,
+                              const std::string &url, long timeout,
+                              std::string *body) noexcept;
 
   virtual bool Get(UniqueCurl &handle, const std::string &url, long timeout,
                    std::string *body) noexcept;
 
-  virtual CURLcode SetoptURL(UniqueCurl &handle, const std::string &url) noexcept;
+  virtual CURLcode SetoptURL(UniqueCurl &handle,
+                             const std::string &url) noexcept;
 
-  virtual CURLcode SetoptProxy(UniqueCurl &handle, const std::string &url) noexcept;
+  virtual CURLcode SetoptProxy(UniqueCurl &handle,
+                               const std::string &url) noexcept;
 
-  virtual CURLcode SetoptWriteFunction(UniqueCurl &handle, CurlWriteCb callback) noexcept;
+  virtual CURLcode SetoptWriteFunction(UniqueCurl &handle,
+                                       CurlWriteCb callback) noexcept;
 
   virtual CURLcode SetoptWriteData(UniqueCurl &handle, void *pointer) noexcept;
 
@@ -21313,7 +21308,8 @@ class Curlx {
 
   virtual UniqueCurl NewUniqueCurl() noexcept;
 
-  virtual CURLcode GetinfoResponseCode(UniqueCurl &handle, long *response_code) noexcept;
+  virtual CURLcode GetinfoResponseCode(UniqueCurl &handle,
+                                       long *response_code) noexcept;
 
   virtual ~Curlx() noexcept;
 
@@ -21326,7 +21322,8 @@ class Curlx {
 }  // namespace measurementlab
 extern "C" {
 
-static size_t libndt7_curl_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+static size_t libndt7_curl_callback(char *ptr, size_t size, size_t nmemb,
+                                    void *userdata) {
   // Note: I have this habit of using `<= 0` rather than `== 0` even for
   // unsigned numbers because that makes the check robust when there is a
   // refactoring in which the number later becomes signed. In this case
@@ -21363,8 +21360,9 @@ void CurlDeleter::operator()(CURL *handle) noexcept {
 
 Curlx::Curlx(const Logger &logger) noexcept : logger_{logger} {}
 
-bool Curlx::GetMaybeSOCKS5(const std::string &proxy_port, const std::string &url,
-                           long timeout, std::string *body) noexcept {
+bool Curlx::GetMaybeSOCKS5(const std::string &proxy_port,
+                           const std::string &url, long timeout,
+                           std::string *body) noexcept {
   auto handle = this->NewUniqueCurl();
   if (!handle) {
     LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot initialize cURL");
@@ -21374,7 +21372,8 @@ bool Curlx::GetMaybeSOCKS5(const std::string &proxy_port, const std::string &url
     std::stringstream ss;
     ss << "socks5h://127.0.0.1:" << proxy_port;
     if (this->SetoptProxy(handle, ss.str()) != CURLE_OK) {
-      LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot configure proxy: " << ss.str());
+      LIBNDT7_LOGGER_WARNING(logger_,
+                             "curlx: cannot configure proxy: " << ss.str());
       return false;
     }
   }
@@ -21397,7 +21396,8 @@ bool Curlx::Get(UniqueCurl &handle, const std::string &url, long timeout,
     return false;
   }
   if (this->SetoptWriteData(handle, &ss) != CURLE_OK) {
-    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set callback function context");
+    LIBNDT7_LOGGER_WARNING(logger_,
+                           "curlx: cannot set callback function context");
     return false;
   }
   if (this->SetoptTimeout(handle, timeout) != CURLE_OK) {
@@ -21411,7 +21411,8 @@ bool Curlx::Get(UniqueCurl &handle, const std::string &url, long timeout,
   LIBNDT7_LOGGER_DEBUG(logger_, "curlx: performing request");
   auto rv = this->Perform(handle);
   if (rv != CURLE_OK) {
-    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cURL failed: " << curl_easy_strerror(rv));
+    LIBNDT7_LOGGER_WARNING(logger_,
+                           "curlx: cURL failed: " << curl_easy_strerror(rv));
     return false;
   }
   long response_code = 0L;
@@ -21437,12 +21438,14 @@ CURLcode Curlx::SetoptURL(UniqueCurl &handle, const std::string &url) noexcept {
   return ::curl_easy_setopt(handle.get(), CURLOPT_URL, url.c_str());
 }
 
-CURLcode Curlx::SetoptProxy(UniqueCurl &handle, const std::string &url) noexcept {
+CURLcode Curlx::SetoptProxy(UniqueCurl &handle,
+                            const std::string &url) noexcept {
   LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_PROXY, url.c_str());
 }
 
-CURLcode Curlx::SetoptWriteFunction(UniqueCurl &handle, CurlWriteCb callback) noexcept {
+CURLcode Curlx::SetoptWriteFunction(UniqueCurl &handle,
+                                    CurlWriteCb callback) noexcept {
   LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_WRITEFUNCTION, callback);
 }
@@ -21467,12 +21470,16 @@ CURLcode Curlx::Perform(UniqueCurl &handle) noexcept {
   return ::curl_easy_perform(handle.get());
 }
 
-UniqueCurl Curlx::NewUniqueCurl() noexcept { return UniqueCurl{::curl_easy_init()}; }
+UniqueCurl Curlx::NewUniqueCurl() noexcept {
+  return UniqueCurl{::curl_easy_init()};
+}
 
-CURLcode Curlx::GetinfoResponseCode(UniqueCurl &handle, long *response_code) noexcept {
+CURLcode Curlx::GetinfoResponseCode(UniqueCurl &handle,
+                                    long *response_code) noexcept {
   LIBNDT7_ASSERT(handle);
   LIBNDT7_ASSERT(response_code);
-  return ::curl_easy_getinfo(handle.get(), CURLINFO_RESPONSE_CODE, response_code);
+  return ::curl_easy_getinfo(handle.get(), CURLINFO_RESPONSE_CODE,
+                             response_code);
 }
 
 Curlx::~Curlx() noexcept {}
@@ -21489,11 +21496,11 @@ Curlx::~Curlx() noexcept {}
 
 // libndt7/internal/err.hpp - definition of error
 
+#include <openssl/err.h>
+
 #include <climits>
 #include <sstream>
 #include <string>
-
-#include <openssl/err.h>
 
 namespace measurementlab {
 namespace libndt7 {

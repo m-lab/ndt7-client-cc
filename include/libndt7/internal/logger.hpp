@@ -36,10 +36,10 @@ class NoLogger : public Logger {
 };
 
 #define LIBNDT7_LOGGER_LEVEL_(logger, level, statements) \
-  if ((logger).is_##level##_enabled()) {                \
-    std::stringstream ss;                               \
-    ss << statements;                                   \
-    logger.emit_##level(ss.str());                      \
+  if ((logger).is_##level##_enabled()) {                 \
+    std::stringstream ss;                                \
+    ss << statements;                                    \
+    logger.emit_##level(ss.str());                       \
   }
 
 #define LIBNDT7_LOGGER_WARNING(logger, statements) \
@@ -53,17 +53,11 @@ class NoLogger : public Logger {
 
 Logger::~Logger() noexcept {}
 
-bool NoLogger::is_warning_enabled() const noexcept {
-  return false;
-}
+bool NoLogger::is_warning_enabled() const noexcept { return false; }
 
-bool NoLogger::is_info_enabled() const noexcept {
-  return false;
-}
+bool NoLogger::is_info_enabled() const noexcept { return false; }
 
-bool NoLogger::is_debug_enabled() const noexcept {
-  return false;
-}
+bool NoLogger::is_debug_enabled() const noexcept { return false; }
 
 void NoLogger::emit_warning(const std::string &) const noexcept {}
 

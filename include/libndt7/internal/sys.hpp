@@ -64,25 +64,23 @@ class Sys {
 
   virtual void SetLastError(int err) const noexcept;
 
-  virtual int Getaddrinfo(
-      const char *domain, const char *port, const addrinfo *hints,
-      addrinfo **res) const noexcept;
+  virtual int Getaddrinfo(const char *domain, const char *port,
+                          const addrinfo *hints, addrinfo **res) const noexcept;
 
-  virtual int Getnameinfo(
-      const sockaddr *sa, socklen_t salen, char *host, socklen_t hostlen,
-      char *serv, socklen_t servlen, int flags) const noexcept;
+  virtual int Getnameinfo(const sockaddr *sa, socklen_t salen, char *host,
+                          socklen_t hostlen, char *serv, socklen_t servlen,
+                          int flags) const noexcept;
 
   virtual void Freeaddrinfo(addrinfo *aip) const noexcept;
 
   virtual Socket NewSocket(int domain, int type, int protocol) const noexcept;
 
-  virtual int Connect(
-      Socket fd, const sockaddr *sa, socklen_t n) const noexcept;
+  virtual int Connect(Socket fd, const sockaddr *sa,
+                      socklen_t n) const noexcept;
 
   virtual Ssize Recv(Socket fd, void *base, Size count) const noexcept;
 
-  virtual Ssize Send(
-      Socket fd, const void *base, Size count) const noexcept;
+  virtual Ssize Send(Socket fd, const void *base, Size count) const noexcept;
 
   virtual int Shutdown(Socket fd, int shutdown_how) const noexcept;
 
@@ -94,9 +92,8 @@ class Sys {
   virtual int Poll(pollfd *fds, nfds_t nfds, int timeout) const noexcept;
 #endif
 
-  virtual long long Strtonum(
-      const char *s, long long minval, long long maxval,
-      const char **err) const noexcept;
+  virtual long long Strtonum(const char *s, long long minval, long long maxval,
+                             const char **err) const noexcept;
 
 #ifdef _WIN32
   virtual int Ioctlsocket(Socket s, long cmd, u_long *argp) const noexcept;
@@ -105,9 +102,8 @@ class Sys {
   virtual int Fcntl(Socket s, int cmd, int arg) const noexcept;
 #endif
 
-  virtual int Getsockopt(
-      Socket socket, int level, int name, void *value,
-      socklen_t *len) const noexcept;
+  virtual int Getsockopt(Socket socket, int level, int name, void *value,
+                         socklen_t *len) const noexcept;
 
   virtual ~Sys() noexcept;
 };
@@ -236,8 +232,8 @@ Ssize Sys::Recv(Socket fd, void *base, Size count) const noexcept {
   // On Linux systems this flag prevents socket ops from raising SIGPIPE.
   flags |= MSG_NOSIGNAL;
 #endif
-  return (Ssize)::recv(
-      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
+  return (Ssize)::recv(fd, LIBNDT7_AS_OS_BUFFER(base),
+                       LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
@@ -250,8 +246,8 @@ Ssize Sys::Send(Socket fd, const void *base, Size count) const noexcept {
   // On Linux systems this flag prevents socket ops from raising SIGPIPE.
   flags |= MSG_NOSIGNAL;
 #endif
-  return (Ssize)::send(
-      fd, LIBNDT7_AS_OS_BUFFER(base), LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
+  return (Ssize)::send(fd, LIBNDT7_AS_OS_BUFFER(base),
+                       LIBNDT7_AS_OS_BUFFER_LEN(count), flags);
 }
 
 int Sys::Shutdown(Socket fd, int shutdown_how) const noexcept {
@@ -276,8 +272,8 @@ int Sys::Poll(pollfd *fds, nfds_t nfds, int timeout) const noexcept {
 }
 #endif
 
-long long Sys::Strtonum(const char *s, long long minval,
-                        long long maxval, const char **errp) const noexcept {
+long long Sys::Strtonum(const char *s, long long minval, long long maxval,
+                        const char **errp) const noexcept {
   return strtonum(s, minval, maxval, errp);
 }
 
@@ -294,8 +290,8 @@ int Sys::Fcntl(Socket s, int cmd, int arg) const noexcept {
 
 int Sys::Getsockopt(Socket socket, int level, int name, void *value,
                     socklen_t *len) const noexcept {
-  return ::getsockopt(
-      socket, level, name, LIBNDT7_AS_OS_OPTION_VALUE(value), len);
+  return ::getsockopt(socket, level, name, LIBNDT7_AS_OS_OPTION_VALUE(value),
+                      len);
 }
 
 Sys::~Sys() noexcept {}
