@@ -21637,12 +21637,16 @@ using Timeout = unsigned int;
 // Part of Measurement Lab <https://www.measurementlab.net/>.
 // Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
 // and LICENSE for more information on the copying conditions.
-#ifndef MEASUREMENTLAB_LIBNDT7_API_HPP
-#define MEASUREMENTLAB_LIBNDT7_API_HPP
+#ifndef MEASUREMENTLAB_LIBNDT7_API_H
+#define MEASUREMENTLAB_LIBNDT7_API_H
 
-// TODO(bassosimone): run through cppcheck and attempt to minimize warnings.
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-/// \file libndt7.hpp
+/// \file libndt7.h
 ///
 /// \brief Public header of m-lab/ndt7-client-cc libndt7. The basic usage is a simple
 /// as creating a `libndt7::Client c` instance and then calling `c.run()`. More
@@ -21666,7 +21670,7 @@ using Timeout = unsigned int;
 ///
 /// ```
 /// #include "json.hpp"
-/// #include "libndt7.hpp"
+/// #include "libndt7.h"
 /// measurementlab::libndt7::Client client;
 /// client.run();
 /// ```
@@ -21675,87 +21679,48 @@ using Timeout = unsigned int;
 /// the build to fail, because libndt7 uses nlohmann/json symbols.
 
 #ifndef LIBNDT7_SINGLE_INCLUDE
-#include "libndt7/internal/err.hpp"
-#include "libndt7/internal/sys.hpp"
-#include "libndt7/internal/curlx.hpp"
-#include "libndt7/timeout.hpp"
-#endif // !LIBNDT7_SINGLE_INCLUDE
+#ifndef INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#define INCLUDE_NLOHMANN_JSON_FWD_HPP_ 1
+namespace nlohmann {
+template <typename T = void, typename SFINAE = void>
+struct adl_serializer;
 
-// Check dependencies
-// ``````````````````
-#ifndef NLOHMANN_JSON_VERSION_MAJOR
-#error "Libndt7 depends on nlohmann/json. Include nlohmann/json before including libndt7."
-#endif  // !NLOHMANN_JSON_VERSION_MAJOR
-#if NLOHMANN_JSON_VERSION_MAJOR < 3
-#error "Libndt7 requires nlohmann/json >= 3"
-#endif
+template <template <typename U, typename V, typename... Args> class ObjectType =
+              std::map,
+          template <typename U, typename... Args> class ArrayType = std::vector,
+          class StringType = std::string, class BooleanType = bool,
+          class NumberIntegerType = std::int64_t,
+          class NumberUnsignedType = std::uint64_t,
+          class NumberFloatType = double,
+          template <typename U> class AllocatorType = std::allocator,
+          template <typename T, typename SFINAE = void> class JSONSerializer =
+              adl_serializer>
+class basic_json;
+using json = basic_json<>;
+}  // namespace nlohmann
+#endif  // INCLUDE_NLOHMANN_JSON_FWD_HPP_
 
-// TODO(bassosimone): these headers should be in impl.hpp and here we
-// need to include the bare minimum required by the API
+typedef struct ssl_st SSL;
+struct pollfd;
 
-#ifndef _WIN32
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#else
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
-
-#include <assert.h>
-#ifndef _WIN32
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <netdb.h>
-#include <poll.h>
-#endif
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
-
-#include <algorithm>
-#include <atomic>
-#include <chrono>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <random>
-
-// TODO(github.com/m-lab/ndt7-client-cc/issues/10): Remove pragma ignoring warning when possible.
-#if !defined(__clang__) && defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-#include <regex>
-#if !defined(__clang__) && defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
-
-#include <sstream>
-#include <string>
-#include <thread>
-#include <utility>
-#include <vector>
-
-#include <openssl/bio.h>
-#include <openssl/err.h>
-#include <openssl/ssl.h>
-#include <openssl/x509v3.h>
-
-#include <linux/version.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0)
-#define NDT7_UPLOAD_RETRANSMISSION_SUPPORT
-#endif  // LINUX_VERSION_CODE
+#endif  // !LIBNDT7_SINGLE_INCLUDE
 
 namespace measurementlab {
 namespace libndt7 {
+
+#ifndef LIBNDT7_SINGLE_INCLUDE
+namespace internal {
+enum class Err;
+class Sys;
+using Size = uint64_t;
+#ifdef _WIN32
+using Socket = SOCKET;
+#else
+using Socket = int;
+#endif
+}  // namespace internal
+using Timeout = unsigned int;
+#endif  // !LIBNDT7_SINGLE_INCLUDE
 
 // Structure to store extracted URL parts
 struct UrlParts {
@@ -21769,7 +21734,13 @@ UrlParts parse_ws_url(const std::string& url);
 
 std::string format_http_params(const std::map<std::string, std::string>& params);
 
-static std::string curl_urlencode(const std::string& raw);
+std::string curl_urlencode(const std::string& raw);
+
+double compute_speed_kbits(double data, double elapsed) noexcept;
+
+std::string format_speed_from_kbits(double speed) noexcept;
+
+std::string format_speed_from_kbits(double data, double elapsed) noexcept;
 
 // Versioning
 // ``````````
@@ -21892,7 +21863,6 @@ class EventHandler {
   /// ~EventHandler is the destructor.
   virtual ~EventHandler() noexcept;
 };
-EventHandler::~EventHandler() noexcept {}
 
 // Settings
 // ````````
@@ -22284,6 +22254,101 @@ class Client : public EventHandler {
 #endif
 };
 
+}  // namespace libndt7
+}  // namespace measurementlab
+
+#endif  // MEASUREMENTLAB_LIBNDT7_API_H
+// Part of Measurement Lab <https://www.measurementlab.net/>.
+// Measurement Lab libndt7 is free software under the BSD license. See AUTHORS
+// and LICENSE for more information on the copying conditions.
+
+// TODO(bassosimone): run through cppcheck and attempt to minimize warnings.
+
+#include "libndt7/libndt7.h"
+
+#ifndef LIBNDT7_SINGLE_INCLUDE
+#include "libndt7/internal/err.hpp"
+#include "libndt7/internal/sys.hpp"
+#include "libndt7/internal/curlx.hpp"
+#include "libndt7/timeout.hpp"
+#endif // !LIBNDT7_SINGLE_INCLUDE
+
+// Check dependencies
+// ``````````````````
+#ifndef NLOHMANN_JSON_VERSION_MAJOR
+#error "Libndt7 depends on nlohmann/json. Include nlohmann/json before including libndt7."
+#endif  // !NLOHMANN_JSON_VERSION_MAJOR
+#if NLOHMANN_JSON_VERSION_MAJOR < 3
+#error "Libndt7 requires nlohmann/json >= 3"
+#endif
+
+// TODO(bassosimone): these headers should be in impl.hpp and here we
+// need to include the bare minimum required by the API
+
+#ifndef _WIN32
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
+#include <assert.h>
+#ifndef _WIN32
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <netdb.h>
+#include <poll.h>
+#endif
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <random>
+
+// TODO(github.com/m-lab/ndt7-client-cc/issues/10): Remove pragma ignoring warning when possible.
+#if !defined(__clang__) && defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+#include <regex>
+#if !defined(__clang__) && defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
+#include <sstream>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
+#include <openssl/x509v3.h>
+
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0)
+#define NDT7_UPLOAD_RETRANSMISSION_SUPPORT
+#endif  // LINUX_VERSION_CODE
+
+namespace measurementlab {
+namespace libndt7 {
+
 #ifdef __linux__
 #include <linux/tcp.h>
 #define NDT7_ENUM_TCP_INFO                                       \
@@ -22431,13 +22496,13 @@ static void random_printable_fill(char *buffer, size_t length) noexcept {
   }
 }
 
-static double compute_speed_kbits(double data, double elapsed) noexcept {
+double compute_speed_kbits(double data, double elapsed) noexcept {
   return (elapsed > 0.0) ? ((data * 8.0) / 1000.0 / elapsed) : 0.0;
 }
 
 // format_speed_from_kbits format the input speed, which must be in kbit/s, to
 // a string describing the speed with a measurement unit.
-static std::string format_speed_from_kbits(double speed) noexcept {
+std::string format_speed_from_kbits(double speed) noexcept {
   std::string unit = "kbit/s";
   if (speed > 1000) {
     unit = "Mbit/s";
@@ -22453,7 +22518,7 @@ static std::string format_speed_from_kbits(double speed) noexcept {
   return ss.str();
 }
 
-static std::string format_speed_from_kbits(double data, double elapsed) noexcept {
+std::string format_speed_from_kbits(double data, double elapsed) noexcept {
   return format_speed_from_kbits(compute_speed_kbits(data, elapsed));
 }
 
@@ -22523,6 +22588,8 @@ SocketVector::~SocketVector() noexcept {
     }
   }
 }
+
+EventHandler::~EventHandler() noexcept {}
 
 // Client constructor and destructor
 // `````````````````````````````````
@@ -24677,7 +24744,7 @@ UrlParts parse_ws_url(const std::string& url) {
   return parts;
 }
 
-static std::string curl_urlencode(const std::string& raw) {
+std::string curl_urlencode(const std::string& raw) {
     const auto encoded_value = curl_easy_escape(nullptr, raw.c_str(), static_cast<int>(raw.length()));
     std::string result(encoded_value);
     curl_free(encoded_value);
@@ -24700,4 +24767,3 @@ std::string format_http_params(const std::map<std::string, std::string>& params)
 
 }  // namespace libndt7
 }  // namespace measurementlab
-#endif

@@ -7,7 +7,7 @@
 // We should include this before inculding libndt7.hpp and catch.hpp.
 #include <linux/types.h>
 
-#include "libndt7/libndt7.hpp"
+#include "single_include/libndt7.hpp"
 
 #ifndef _WIN32
 #include <arpa/inet.h>
