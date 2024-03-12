@@ -138,7 +138,8 @@ foreach(SOURCE IN ITEMS
         include/libndt7/internal/curlx.hpp
         include/libndt7/internal/err.hpp
         include/libndt7/timeout.hpp
-        include/libndt7/libndt7.hpp)
+        include/libndt7/libndt7.h
+        include/libndt7/libndt7.cpp)
   file(READ ${SOURCE} CONTENT)
   file(APPEND ${MK_LIBNDT7_AMALGAMATE_DEST} "${CONTENT}")
 endforeach()
@@ -151,17 +152,36 @@ include_directories(${CMAKE_REQUIRED_INCLUDES}
 add_executable(curlx_test test/curlx_test.cpp)
 target_link_libraries(curlx_test ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(ndt7-client-cc ndt7-client-cc.cpp)
-target_link_libraries(ndt7-client-cc ${CMAKE_REQUIRED_LIBRARIES})
-
 add_executable(libndt7-standalone-builds libndt7-standalone-builds.cpp)
 target_link_libraries(libndt7-standalone-builds ${CMAKE_REQUIRED_LIBRARIES})
+
+add_executable(tests-libndt test/libndt7_test.cpp)
+target_link_libraries(tests-libndt ${CMAKE_REQUIRED_LIBRARIES})
 
 add_executable(sys_test test/sys_test.cpp)
 target_link_libraries(sys_test ${CMAKE_REQUIRED_LIBRARIES})
 
-add_executable(tests-libndt test/libndt7_test.cpp)
-target_link_libraries(tests-libndt ${CMAKE_REQUIRED_LIBRARIES})
+set(MK_LIBNDT7_LIBRARY_SOURCE library/libndt7.cpp)
+file(REMOVE ${MK_LIBNDT7_LIBRARY_SOURCE})
+foreach(SOURCE IN ITEMS
+        include/libndt7/preamble.hpp
+        third_party/github.com/nlohmann/json/json.hpp
+        include/libndt7/internal/assert.hpp
+        include/libndt7/internal/sys.hpp
+        include/libndt7/internal/logger.hpp
+        include/libndt7/internal/curlx.hpp
+        include/libndt7/internal/err.hpp
+        include/libndt7/timeout.hpp
+        include/libndt7/libndt7.cpp)
+  file(READ ${SOURCE} CONTENT)
+  file(APPEND ${MK_LIBNDT7_LIBRARY_SOURCE} "${CONTENT}")
+endforeach()
+
+add_library(ndt7 STATIC ${MK_LIBNDT7_LIBRARY_SOURCE})
+set_target_properties(ndt7 PROPERTIES LINKER_LANGUAGE CXX)
+
+add_executable(ndt7-client-cc ndt7-client-cc.cpp)
+target_link_libraries(ndt7-client-cc "ndt7" ${CMAKE_REQUIRED_LIBRARIES})
 
 enable_testing()
 
@@ -175,7 +195,8 @@ add_test(NAME modern_test COMMAND ndt7-client-cc
          -ca-bundle-path ${CMAKE_SOURCE_DIR}/third_party/curl.haxx.se/ca/cacert.pem
          -verbose -download -upload -scheme=wss)
 
-INSTALL(PROGRAMS ndt7-client-cc
-        DESTINATION bin)
-INSTALL(FILES ${MK_LIBNDT7_AMALGAMATE_DEST}
-        DESTINATION include/libndt7)
+INSTALL(PROGRAMS ndt7-client-cc DESTINATION bin)
+INSTALL(FILES ${MK_LIBNDT7_AMALGAMATE_DEST} DESTINATION include/libndt7)
+INSTALL(FILES include/libndt7/libndt7.h DESTINATION include/libndt7)
+INSTALL(FILES include/libndt7/json_fwd.hpp DESTINATION include/libndt7)
+INSTALL(FILES libndt7.a DESTINATION lib)
