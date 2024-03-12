@@ -22252,16 +22252,16 @@ class Client : public EventHandler {
   Verbosity get_verbosity() const noexcept;
 
   // Reference to overridable system dependencies
-  std::unique_ptr<internal::Sys> sys{new internal::Sys{}};
+  std::unique_ptr<internal::Sys> sys;
 
  protected:
   SummaryData summary_;
 
   // ndt7 Measurement object.
-  nlohmann::json measurement_;
+  std::unique_ptr<nlohmann::json> measurement_;
 
   // ndt7 ConnectionInfo object.
-  nlohmann::json connection_info_;
+  std::unique_ptr<nlohmann::json> connection_info_;
 
  private:
   class Winsock {
@@ -22527,7 +22527,7 @@ SocketVector::~SocketVector() noexcept {
 // Client constructor and destructor
 // `````````````````````````````````
 
-Client::Client() noexcept {}
+Client::Client() noexcept : sys{new internal::Sys{}} {}
 
 Client::Client(Settings settings) noexcept : Client::Client() {
   std::swap(settings_, settings);
@@ -22830,14 +22830,16 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
         std::string sinfo{(const char *)buff.get(), (size_t)count};
         // Try parsing the received message as JSON.
         try {
-          measurement_ = nlohmann::json::parse(sinfo);
-          if (measurement_.contains("ConnectionInfo")) {
-            connection_info_ = measurement_["ConnectionInfo"];
+          measurement_ = std::unique_ptr<nlohmann::json>(
+              new nlohmann::json(nlohmann::json::parse(sinfo)));
+          if (measurement_->contains("ConnectionInfo")) {
+            connection_info_ = std::unique_ptr<nlohmann::json>(
+                new nlohmann::json((*measurement_)["ConnectionInfo"]));
           }
 
           // Calculate retransmission rate (BytesRetrans / BytesSent).
           try {
-            nlohmann::json tcpinfo_json = measurement_["TCPInfo"];
+            nlohmann::json tcpinfo_json = (*measurement_)["TCPInfo"];
             double bytes_retrans = (double) tcpinfo_json["BytesRetrans"].get<int64_t>();
             double bytes_sent = (double) tcpinfo_json["BytesSent"].get<int64_t>();
             summary_.download_retrans = (bytes_sent != 0.0) ? bytes_retrans / bytes_sent : 0.0;

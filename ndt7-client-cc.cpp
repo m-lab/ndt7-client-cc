@@ -67,8 +67,8 @@ void BatchClient::summary() noexcept {
     download["Retransmission"] = summary_.download_retrans;
 
     if (measurement_ != nullptr) {
-      download["ConnectionInfo"] = connection_info_;
-      download["LastMeasurement"] = measurement_;
+      download["ConnectionInfo"] = *connection_info_;
+      download["LastMeasurement"] = *measurement_;
     }
 
     summary["Download"] = download;
