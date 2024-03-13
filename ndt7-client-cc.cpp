@@ -4,7 +4,7 @@
 
 #include "third_party/github.com/nlohmann/json/json.hpp"
 
-#include "libndt7/libndt7.hpp"  // not standalone
+#include "libndt7/libndt7.h"  // not standalone
 
 #include <stdlib.h>
 
