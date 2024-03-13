@@ -236,8 +236,8 @@ static void random_printable_fill(char *buffer, size_t length) noexcept {
   }
 }
 
-double compute_speed_kbits(double data, double elapsed) noexcept {
-  return (elapsed > 0.0) ? ((data * 8.0) / 1000.0 / elapsed) : 0.0;
+double compute_speed_kbits(double data_bytes, double elapsed_sec) noexcept {
+  return (elapsed_sec > 0.0) ? ((data_bytes * 8.0) / 1000.0 / elapsed_sec) : 0.0;
 }
 
 // format_speed_from_kbits format the input speed, which must be in kbit/s, to
@@ -258,8 +258,8 @@ static std::string format_speed_from_kbits(double speed) noexcept {
   return ss.str();
 }
 
-std::string format_speed_from_kbits(double data, double elapsed) noexcept {
-  return format_speed_from_kbits(compute_speed_kbits(data, elapsed));
+std::string format_speed_from_kbits(double data_bytes, double elapsed_sec) noexcept {
+  return format_speed_from_kbits(compute_speed_kbits(data_bytes, elapsed_sec));
 }
 
 static std::string represent(std::string message) noexcept {
@@ -424,19 +424,19 @@ void Client::on_debug(const std::string &msg) const noexcept {
 
 void Client::on_performance(NettestFlags tid, uint8_t nflows,
                             double measured_bytes,
-                            double elapsed_time, double max_runtime) noexcept {
+                            double elapsed_sec, double max_runtime) noexcept {
   auto percent = 0.0;
   if (max_runtime > 0.0) {
-    percent = (elapsed_time * 100.0 / max_runtime);
+    percent = (elapsed_sec * 100.0 / max_runtime);
   }
   LIBNDT7_EMIT_INFO("  [" << std::fixed << std::setprecision(0) << std::setw(2)
                   << std::right << percent << "%] speed: "
-                  << format_speed_from_kbits(measured_bytes, elapsed_time));
+                  << format_speed_from_kbits(measured_bytes, elapsed_sec));
 
   LIBNDT7_EMIT_DEBUG("  [" << std::fixed << std::setprecision(0) << std::setw(2)
                   << std::right << percent << "%]"
                   << " elapsed: " << std::fixed << std::setprecision(3)
-                  << std::setw(6) << elapsed_time << " s;"
+                  << std::setw(6) << elapsed_sec << " s;"
                   << " test_id: " << (int)tid << "; num_flows: " << (int)nflows
                   << "; measured_bytes: " << measured_bytes);
 }
