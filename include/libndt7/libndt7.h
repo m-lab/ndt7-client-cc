@@ -12,14 +12,15 @@
 
 #ifndef LIBNDT7_SINGLE_INCLUDE
 #include "third_party/github.com/nlohmann/json/json_fwd.hpp"
-#endif // !LIBNDT7_SINGLE_INCLUDE
+#endif  // !LIBNDT7_SINGLE_INCLUDE
 
 /// \file libndt7.h
 ///
-/// \brief Public header of m-lab/ndt7-client-cc libndt7. The basic usage is a simple
-/// as creating a `libndt7::Client c` instance and then calling `c.run()`. More
-/// advanced usage may require you to create a subclass of `libndt7::Client` and
-/// override specific virtual methods to customize the behaviour.
+/// \brief Public header of m-lab/ndt7-client-cc libndt7. The basic usage is a
+/// simple as creating a `libndt7::Client c` instance and then calling
+/// `c.run()`. More advanced usage may require you to create a subclass of
+/// `libndt7::Client` and override specific virtual methods to customize the
+/// behaviour.
 ///
 /// This implementation provides version 7 of the NDT protocol (aka ndt7). The
 /// code in this library includes C2S (upload) and S2C (download) ndt7 subtests
@@ -77,14 +78,16 @@ struct UrlParts {
 };
 
 // Exported for testing.
-UrlParts parse_ws_url(const std::string& url);
+UrlParts parse_ws_url(const std::string &url);
 
-std::string format_http_params(const std::map<std::string, std::string>& params);
+std::string format_http_params(
+    const std::map<std::string, std::string> &params);
 
 // Utility functions.
 double compute_speed_kbits(double data_bytes, double elapsed_sec) noexcept;
 
-std::string format_speed_from_kbits(double data_bytes, double elapsed_sec) noexcept;
+std::string format_speed_from_kbits(double data_bytes,
+                                    double elapsed_sec) noexcept;
 
 // Versioning
 // ``````````
@@ -157,13 +160,13 @@ class EventHandler {
   virtual void on_warning(const std::string &s) const noexcept = 0;
 
   /// Called when an informational message is emitted. The default behavior is
-  /// to write the message onto the `std::clog` standard stream. \warning This method
-  /// could be called from a different thread context.
+  /// to write the message onto the `std::clog` standard stream. \warning This
+  /// method could be called from a different thread context.
   virtual void on_info(const std::string &s) const noexcept = 0;
 
   /// Called when a debug message is emitted. The default behavior is
-  /// to write the message onto the `std::clog` standard stream. \warning This method
-  /// could be called from a different thread context.
+  /// to write the message onto the `std::clog` standard stream. \warning This
+  /// method could be called from a different thread context.
   virtual void on_debug(const std::string &s) const noexcept = 0;
 
   /// Called to inform you about the measured speed. The default behavior is
@@ -173,8 +176,8 @@ class EventHandler {
   /// or sent since the beginning of the measurement. @param elapsed_sec
   /// is the number of seconds elapsed since the beginning of the nettest.
   /// @param max_runtime is the maximum runtime of this nettest, as copied from
-  /// the Settings. @remark By dividing @p elapsed_sec by @p max_runtime, you can
-  /// get the percentage of completion of the current nettest. @remark We
+  /// the Settings. @remark By dividing @p elapsed_sec by @p max_runtime, you
+  /// can get the percentage of completion of the current nettest. @remark We
   /// provide you with @p tid, so you know whether the nettest is downloading
   /// bytes from the server or uploading bytes to the server. \warning This
   /// method could be called from another thread context.
@@ -191,8 +194,8 @@ class EventHandler {
   /// value; variables are serialized JSON returned by the server when
   /// running an ndt7 test. \warning This method could be called from another
   /// thread context.
-  virtual void on_result(std::string scope, std::string name, std::string value)
-  noexcept = 0;
+  virtual void on_result(std::string scope, std::string name,
+                         std::string value) noexcept = 0;
 
   /// Called when the server is busy. The default behavior is to write a
   /// warning message. @param msg is the reason why the server is busy, encoded
@@ -231,8 +234,8 @@ class Settings {
   /// the most correct port depending on the configuration.
   std::string port = "443";
 
-  /// Scheme to use connecting to the NDT server. If this is not specified, we will use
-  /// the secure websocket configuration.
+  /// Scheme to use connecting to the NDT server. If this is not specified, we
+  /// will use the secure websocket configuration.
   std::string scheme = "wss";
 
   /// The tests you want to run with the NDT server. By default we run
@@ -307,7 +310,6 @@ struct SummaryData {
   uint32_t min_rtt;
 };
 
-
 // Client
 // ``````
 
@@ -356,11 +358,8 @@ class Client : public EventHandler {
 
   void on_debug(const std::string &s) const noexcept override;
 
-  void on_performance(NettestFlags tid,
-                      uint8_t nflows,
-                      double measured_bytes,
-                      double elapsed_sec,
-                      double max_runtime) noexcept override;
+  void on_performance(NettestFlags tid, uint8_t nflows, double measured_bytes,
+                      double elapsed_sec, double max_runtime) noexcept override;
 
   void on_result(std::string scope, std::string name,
                  std::string value) noexcept override;
@@ -389,9 +388,14 @@ class Client : public EventHandler {
 
   // High-level API
   virtual void summary() noexcept;
-  virtual bool query_locate_api(const std::map<std::string, std::string>& opts, std::vector<nlohmann::json> *urls) noexcept;
-  virtual std::string get_static_locate_result(std::string opts, std::string scheme, std::string hostname, std::string port);
-  virtual std::string replace_all_with(std::string templ, std::string pattern, std::string replace);
+  virtual bool query_locate_api(const std::map<std::string, std::string> &opts,
+                                std::vector<nlohmann::json> *urls) noexcept;
+  virtual std::string get_static_locate_result(std::string opts,
+                                               std::string scheme,
+                                               std::string hostname,
+                                               std::string port);
+  virtual std::string replace_all_with(std::string templ, std::string pattern,
+                                       std::string replace);
 
   // ndt7 protocol API
   // `````````````````
@@ -417,10 +421,12 @@ class Client : public EventHandler {
   // This section contain a WebSocket implementation.
 
   // Send @p line over @p fd.
-  virtual internal::Err ws_sendln(internal::Socket fd, std::string line) noexcept;
+  virtual internal::Err ws_sendln(internal::Socket fd,
+                                  std::string line) noexcept;
 
   // Receive shorter-than @p maxlen @p *line over @p fd.
-  virtual internal::Err ws_recvln(internal::Socket fd, std::string *line, size_t maxlen) noexcept;
+  virtual internal::Err ws_recvln(internal::Socket fd, std::string *line,
+                                  size_t maxlen) noexcept;
 
   // Perform websocket handshake. @param fd is the socket to use. @param
   // ws_flags specifies what headers to send and to expect (for more information
@@ -428,9 +434,9 @@ class Client : public EventHandler {
   // what protocol to specify as Sec-WebSocket-Protocol in the upgrade request.
   // @param port is used to construct the Host header. @param url_path is the
   // URL path to use for performing the websocket upgrade.
-  virtual internal::Err ws_handshake(internal::Socket fd, std::string port, uint64_t ws_flags,
-                           std::string ws_protocol,
-                           std::string url_path) noexcept;
+  virtual internal::Err ws_handshake(internal::Socket fd, std::string port,
+                                     uint64_t ws_flags, std::string ws_protocol,
+                                     std::string url_path) noexcept;
 
   // Prepare and return a WebSocket frame containing @p first_byte and
   // the content of @p base and @p count as payload. If @p base is nullptr
@@ -440,20 +446,24 @@ class Client : public EventHandler {
 
   // Send @p count bytes from @p base over @p sock as a frame whose first byte
   // @p first_byte should contain the opcode and possibly the FIN flag.
-  virtual internal::Err ws_send_frame(internal::Socket sock, uint8_t first_byte, uint8_t *base,
-                            internal::Size count) const noexcept;
+  virtual internal::Err ws_send_frame(internal::Socket sock, uint8_t first_byte,
+                                      uint8_t *base,
+                                      internal::Size count) const noexcept;
 
   // Receive a frame from @p sock. Puts the opcode in @p *opcode. Puts whether
   // there is a FIN flag in @p *fin. The buffer starts at @p base and it
   // contains @p total bytes. Puts in @p *count the actual number of bytes
   // in the message. @return The error that occurred or Err::none.
-  internal::Err ws_recv_any_frame(internal::Socket sock, uint8_t *opcode, bool *fin, uint8_t *base,
-                        internal::Size total, internal::Size *count) const noexcept;
+  internal::Err ws_recv_any_frame(internal::Socket sock, uint8_t *opcode,
+                                  bool *fin, uint8_t *base,
+                                  internal::Size total,
+                                  internal::Size *count) const noexcept;
 
   // Receive a frame. Automatically and transparently responds to PING, ignores
   // PONG, and handles CLOSE frames. Arguments like ws_recv_any_frame().
-  internal::Err ws_recv_frame(internal::Socket sock, uint8_t *opcode, bool *fin, uint8_t *base,
-                    internal::Size total, internal::Size *count) const noexcept;
+  internal::Err ws_recv_frame(internal::Socket sock, uint8_t *opcode, bool *fin,
+                              uint8_t *base, internal::Size total,
+                              internal::Size *count) const noexcept;
 
   // Receive a message consisting of one or more frames. Transparently handles
   // PING and PONG frames. Handles CLOSE frames. @param sock is the socket to
@@ -461,8 +471,9 @@ class Client : public EventHandler {
   // beginning of the buffer. @param total is the size of the buffer. @param
   // count contains the actual message size. @return An error on failure or
   // Err::none in case of success.
-  internal::Err ws_recvmsg(internal::Socket sock, uint8_t *opcode, uint8_t *base, internal::Size total,
-                 internal::Size *count) const noexcept;
+  internal::Err ws_recvmsg(internal::Socket sock, uint8_t *opcode,
+                           uint8_t *base, internal::Size total,
+                           internal::Size *count) const noexcept;
 
   // Networking layer
   // ````````````````
@@ -489,21 +500,23 @@ class Client : public EventHandler {
   // of ws_handshake() for more info on @p ws_flags, @p ws_protocol, and
   // @p url_path.
   virtual internal::Err netx_maybews_dial(const std::string &hostname,
-                                const std::string &port, uint64_t ws_flags,
-                                std::string ws_protocol, std::string url_path,
-                                internal::Socket *sock) noexcept;
+                                          const std::string &port,
+                                          uint64_t ws_flags,
+                                          std::string ws_protocol,
+                                          std::string url_path,
+                                          internal::Socket *sock) noexcept;
 
   // Connect to @p hostname and @p port possibly using SSL and SOCKSv5. This
   // depends on the Settings you configured.
   virtual internal::Err netx_maybessl_dial(const std::string &hostname,
-                                 const std::string &port,
-                                 internal::Socket *sock) noexcept;
+                                           const std::string &port,
+                                           internal::Socket *sock) noexcept;
 
   // Connect to @p hostname and @port possibly using SOCKSv5. This depends
   // on the Settings you configured.
   virtual internal::Err netx_maybesocks5h_dial(const std::string &hostname,
-                                     const std::string &port,
-                                     internal::Socket *sock) noexcept;
+                                               const std::string &port,
+                                               internal::Socket *sock) noexcept;
 
   // Map errno code into a Err value.
   static internal::Err netx_map_errno(int ec) noexcept;
@@ -512,48 +525,57 @@ class Client : public EventHandler {
   internal::Err netx_map_eai(int ec) noexcept;
 
   // Connect to @p hostname and @p port.
-  virtual internal::Err netx_dial(const std::string &hostname, const std::string &port,
-                        internal::Socket *sock) noexcept;
+  virtual internal::Err netx_dial(const std::string &hostname,
+                                  const std::string &port,
+                                  internal::Socket *sock) noexcept;
 
   // Receive from the network.
-  virtual internal::Err netx_recv(internal::Socket fd, void *base, internal::Size count,
-                        internal::Size *actual) const noexcept;
+  virtual internal::Err netx_recv(internal::Socket fd, void *base,
+                                  internal::Size count,
+                                  internal::Size *actual) const noexcept;
 
   // Receive from the network without blocking.
-  virtual internal::Err netx_recv_nonblocking(internal::Socket fd, void *base, internal::Size count,
-                                    internal::Size *actual) const noexcept;
+  virtual internal::Err netx_recv_nonblocking(
+      internal::Socket fd, void *base, internal::Size count,
+      internal::Size *actual) const noexcept;
 
   // Receive exactly N bytes from the network.
-  virtual internal::Err netx_recvn(internal::Socket fd, void *base, internal::Size count) const noexcept;
+  virtual internal::Err netx_recvn(internal::Socket fd, void *base,
+                                   internal::Size count) const noexcept;
 
   // Send data to the network.
-  virtual internal::Err netx_send(internal::Socket fd, const void *base, internal::Size count,
-                        internal::Size *actual) const noexcept;
+  virtual internal::Err netx_send(internal::Socket fd, const void *base,
+                                  internal::Size count,
+                                  internal::Size *actual) const noexcept;
 
   // Send to the network without blocking.
-  virtual internal::Err netx_send_nonblocking(internal::Socket fd, const void *base, internal::Size count,
-                                    internal::Size *actual) const noexcept;
+  virtual internal::Err netx_send_nonblocking(
+      internal::Socket fd, const void *base, internal::Size count,
+      internal::Size *actual) const noexcept;
 
   // Send exactly N bytes to the network.
-  virtual internal::Err netx_sendn(
-    internal::Socket fd, const void *base, internal::Size count) const noexcept;
+  virtual internal::Err netx_sendn(internal::Socket fd, const void *base,
+                                   internal::Size count) const noexcept;
 
   // Resolve hostname into a list of IP addresses.
   virtual internal::Err netx_resolve(const std::string &hostname,
-                           std::vector<std::string> *addrs) noexcept;
+                                     std::vector<std::string> *addrs) noexcept;
 
   // Set socket non blocking.
-  virtual internal::Err netx_setnonblocking(internal::Socket fd, bool enable) noexcept;
+  virtual internal::Err netx_setnonblocking(internal::Socket fd,
+                                            bool enable) noexcept;
 
   // Pauses until the socket becomes readable.
-  virtual internal::Err netx_wait_readable(internal::Socket, Timeout timeout) const noexcept;
+  virtual internal::Err netx_wait_readable(internal::Socket,
+                                           Timeout timeout) const noexcept;
 
   // Pauses until the socket becomes writeable.
-  virtual internal::Err netx_wait_writeable(internal::Socket, Timeout timeout) const noexcept;
+  virtual internal::Err netx_wait_writeable(internal::Socket,
+                                            Timeout timeout) const noexcept;
 
   // Main function for dealing with I/O patterned after poll(2).
-  virtual internal::Err netx_poll(
-    std::vector<pollfd> *fds, int timeout_msec) const noexcept;
+  virtual internal::Err netx_poll(std::vector<pollfd> *fds,
+                                  int timeout_msec) const noexcept;
 
   // Shutdown both ends of a socket.
   virtual internal::Err netx_shutdown_both(internal::Socket fd) noexcept;
@@ -562,7 +584,7 @@ class Client : public EventHandler {
   virtual internal::Err netx_closesocket(internal::Socket fd) noexcept;
 
   virtual bool query_locate_api_curl(const std::string &url, long timeout,
-                                 std::string *body) noexcept;
+                                     std::string *body) noexcept;
 
   // Other helpers
 
