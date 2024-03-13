@@ -230,7 +230,7 @@ int main(int, char **argv) {
         settings.hostname = param.second;
         std::clog << "will use this hostname: " << param.second << std::endl;
       } else if (param.first == "user-agent") {
-        settings.userAgent = param.second;
+        settings.user_agent = param.second;
         std::clog << "will use this user-agent: " << param.second << std::endl;
       } else if (param.first == "socks5h") {
         settings.socks5h_port = param.second;

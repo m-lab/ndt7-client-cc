@@ -21954,8 +21954,8 @@ class Settings {
       {"client_library_name", "m-lab/libndt7-cc"},
   };
 
-  /// userAgent is the user agent provided for Locate API requests.
-  std::string userAgent = "libndt7-cc-agent/v0.1.0";
+  /// user_agent is the user agent provided for Locate API requests.
+  std::string user_agent = "libndt7-cc-agent/v0.1.0";
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
   /// cause libndt7 to use different default settings for the port or for
@@ -24651,7 +24651,7 @@ class CurlxLoggerAdapter : public internal::Logger {
 bool Client::query_locate_api_curl(const std::string &url, long timeout,
                                std::string *body) noexcept {
   CurlxLoggerAdapter adapter{this};
-  internal::Curlx curlx{adapter, settings_.userAgent};
+  internal::Curlx curlx{adapter, settings_.user_agent};
   return curlx.GetMaybeSOCKS5(settings_.socks5h_port, url, timeout, body);
 }
 
