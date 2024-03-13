@@ -82,9 +82,9 @@ UrlParts parse_ws_url(const std::string& url);
 std::string format_http_params(const std::map<std::string, std::string>& params);
 
 // Utility functions.
-double compute_speed_kbits(double data, double elapsed) noexcept;
+double compute_speed_kbits(double data_bytes, double elapsed_sec) noexcept;
 
-std::string format_speed_from_kbits(double data, double elapsed) noexcept;
+std::string format_speed_from_kbits(double data_bytes, double elapsed_sec) noexcept;
 
 // Versioning
 // ``````````
@@ -170,16 +170,16 @@ class EventHandler {
   /// to write the provided information as an info message. @param tid is either
   /// nettest_flag_download or nettest_flag_upload. @param nflows is the number
   /// of used flows. @param measured_bytes is the number of bytes received
-  /// or sent since the beginning of the measurement. @param elapsed
+  /// or sent since the beginning of the measurement. @param elapsed_sec
   /// is the number of seconds elapsed since the beginning of the nettest.
   /// @param max_runtime is the maximum runtime of this nettest, as copied from
-  /// the Settings. @remark By dividing @p elapsed by @p max_runtime, you can
+  /// the Settings. @remark By dividing @p elapsed_sec by @p max_runtime, you can
   /// get the percentage of completion of the current nettest. @remark We
   /// provide you with @p tid, so you know whether the nettest is downloading
   /// bytes from the server or uploading bytes to the server. \warning This
   /// method could be called from another thread context.
   virtual void on_performance(NettestFlags tid, uint8_t nflows,
-                              double measured_bytes, double elapsed,
+                              double measured_bytes, double elapsed_sec,
                               double max_runtime) noexcept = 0;
 
   /// Called to provide you with NDT results. The default behavior is to write
@@ -359,7 +359,7 @@ class Client : public EventHandler {
   void on_performance(NettestFlags tid,
                       uint8_t nflows,
                       double measured_bytes,
-                      double elapsed,
+                      double elapsed_sec,
                       double max_runtime) noexcept override;
 
   void on_result(std::string scope, std::string name,
