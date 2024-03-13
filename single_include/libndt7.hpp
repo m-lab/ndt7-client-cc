@@ -21282,6 +21282,8 @@ class Curlx {
  public:
   explicit Curlx(const Logger &logger) noexcept;
 
+  explicit Curlx(const Logger &logger, const std::string &agent) noexcept;
+
   virtual bool GetMaybeSOCKS5(const std::string &proxy_port,
                               const std::string &url, long timeout,
                               std::string *body) noexcept;
@@ -21297,6 +21299,9 @@ class Curlx {
 
   virtual CURLcode SetoptWriteFunction(UniqueCurl &handle,
                                        CurlWriteCb callback) noexcept;
+
+  virtual CURLcode SetoptUserAgent(UniqueCurl &handle,
+                                   const std::string &agent) noexcept;
 
   virtual CURLcode SetoptWriteData(UniqueCurl &handle, void *pointer) noexcept;
 
@@ -21315,6 +21320,7 @@ class Curlx {
 
  private:
   const Logger &logger_;
+  const std::string agent_;
 };
 
 }  // namespace internal
@@ -21358,7 +21364,9 @@ void CurlDeleter::operator()(CURL *handle) noexcept {
   }
 }
 
-Curlx::Curlx(const Logger &logger) noexcept : logger_{logger} {}
+Curlx::Curlx(const Logger &logger) noexcept : logger_{logger}, agent_{"default-ndt7-client-cc-agent"} {}
+
+Curlx::Curlx(const Logger &logger, const std::string &agent) noexcept : logger_{logger}, agent_{agent} {}
 
 bool Curlx::GetMaybeSOCKS5(const std::string &proxy_port,
                            const std::string &url, long timeout,
@@ -21398,6 +21406,10 @@ bool Curlx::Get(UniqueCurl &handle, const std::string &url, long timeout,
   if (this->SetoptWriteData(handle, &ss) != CURLE_OK) {
     LIBNDT7_LOGGER_WARNING(logger_,
                            "curlx: cannot set callback function context");
+    return false;
+  }
+  if (this->SetoptUserAgent(handle, this->agent_) != CURLE_OK) {
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set user agent");
     return false;
   }
   if (this->SetoptTimeout(handle, timeout) != CURLE_OK) {
@@ -21448,6 +21460,12 @@ CURLcode Curlx::SetoptWriteFunction(UniqueCurl &handle,
                                     CurlWriteCb callback) noexcept {
   LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_WRITEFUNCTION, callback);
+}
+
+CURLcode Curlx::SetoptUserAgent(UniqueCurl &handle,
+                                const std::string &agent) noexcept {
+  LIBNDT7_ASSERT(handle);
+  return ::curl_easy_setopt(handle.get(), CURLOPT_USERAGENT, agent.c_str());
 }
 
 CURLcode Curlx::SetoptWriteData(UniqueCurl &handle, void *pointer) noexcept {
@@ -21935,6 +21953,9 @@ class Settings {
       {"client_library_version", "v0.1.0"},
       {"client_library_name", "m-lab/libndt7-cc"},
   };
+
+  /// user_agent is the user agent provided for Locate API requests.
+  std::string user_agent = "libndt7-cc-agent/v0.1.0";
 
   /// Type of NDT protocol that you want to use. Selecting the protocol may
   /// cause libndt7 to use different default settings for the port or for
@@ -24630,7 +24651,7 @@ class CurlxLoggerAdapter : public internal::Logger {
 bool Client::query_locate_api_curl(const std::string &url, long timeout,
                                std::string *body) noexcept {
   CurlxLoggerAdapter adapter{this};
-  internal::Curlx curlx{adapter};
+  internal::Curlx curlx{adapter, settings_.user_agent};
   return curlx.GetMaybeSOCKS5(settings_.socks5h_port, url, timeout, body);
 }
 

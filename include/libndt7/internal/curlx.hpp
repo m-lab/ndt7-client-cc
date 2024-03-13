@@ -40,6 +40,8 @@ class Curlx {
  public:
   explicit Curlx(const Logger &logger) noexcept;
 
+  explicit Curlx(const Logger &logger, const std::string &agent) noexcept;
+
   virtual bool GetMaybeSOCKS5(const std::string &proxy_port,
                               const std::string &url, long timeout,
                               std::string *body) noexcept;
@@ -55,6 +57,9 @@ class Curlx {
 
   virtual CURLcode SetoptWriteFunction(UniqueCurl &handle,
                                        CurlWriteCb callback) noexcept;
+
+  virtual CURLcode SetoptUserAgent(UniqueCurl &handle,
+                                   const std::string &agent) noexcept;
 
   virtual CURLcode SetoptWriteData(UniqueCurl &handle, void *pointer) noexcept;
 
@@ -73,6 +78,7 @@ class Curlx {
 
  private:
   const Logger &logger_;
+  const std::string agent_;
 };
 
 }  // namespace internal
@@ -116,7 +122,9 @@ void CurlDeleter::operator()(CURL *handle) noexcept {
   }
 }
 
-Curlx::Curlx(const Logger &logger) noexcept : logger_{logger} {}
+Curlx::Curlx(const Logger &logger) noexcept : logger_{logger}, agent_{"default-ndt7-client-cc-agent"} {}
+
+Curlx::Curlx(const Logger &logger, const std::string &agent) noexcept : logger_{logger}, agent_{agent} {}
 
 bool Curlx::GetMaybeSOCKS5(const std::string &proxy_port,
                            const std::string &url, long timeout,
@@ -156,6 +164,10 @@ bool Curlx::Get(UniqueCurl &handle, const std::string &url, long timeout,
   if (this->SetoptWriteData(handle, &ss) != CURLE_OK) {
     LIBNDT7_LOGGER_WARNING(logger_,
                            "curlx: cannot set callback function context");
+    return false;
+  }
+  if (this->SetoptUserAgent(handle, this->agent_) != CURLE_OK) {
+    LIBNDT7_LOGGER_WARNING(logger_, "curlx: cannot set user agent");
     return false;
   }
   if (this->SetoptTimeout(handle, timeout) != CURLE_OK) {
@@ -206,6 +218,12 @@ CURLcode Curlx::SetoptWriteFunction(UniqueCurl &handle,
                                     CurlWriteCb callback) noexcept {
   LIBNDT7_ASSERT(handle);
   return ::curl_easy_setopt(handle.get(), CURLOPT_WRITEFUNCTION, callback);
+}
+
+CURLcode Curlx::SetoptUserAgent(UniqueCurl &handle,
+                                const std::string &agent) noexcept {
+  LIBNDT7_ASSERT(handle);
+  return ::curl_easy_setopt(handle.get(), CURLOPT_USERAGENT, agent.c_str());
 }
 
 CURLcode Curlx::SetoptWriteData(UniqueCurl &handle, void *pointer) noexcept {

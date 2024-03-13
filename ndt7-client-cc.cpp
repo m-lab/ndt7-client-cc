@@ -165,6 +165,7 @@ int main(int, char **argv) {
     cmdline.add_param("port");
     cmdline.add_param("scheme");
     cmdline.add_param("hostname");
+    cmdline.add_param("user-agent");
     cmdline.parse(argv);
     for (auto &flag : cmdline.flags()) {
       if (flag == "download") {
@@ -228,6 +229,9 @@ int main(int, char **argv) {
       } else if (param.first == "hostname") {
         settings.hostname = param.second;
         std::clog << "will use this hostname: " << param.second << std::endl;
+      } else if (param.first == "user-agent") {
+        settings.user_agent = param.second;
+        std::clog << "will use this user-agent: " << param.second << std::endl;
       } else if (param.first == "socks5h") {
         settings.socks5h_port = param.second;
         std::clog << "will use the socks5h proxy at: 127.0.0.1:" << param.second << std::endl;
