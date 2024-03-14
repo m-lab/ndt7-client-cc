@@ -27,7 +27,7 @@
 /// based on the ndt7 specification, which is described at \see
 /// https://github.com/m-lab/ndt-server/blob/master/spec/ndt7-protocol.md.
 ///
-/// Throughout this file, we'll use NDT or ndt7 interchangably to indicate
+/// Throughout this file, we'll use NDT or ndt7 interchangeably to indicate
 /// version 7 of the protocol.
 ///
 /// \remark As a general rule, what is not documented using Doxygen comments
@@ -486,7 +486,7 @@ class Client : public EventHandler {
   //   then attempts to negotiate a websocket channel (if enabled);
   //
   // - netx_maybessl_dial() calls netx_maybesocks5h_dial() and, if that
-  //   suceeds, it then attempts to establish a TLS connection (if enabled);
+  //   succeeds, it then attempts to establish a TLS connection (if enabled);
   //
   // - netx_maybesocks5h_dial() possibly creates the connection through a
   //   SOCKSv5h proxy (if the proxy is enabled).
