@@ -84,9 +84,9 @@ std::string format_http_params(
     const std::map<std::string, std::string> &params);
 
 // Utility functions.
-double compute_speed_kbits(double data_bytes, double elapsed_sec) noexcept;
+double compute_speed_kbits(uint64_t data_bytes, double elapsed_sec) noexcept;
 
-std::string format_speed_from_kbits(double data_bytes,
+std::string format_speed_from_kbits(uint64_t data_bytes,
                                     double elapsed_sec) noexcept;
 
 // Versioning
@@ -182,7 +182,7 @@ class EventHandler {
   /// bytes from the server or uploading bytes to the server. \warning This
   /// method could be called from another thread context.
   virtual void on_performance(NettestFlags tid, uint8_t nflows,
-                              double measured_bytes, double elapsed_sec,
+                              uint64_t measured_bytes, double elapsed_sec,
                               double max_runtime) noexcept = 0;
 
   /// Called to provide you with NDT results. The default behavior is to write
@@ -358,7 +358,7 @@ class Client : public EventHandler {
 
   void on_debug(const std::string &s) const noexcept override;
 
-  void on_performance(NettestFlags tid, uint8_t nflows, double measured_bytes,
+  void on_performance(NettestFlags tid, uint8_t nflows, uint64_t measured_bytes,
                       double elapsed_sec, double max_runtime) noexcept override;
 
   void on_result(std::string scope, std::string name,
