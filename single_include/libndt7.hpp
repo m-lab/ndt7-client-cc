@@ -21738,9 +21738,9 @@ std::string format_http_params(
     const std::map<std::string, std::string> &params);
 
 // Utility functions.
-double compute_speed_kbits(double data_bytes, double elapsed_sec) noexcept;
+double compute_speed_kbits(uint64_t data_bytes, double elapsed_sec) noexcept;
 
-std::string format_speed_from_kbits(double data_bytes,
+std::string format_speed_from_kbits(uint64_t data_bytes,
                                     double elapsed_sec) noexcept;
 
 // Versioning
@@ -21836,7 +21836,7 @@ class EventHandler {
   /// bytes from the server or uploading bytes to the server. \warning This
   /// method could be called from another thread context.
   virtual void on_performance(NettestFlags tid, uint8_t nflows,
-                              double measured_bytes, double elapsed_sec,
+                              uint64_t measured_bytes, double elapsed_sec,
                               double max_runtime) noexcept = 0;
 
   /// Called to provide you with NDT results. The default behavior is to write
@@ -22012,7 +22012,7 @@ class Client : public EventHandler {
 
   void on_debug(const std::string &s) const noexcept override;
 
-  void on_performance(NettestFlags tid, uint8_t nflows, double measured_bytes,
+  void on_performance(NettestFlags tid, uint8_t nflows, uint64_t measured_bytes,
                       double elapsed_sec, double max_runtime) noexcept override;
 
   void on_result(std::string scope, std::string name,
@@ -22524,9 +22524,11 @@ static void random_printable_fill(char *buffer, size_t length) noexcept {
   }
 }
 
-double compute_speed_kbits(double data_bytes, double elapsed_sec) noexcept {
-  return (elapsed_sec > 0.0) ? ((data_bytes * 8.0) / 1000.0 / elapsed_sec)
-                             : 0.0;
+double compute_speed_kbits(uint64_t data_bytes, double elapsed_sec) noexcept {
+  if (elapsed_sec <= 0.0) {
+    return 0.0;
+  }
+  return static_cast<double>(data_bytes) * 8.0 / 1000.0 / elapsed_sec;
 }
 
 // format_speed_from_kbits format the input speed, which must be in kbit/s, to
@@ -22547,7 +22549,7 @@ static std::string format_speed_from_kbits(double speed) noexcept {
   return ss.str();
 }
 
-std::string format_speed_from_kbits(double data_bytes,
+std::string format_speed_from_kbits(uint64_t data_bytes,
                                     double elapsed_sec) noexcept {
   return format_speed_from_kbits(compute_speed_kbits(data_bytes, elapsed_sec));
 }
@@ -22713,7 +22715,7 @@ void Client::on_debug(const std::string &msg) const noexcept {
 }
 
 void Client::on_performance(NettestFlags tid, uint8_t nflows,
-                            double measured_bytes, double elapsed_sec,
+                            uint64_t measured_bytes, double elapsed_sec,
                             double max_runtime) noexcept {
   auto percent = 0.0;
   if (max_runtime > 0.0) {
@@ -22906,8 +22908,8 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
     std::chrono::duration<double> interval = now - latest;
     if (interval.count() > measurement_interval) {
       if (!settings_.summary_only) {
-        on_performance(nettest_flag_download, 1, static_cast<double>(total),
-                       elapsed.count(), settings_.max_runtime);
+        on_performance(nettest_flag_download, 1, total, elapsed.count(),
+                       settings_.max_runtime);
       }
       latest = now;
     }
@@ -22964,8 +22966,7 @@ bool Client::ndt7_download(const UrlParts &url) noexcept {
     }
     total += count;  // Assume we won't overflow
   }
-  summary_.download_speed =
-      compute_speed_kbits(static_cast<double>(total), elapsed.count());
+  summary_.download_speed = compute_speed_kbits(total, elapsed.count());
   return true;
 }
 
@@ -23042,8 +23043,8 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
 #endif  // NDT7_UPLOAD_RETRANSMISSION_SUPPORT
 #endif  // __linux__
       if (!settings_.summary_only) {
-        on_performance(nettest_flag_upload, 1, static_cast<double>(total),
-                       elapsed.count(), max_upload_time);
+        on_performance(nettest_flag_upload, 1, total, elapsed.count(),
+                       max_upload_time);
       }
       // This could fail if there are non-utf8 characters. This structure just
       // contains integers and ASCII strings, so we should be good.
@@ -23065,8 +23066,7 @@ bool Client::ndt7_upload(const UrlParts &url) noexcept {
     }
     total += ndt7_bufsiz;  // Assume we won't overflow
   }
-  summary_.upload_speed =
-      compute_speed_kbits(static_cast<double>(total), elapsed.count());
+  summary_.upload_speed = compute_speed_kbits(total, elapsed.count());
   return true;
 }
 

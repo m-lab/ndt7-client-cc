@@ -35,7 +35,7 @@ class BatchClient : public libndt7::Client {
   public:
     using libndt7::Client::Client;
     void on_result(std::string, std::string, std::string value) noexcept override;
-    void on_performance(libndt7::NettestFlags, uint8_t, double, double,
+    void on_performance(libndt7::NettestFlags, uint8_t, uint64_t, double,
                         double) noexcept override;
     void summary() noexcept override;
 };
@@ -46,7 +46,7 @@ void BatchClient::on_result(std::string, std::string, std::string value) noexcep
 }
 // on_performance is overridded to hide the user-friendly output messages.
 void BatchClient::on_performance(libndt7::NettestFlags tid, uint8_t nflows,
-                            double measured_bytes,
+                            uint64_t measured_bytes,
                             double elapsed_time, double) noexcept {
   nlohmann::json performance;
   performance["ElapsedTime"] = elapsed_time;
