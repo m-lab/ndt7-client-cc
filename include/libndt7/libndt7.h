@@ -346,11 +346,11 @@ class Client : public EventHandler {
   /// returns true. When using the Locate API, `run` will attempt a test with
   /// multiple servers, stopping on the first success or continue trying the
   /// next server on failure. If all attempts fail, `run` returns false.
-  bool run() noexcept;
+  virtual bool run() noexcept;
 
   // After running a successful test with `run`, `get_summary` returns the test
   // summary metrics.
-  SummaryData get_summary() noexcept;
+  virtual SummaryData get_summary() noexcept;
 
   void on_warning(const std::string &s) const noexcept override;
 
